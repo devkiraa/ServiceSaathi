@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Signup - ServiceSathi</title>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded shadow-md w-full max-w-lg">
+    <h1 class="text-2xl font-bold mb-4">Sign Up</h1>
+    <form action="/signup" method="POST" class="space-y-4">
+      <!-- Username -->
+      <input type="text" name="username" placeholder="Username" class="w-full p-2 border rounded" required>
+
+      <!-- Password -->
+      <input type="password" name="password" placeholder="Password" class="w-full p-2 border rounded" required>
+
+      <!-- Center Name -->
+      <input type="text" name="centerName" placeholder="Center Name" class="w-full p-2 border rounded" required>
+
+      <!-- Location -->
+      <input type="text" name="location" placeholder="Location" class="w-full p-2 border rounded" required>
+
+      <!-- Shop Address -->
+      <input type="text" name="shopAddress" placeholder="Shop Address" class="w-full p-2 border rounded" required>
+
+      <!-- District Dropdown -->
+      <select id="district" name="district" class="w-full p-2 border rounded" required>
+        <option value="">Select District</option>
+      </select>
+
+      <!-- Subdistrict Dropdown -->
+      <select id="subdistrict" name="subdistrict" class="w-full p-2 border rounded" required>
+        <option value="">Select Subdistrict</option>
+      </select>
+
+      <!-- Submit Button -->
+      <button type="submit" class="w-full bg-green-500 text-white p-2 rounded">Sign Up</button>
+    </form>
+    <p class="mt-4 text-center"><a href="/login" class="text-blue-500">Login</a></p>
+  </div>
+
+  <!-- JavaScript to Populate Dropdowns -->
+  <script>
+    // Load location data from JSON file
+    fetch('/data/locations.json')
+      .then((response) => response.json())
+      .then((data) => {
+        const districtDropdown = document.getElementById('district');
+        const subdistrictDropdown = document.getElementById('subdistrict');
+
+        // Populate district dropdown
+        for (const state in data) {
+          for (const district in data[state]) {
+            const option = document.createElement('option');
+            option.value = district;
+            option.textContent = district;
+            districtDropdown.appendChild(option);
+          }
+        }
+
+        // Populate subdistrict dropdown based on selected district
+        districtDropdown.addEventListener('change', () => {
+          const selectedDistrict = districtDropdown.value;
+          subdistrictDropdown.innerHTML = '<option value="">Select Subdistrict</option>';
+
+          if (selectedDistrict) {
+            const state = Object.keys(data).find((state) => data[state][selectedDistrict]);
+            const subdistricts = data[state][selectedDistrict];
+
+            subdistricts.forEach((subdistrict) => {
+              const option = document.createElement('option');
+              option.value = subdistrict;
+              option.textContent = subdistrict;
+              subdistrictDropdown.appendChild(option);
+            });
+          }
+        });
+      })
+      .catch((error) => console.error('Error loading location data:', error));
+  </script>
+</body>
+</html>
