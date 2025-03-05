@@ -2,15 +2,30 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  username: { // storing email as username
+  // Mobile number is used as the username for login
+  username: { 
     type: String,
     required: true,
     unique: true,
     trim: true
   },
-  phone: {
+  // Storing mobile number (same as username)
+  phone: { 
     type: String,
     required: true
+  },
+  // Additional signup details
+  email: { 
+    type: String, 
+    required: true 
+  },
+  shopName: { 
+    type: String, 
+    required: true 
+  },
+  personName: { 
+    type: String, 
+    required: true 
   },
   password: { 
     type: String, 
@@ -22,17 +37,19 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user'
   },
-  type: {
+  // Centre type: either CSC or Akshaya
+  type: { 
     type: String,
     enum: ['csc', 'akshaya'],
     required: true
   },
-  centerId: {
-    type: String // Centre identifier/name provided during signup
+  // Centre ID as entered by the user (may be an identifier)
+  centerId: { 
+    type: String 
   }
 });
 
-// Password hashing middleware
+// Hash the password before saving
 userSchema.pre('save', async function(next) {
   if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 10);

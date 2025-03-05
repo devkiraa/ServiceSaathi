@@ -32,15 +32,18 @@ app.use(session({
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/sendimage', express.static(path.join(__dirname, 'uploads/service-documents')));
 
 // Routes
 const authRoutes = require('./routes/auth');
 const documentRoutes = require('./routes/documents');
 const adminRoutes = require('./routes/admin');
+const serviceRoutes = require('./routes/service'); // New service routes
 
 app.use(authRoutes);
 app.use(documentRoutes);
 app.use(adminRoutes);
+app.use(serviceRoutes);
 
 // Login page
 app.get('/', (req, res) => {
@@ -59,22 +62,32 @@ app.get('/signup', (req, res) => {
   res.render('signup');
 });
 
-// Dashboard route (for regular users)
-// Fetch recent documents (services) from the database
 const Document = require('./models/Document');
-// Dashboard route (for regular users)
+const ServiceRequest = require('./models/ServiceRequest');
+
 app.get('/dashboard', async (req, res) => {
   if (!req.session.user) return res.redirect('/');
   // If the logged-in user is an admin, redirect to admin-dashboard
   if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
   
   try {
+    // Fetch recent documents
     const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-    res.render('dashboard', { user: req.session.user, documents });
+    // Fetch service requests for this user.
+    // (Assumes that the user's centre id is stored in req.session.user.centerId)
+    // Make sure that your login route also stores the centerId in the session.
+    const serviceRequests = await ServiceRequest.find({ centreId: req.session.user.centerId });
+    
+    res.render('dashboard', { 
+      user: req.session.user, 
+      documents, 
+      serviceRequests 
+    });
   } catch (error) {
     res.status(500).send(error.message);
   }
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

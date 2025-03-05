@@ -3,20 +3,47 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 
-// Route to create a new user (admin-created via /api/users)
+// Admin-created user route
 router.post('/api/users', async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    // Expecting: username (mobile number), phone, email, shopName, personName, password, role, type, centerId
+    const { username, phone, email, shopName, personName, password, role, type, centerId } = req.body;
     
-    // Check if user exists
+    // Check if user already exists (using mobile number as username)
     const existingUser = await User.findOne({ username });
     if (existingUser) {
-      return res.status(400).json({ error: 'Username already exists' });
+      return res.status(400).json({ error: 'Mobile number already registered' });
     }
-
-    // Create new user with provided role
-    const user = new User({ username, password, role, phone: '', type: 'cse' });
+    
+    // Create new user with provided details
+    const user = new User({
+      username,   // mobile number used for login
+      phone,
+      email,
+      shopName,
+      personName,
+      password,
+      role,
+      type,
+      centerId
+    });
     await user.save();
+    
+    // Create Centre record for CSC or Akshaya types
+    if (type === 'akshaya' || type === 'csc') {
+      const Centre = require('../models/Centre');
+      const centre = new Centre({
+        centreName: centerId,   // using centerId as the centre identifier
+        ownerName: personName,
+        contact: phone,
+        email,
+        type,
+        centerId,
+        // Optionally, auto-approve admin-created centres or leave them pending:
+        status: role === 'admin' ? 'approved' : 'pending'
+      });
+      await centre.save();
+    }
     
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
@@ -24,76 +51,93 @@ router.post('/api/users', async (req, res) => {
   }
 });
 
-// Signup Route (for self signup)
+// Self Signup Route
 router.post('/api/signup', async (req, res) => {
-    try {
-      const { email, phone, password, type, centerId } = req.body;
-      // Check if user exists (using email as username)
-      const existingUser = await User.findOne({ username: email });
-      if (existingUser) {
-        return res.status(400).json({ error: 'Email already registered' });
-      }
-      // Create new user with role 'user'
-      const user = new User({
-        username: email,
-        phone,
-        password,
+  try {
+    // Expecting: phone, email, shopName, personName, password, type, centerId
+    const { phone, email, shopName, personName, password, type, centerId } = req.body;
+    
+    // Use mobile number as the username
+    const existingUser = await User.findOne({ username: phone });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Mobile number already registered' });
+    }
+    
+    // Create new user with role 'user'
+    const user = new User({
+      username: phone,
+      phone,
+      email,
+      shopName,
+      personName,
+      password,
+      type,
+      centerId,
+      role: 'user'
+    });
+    await user.save();
+    
+    // For both CSC and Akshaya types, create a Centre record (status pending)
+    if (type === 'akshaya' || type === 'csc') {
+      const Centre = require('../models/Centre');
+      const centre = new Centre({
+        centreName: centerId,
+        ownerName: personName,
+        contact: phone,
+        email,
         type,
         centerId,
-        role: 'user'
+        status: 'pending'
       });
-      await user.save();
-  
-      // For both cse and akshaya types, create a Centre record
-      if (type === 'akshaya' || type === 'csc') {
-        const Centre = require('../models/Centre');
-        const centre = new Centre({
-          centreName: centerId,       // using the centerId field as centre identifier/name
-          ownerName: email,           // using the email as a placeholder for owner name
-          contact: phone,
-          status: 'pending'
-        });
-        await centre.save();
-      }
-      
-      res.status(201).json({ message: 'Signup successful. Await admin approval.' });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+      await centre.save();
     }
-  });
-  
-  
-// Login route to authenticate users
+    
+    res.status(201).json({ message: 'Signup successful. Await admin approval.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Login Route
 router.post('/api/login', async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      // Find the user
-      const user = await User.findOne({ username });
-      if (!user) {
-        return res.status(400).json({ error: 'Invalid username or password' });
-      }
-      // Compare passwords
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ error: 'Invalid username or password' });
-      }
-      
-      // For non-admin users with a centre record, ensure the centre is approved before login.
-      // (Assumes that non-admin users have a "centerId" field and a corresponding Centre document.)
-      if (user.role !== 'admin' && user.centerId) {
-        const Centre = require('../models/Centre');
-        const centre = await Centre.findOne({ centreName: user.centerId });
-        if (!centre || centre.status !== 'approved') {
-          return res.status(400).json({ error: 'Your centre is not approved yet' });
-        }
-      }
-      
-      // Set session
-      req.session.user = { id: user._id, username: user.username, role: user.role, type: user.type };
-      res.status(200).json({ message: 'Logged in successfully', role: user.role });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+  try {
+    // Here, username is expected to be the mobile number
+    const { username, password } = req.body;
+    
+    // Find the user
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid mobile number or password' });
     }
-  });  
+    
+    // Compare passwords
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid mobile number or password' });
+    }
+    
+    // For non-admin users, ensure the centre is approved before login
+    if (user.role !== 'admin' && user.centerId) {
+      const Centre = require('../models/Centre');
+      const centre = await Centre.findOne({ centreName: user.centerId });
+      if (!centre || centre.status !== 'approved') {
+        return res.status(400).json({ error: 'Your centre is not approved yet' });
+      }
+    }
+    
+    // Set session data
+    req.session.user = {
+        id: user._id,
+        username: user.username,
+        role: user.role,
+        type: user.type,
+        centerId: user.centerId  // include the centre identifier
+      };      
+    
+    res.status(200).json({ message: 'Logged in successfully', role: user.role });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

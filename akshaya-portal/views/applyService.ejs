@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apply for Service</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="max-w-md mx-auto bg-white p-6 mt-10 rounded shadow">
+    <h2 class="text-xl font-bold mb-4">Upload Documents for <%= serviceRequest.documentType %></h2>
+    <div id="document-form">
+      <div id="doc-step" class="mb-4">
+        <!-- The current step's file input will be rendered here -->
+      </div>
+      <div class="flex justify-between">
+        <button id="backBtn" class="bg-gray-500 text-white px-4 py-2 rounded" onclick="prevStep()" disabled>Back</button>
+        <button id="nextBtn" class="bg-blue-500 text-white px-4 py-2 rounded" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+  </div>
+  <script id="requiredDocumentsData" type="application/json">
+    <%- JSON.stringify(serviceRequest.requiredDocuments) %>
+  </script>
+  <script>
+    // Use the serviceRequest object passed from the server.
+    const serviceRequestId = "<%= serviceRequest._id %>";
+    const requiredDocuments = JSON.parse(document.getElementById('requiredDocumentsData').textContent);
+    
+    let currentStep = 0;
+    const totalSteps = requiredDocuments.length;
+    const docStepDiv = document.getElementById("doc-step");
+    const backBtn = document.getElementById("backBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    // Render the current document upload step
+    function renderStep() {
+      if (totalSteps === 0) {
+        docStepDiv.innerHTML = "<p>No documents required.</p>";
+        backBtn.style.display = "none";
+        nextBtn.style.display = "none";
+        return;
+      }
+      const doc = requiredDocuments[currentStep];
+      docStepDiv.innerHTML = `
+        <p class="mb-2 font-medium">Upload ${doc.name}</p>
+        <input type="file" id="fileInput" accept="image/*" capture="environment" class="mb-4 p-2 border rounded">
+      `;
+      backBtn.disabled = currentStep === 0;
+      nextBtn.textContent = currentStep === totalSteps - 1 ? "Submit" : "Next";
+    }
+
+    function nextStep() {
+      const fileInput = document.getElementById("fileInput");
+      if (!fileInput || fileInput.files.length === 0) {
+        alert("Please capture an image for " + requiredDocuments[currentStep].name);
+        return;
+      }
+      // Save the file in the requiredDocuments object
+      requiredDocuments[currentStep].file = fileInput.files[0];
+      
+      if (currentStep < totalSteps - 1) {
+        currentStep++;
+        renderStep();
+      } else {
+        // All steps completed; submit the documents
+        submitDocuments();
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        renderStep();
+      }
+    }
+
+    async function submitDocuments() {
+      const formData = new FormData();
+      requiredDocuments.forEach((doc) => {
+        if (doc.file) {
+          formData.append('files', doc.file);
+        }
+      });
+      try {
+        const response = await fetch(`/api/upload-documents/${serviceRequestId}`, {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert("Documents uploaded successfully");
+          // Optionally, redirect or update UI as needed.
+        } else {
+          alert("Upload failed: " + result.error);
+        }
+      } catch (error) {
+        console.error(error);
+        alert("An error occurred while uploading documents");
+      }
+    }
+
+    // Initialize the first step
+    renderStep();
+  </script>
+</body>
+</html>

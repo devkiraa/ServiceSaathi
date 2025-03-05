@@ -51,9 +51,50 @@
         </div>
       </header>
 
-      <!-- Recent Services Table -->
+      <!-- Service Requests Section -->
+      <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">My Service Requests</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-600">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th class="px-6 py-3">Service Type</th>
+                <th class="px-6 py-3">Centre ID</th>
+                <th class="px-6 py-3">Status</th>
+                <th class="px-6 py-3">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (serviceRequests.length === 0) { %>
+                <tr>
+                  <td colspan="4" class="px-6 py-4 text-center">No service requests found.</td>
+                </tr>
+              <% } else { %>
+                <% serviceRequests.forEach(function(sr) { %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4"><%= sr.documentType %></td>
+                    <td class="px-6 py-4"><%= sr.centreId %></td>
+                    <td class="px-6 py-4 capitalize"><%= sr.status %></td>
+                    <td class="px-6 py-4">
+                      <% if (sr.requiredDocuments && sr.requiredDocuments.length > 0 && sr.status === 'submitted') { %>
+                        <button class="text-blue-500 hover:text-blue-700" onclick="viewDocuments('<%= sr._id %>')">
+                          View Documents
+                        </button>
+                      <% } else { %>
+                        <span class="text-gray-500">N/A</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Existing Documents Table (if any) -->
       <div class="bg-white p-6 rounded-lg shadow">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">Recent Services</h3>
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Recent Documents</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left text-gray-600">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -67,7 +108,7 @@
             <tbody>
               <% if (documents.length === 0) { %>
                 <tr>
-                  <td colspan="4" class="px-6 py-4 text-center">No services found.</td>
+                  <td colspan="4" class="px-6 py-4 text-center">No documents found.</td>
                 </tr>
               <% } else { %>
                 <% documents.forEach(function(doc) { %>
@@ -92,6 +133,63 @@
     </div>
   </div>
 
+  <!-- Modal for Viewing Uploaded Documents -->
+  <div id="docModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg p-6 w-11/12 md:w-2/3 lg:w-1/2 relative">
+      <button class="absolute top-2 right-2 text-gray-600" onclick="closeModal()">✕</button>
+      <h3 class="text-lg font-semibold mb-4">Uploaded Documents</h3>
+      <div id="docContent" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Dynamically filled with images and labels -->
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+  <script>
+    // Function to fetch service request details (including requiredDocuments) and display in modal.
+    async function viewDocuments(serviceRequestId) {
+      try {
+        // For security, the API should verify the user's access.
+        // Here we fetch a URL (e.g., /api/service-request/:id) that returns the full service request details.
+        const response = await fetch(`/api/service-request/${serviceRequestId}`);
+        if (!response.ok) {
+          alert("Unable to fetch documents.");
+          return;
+        }
+        const sr = await response.json();
+        const docContent = document.getElementById('docContent');
+        docContent.innerHTML = '';
+        sr.requiredDocuments.forEach(doc => {
+          // Create a card for each document showing the name and the image.
+          // If no image is uploaded yet, show a placeholder.
+          const card = document.createElement('div');
+          card.className = "border rounded p-2";
+          const title = document.createElement('p');
+          title.className = "font-semibold mb-2";
+          title.textContent = doc.name;
+          card.appendChild(title);
+          const img = document.createElement('img');
+          img.className = "w-full h-40 object-cover rounded";
+          if (doc.uploadedFile) {
+            // Here the server returns a URL like localhost:3000/sendimage/....
+            img.src = doc.uploadedFile;
+          } else {
+            img.src = "https://via.placeholder.com/150?text=Not+Uploaded";
+          }
+          card.appendChild(img);
+          docContent.appendChild(card);
+        });
+        // Show the modal
+        document.getElementById('docModal').classList.remove('hidden');
+      } catch (error) {
+        console.error(error);
+        alert("An error occurred while fetching documents.");
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('docModal').classList.add('hidden');
+    }
+  </script>
 </body>
 </html>
