@@ -54,11 +54,20 @@ app.get('/add-user', (req, res) => {
   res.render('addUser');
 });
 
+// Signup page
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
 // Dashboard route (for regular users)
 // Fetch recent documents (services) from the database
 const Document = require('./models/Document');
+// Dashboard route (for regular users)
 app.get('/dashboard', async (req, res) => {
   if (!req.session.user) return res.redirect('/');
+  // If the logged-in user is an admin, redirect to admin-dashboard
+  if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
+  
   try {
     const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
     res.render('dashboard', { user: req.session.user, documents });

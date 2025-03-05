@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Saathi Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function validateStep1() {
+      const email = document.getElementById("email");
+      const phone = document.getElementById("phone");
+      const password = document.getElementById("password");
+      const confirmPassword = document.getElementById("confirm-password");
+      const emailError = document.getElementById("email-error");
+      const phoneError = document.getElementById("phone-error");
+      const passwordError = document.getElementById("password-error");
+      const confirmPasswordError = document.getElementById("confirm-password-error");
+      
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phonePattern = /^[6789][0-9]{9}$/;
+      
+      emailError.textContent = "";
+      phoneError.textContent = "";
+      passwordError.textContent = "";
+      confirmPasswordError.textContent = "";
+      
+      let isValid = true;
+      
+      if (!emailPattern.test(email.value)) {
+        emailError.textContent = "Please enter a valid email address.";
+        isValid = false;
+      }
+      if (!phonePattern.test(phone.value)) {
+        phoneError.textContent = "Phone number must start with 9, 8, 7, or 6 and be 10 digits long.";
+        isValid = false;
+      }
+      if (password.value.length < 6) {
+        passwordError.textContent = "Password must be at least 6 characters long.";
+        isValid = false;
+      }
+      if (password.value !== confirmPassword.value) {
+        confirmPasswordError.textContent = "Passwords do not match.";
+        isValid = false;
+      }
+      
+      if (isValid) {
+        document.getElementById("step1").classList.add("hidden");
+        document.getElementById("step2").classList.remove("hidden");
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+  <div class="bg-white shadow-md rounded-md p-8 w-96">
+    <h2 class="text-2xl font-bold text-center mb-6">Service Saathi</h2>
+    <form id="signupForm">
+      <!-- Step 1 -->
+      <div id="step1">
+        <div class="mb-4">
+          <label for="email" class="block text-gray-700 font-medium">Email</label>
+          <input type="email" id="email" name="email" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400">
+          <p id="email-error" class="text-red-500 text-sm"></p>
+        </div>
+        <div class="mb-4">
+          <label for="phone" class="block text-gray-700 font-medium">Phone Number</label>
+          <input type="text" id="phone" name="phone" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400">
+          <p id="phone-error" class="text-red-500 text-sm"></p>
+        </div>
+        <div class="mb-4">
+          <label for="password" class="block text-gray-700 font-medium">Password</label>
+          <input type="password" id="password" name="password" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400">
+          <p id="password-error" class="text-red-500 text-sm"></p>
+        </div>
+        <div class="mb-6">
+          <label for="confirm-password" class="block text-gray-700 font-medium">Confirm Password</label>
+          <input type="password" id="confirm-password" name="confirmPassword" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400">
+          <p id="confirm-password-error" class="text-red-500 text-sm"></p>
+        </div>
+        <button type="button" onclick="validateStep1()" class="w-full bg-gray-800 text-white p-2 rounded hover:bg-gray-700">Continue</button>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="step2" class="hidden">
+        <div class="mb-4">
+          <label class="block text-gray-700 font-medium">Select Type</label>
+          <div class="flex items-center mt-2">
+            <input type="radio" id="cse" name="type" value="csc" class="mr-2">
+            <label for="csC" class="text-gray-700">CSC</label>
+          </div>
+          <div class="flex items-center mt-2">
+            <input type="radio" id="akshaya" name="type" value="akshaya" class="mr-2">
+            <label for="akshaya" class="text-gray-700">Akshaya Center</label>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label for="center-id" class="block text-gray-700 font-medium">Center ID</label>
+          <input type="text" id="center-id" name="centerId" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400">
+        </div>
+        <button type="submit" class="w-full bg-gray-800 text-white p-2 rounded hover:bg-gray-700">Sign Up</button>
+      </div>
+    </form>
+  </div>
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      try {
+        const response = await fetch('/api/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        if(response.ok) {
+          alert('Signup successful. Please log in.');
+          window.location.href = '/';
+        } else {
+          alert('Signup failed: ' + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred during signup.');
+      }
+    });
+  </script>
+</body>
+</html>

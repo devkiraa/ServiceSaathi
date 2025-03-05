@@ -31,12 +31,17 @@
         body: JSON.stringify(Object.fromEntries(formData))
       });
       
+      const result = await response.json();
       if(response.ok) {
+        if(result.role === 'admin') {
+          window.location.href = '/admin-dashboard';
+        } else {
           window.location.href = '/dashboard';
+        }
       } else {
-          alert('Login failed');
+        alert('Login failed: ' + result.error);
       }
     });
-  </script>
+  </script>  
 </body>
 </html>

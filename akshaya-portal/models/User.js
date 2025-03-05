@@ -2,21 +2,33 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  username: { 
-    type: String, 
-    required: true, 
+  username: { // storing email as username
+    type: String,
+    required: true,
     unique: true,
     trim: true
+  },
+  phone: {
+    type: String,
+    required: true
   },
   password: { 
     type: String, 
     required: true,
-    minlength: 8
+    minlength: 6
   },
   role: {
     type: String,
     enum: ['user', 'admin'],
     default: 'user'
+  },
+  type: {
+    type: String,
+    enum: ['csc', 'akshaya'],
+    required: true
+  },
+  centerId: {
+    type: String // Centre identifier/name provided during signup
   }
 });
 
