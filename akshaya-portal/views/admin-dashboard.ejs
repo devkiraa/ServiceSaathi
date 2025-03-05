@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-gray-800 text-white shadow-md p-5">
+      <h2 class="text-2xl font-bold">Admin Dashboard</h2>
+      <nav class="mt-5">
+        <ul>
+          <li class="py-2 px-4 hover:bg-gray-700 rounded cursor-pointer">Akshaya Centres List</li>
+          <li class="py-2 px-4 hover:bg-red-700 rounded cursor-pointer">Logout</li>
+        </ul>
+      </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 p-6 bg-white shadow-md rounded-md">
+      <!-- Header -->
+      <div class="flex justify-between items-center bg-gray-200 shadow p-4 rounded-md">
+        <h2 class="text-xl font-semibold">Admin Dashboard</h2>
+        <span class="text-gray-700 font-medium">Admin</span>
+      </div>
+      
+      <!-- Pending Akshaya Centres Table -->
+      <div class="mt-6 bg-white shadow-md rounded-md p-4">
+        <h3 class="text-lg font-semibold mb-4">Pending Akshaya Centres</h3>
+        <table class="w-full border-collapse border border-gray-200">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="border border-gray-300 p-2">Centre Name</th>
+              <th class="border border-gray-300 p-2">Owner Name</th>
+              <th class="border border-gray-300 p-2">Contact</th>
+              <th class="border border-gray-300 p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (centres.length === 0) { %>
+              <tr>
+                <td colspan="4" class="border border-gray-300 p-2 text-center">No pending centres.</td>
+              </tr>
+            <% } else { %>
+              <% centres.forEach(function(centre) { %>
+                <tr class="hover:bg-gray-50">
+                  <td class="border border-gray-300 p-2 text-center"><%= centre.centreName %></td>
+                  <td class="border border-gray-300 p-2 text-center"><%= centre.ownerName %></td>
+                  <td class="border border-gray-300 p-2 text-center"><%= centre.contact %></td>
+                  <td class="border border-gray-300 p-2 text-center">
+                    <a href="/approve-centre/<%= centre._id %>" class="text-green-500 hover:text-green-700">
+                      <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    </a>
+                    <a href="/reject-centre/<%= centre._id %>" class="text-red-500 hover:text-red-700 ml-4">
+                      <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Saathi Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100">
+  <!-- Sidebar -->
+  <div class="flex h-screen">
+    <!-- Left Sidebar -->
+    <aside class="w-64 bg-white shadow-md">
+      <div class="flex items-center justify-center py-4 border-b border-gray-200">
+        <h2 class="text-xl font-bold text-gray-800">Service Saathi</h2>
+      </div>
+      <nav class="mt-4">
+        <ul>
+          <li class="py-2 px-4 hover:bg-gray-100 cursor-pointer">
+            <a href="/dashboard" class="flex items-center text-gray-600">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0H6a1 1 0 00-1 1v3M6 7h7m-3 4H9m3 0a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 011-1h3a1 1 0 011 1v3z"></path>
+              </svg>
+              Dashboard
+            </a>
+          </li>
+          <li class="py-2 px-4 hover:bg-gray-100 cursor-pointer">
+            <a href="/documents" class="flex items-center text-gray-600">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Documents
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6 bg-white">
+      <!-- Header -->
+      <header class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button class="flex items-center space-x-2 bg-white p-2 rounded-lg shadow">
+              <span class="text-gray-800 font-medium"><%= user.username %></span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Recent Services Table -->
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Recent Services</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-600">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th class="px-6 py-3">Service</th>
+                <th class="px-6 py-3">Customer</th>
+                <th class="px-6 py-3">Contact</th>
+                <th class="px-6 py-3">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (documents.length === 0) { %>
+                <tr>
+                  <td colspan="4" class="px-6 py-4 text-center">No services found.</td>
+                </tr>
+              <% } else { %>
+                <% documents.forEach(function(doc) { %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4"><%= doc.serviceName %></td>
+                    <td class="px-6 py-4"><%= doc.customerName %></td>
+                    <td class="px-6 py-4"><%= doc.contactNumber %></td>
+                    <td class="px-6 py-4">
+                      <a href="/documents" class="text-blue-500 hover:text-blue-700">
+                        <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                      </a>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+</body>
+</html>
