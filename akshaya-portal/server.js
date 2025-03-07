@@ -9,8 +9,6 @@ const app = express();
 
 // MongoDB Atlas connection
 mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true, // deprecated notice only
-  useUnifiedTopology: true, // deprecated notice only
   dbName: 'akshyaportal'
 })
 .then(() => console.log('MongoDB Atlas connected'))
