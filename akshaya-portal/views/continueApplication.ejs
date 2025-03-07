@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Details - Service Saathi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Copied to clipboard: " + text);
+      });
+    }
+  </script>
+</head>
+<body class="bg-gray-100">
+  <!-- Header -->
+  <header class="bg-white shadow-md p-4 mb-6">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-2xl font-bold text-gray-800">Service Saathi - Customer Details</h1>
+    </div>
+  </header>
+
+  <div class="max-w-4xl mx-auto bg-white shadow-md rounded-md p-6">
+    <!-- Customer Details Section (Placeholders for now) -->
+    <h2 class="text-3xl font-bold text-gray-800 mb-4"><%= customerName || "Customer Name" %></h2>
+    <div class="bg-gray-200 p-4 rounded-md mb-6">
+      <p class="text-lg flex justify-between items-center">
+        <strong>Mobile:</strong> <span id="mobileVal"><%= mobile || "Mobile Number" %></span>
+        <button onclick="copyToClipboard(document.getElementById('mobileVal').textContent)" class="text-gray-600 hover:text-blue-500">
+          <!-- SVG icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M15 9V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"></path>
+          </svg>
+        </button>
+      </p>
+      <p class="text-lg flex justify-between items-center mt-2">
+        <strong>Email:</strong> <span id="emailVal"><%= email || "Email Address" %></span>
+        <button onclick="copyToClipboard(document.getElementById('emailVal').textContent)" class="text-gray-600 hover:text-blue-500">
+          <!-- SVG icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M15 9V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"></path>
+          </svg>
+        </button>
+      </p>
+      <p class="text-lg flex justify-between items-center mt-2">
+        <strong>Address:</strong> <span id="addressVal"><%= address || "Customer Address" %></span>
+        <button onclick="copyToClipboard(document.getElementById('addressVal').textContent)" class="text-gray-600 hover:text-blue-500">
+          <!-- SVG icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M15 9V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"></path>
+          </svg>
+        </button>
+      </p>
+      <p class="text-lg flex justify-between items-center mt-2">
+        <strong>Date of Birth:</strong> <span id="dobVal"><%= dob || "Date of Birth" %></span>
+        <button onclick="copyToClipboard(document.getElementById('dobVal').textContent)" class="text-gray-600 hover:text-blue-500">
+          <!-- SVG icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M15 9V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"></path>
+          </svg>
+        </button>
+      </p>
+    </div>
+        
+    <!-- Uploaded Documents Table -->
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Uploaded Documents</h2>
+    <table class="w-full border-collapse border border-gray-300 mb-6">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border border-gray-300 p-2">Document Name</th>
+          <th class="border border-gray-300 p-2">View</th>
+          <th class="border border-gray-300 p-2">Download</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!serviceRequest || serviceRequest.requiredDocuments.length === 0) { %>
+          <tr>
+            <td colspan="3" class="text-center p-4">No documents uploaded.</td>
+          </tr>
+        <% } else { %>
+          <% serviceRequest.requiredDocuments.forEach(function(doc) { %>
+            <tr class="hover:bg-gray-50">
+              <td class="border p-2 text-center"><%= doc.name %></td>
+              <td class="border p-2 text-center">
+                <% if (doc.uploadedFile) { %>
+                  <a href="<%= doc.uploadedFile %>" target="_blank" class="text-blue-500 hover:text-blue-700">View</a>
+                <% } else { %>
+                  Not Uploaded
+                <% } %>
+              </td>
+              <td class="border p-2 text-center">
+                <% if (doc.uploadedFile) { %>
+                  <a href="<%= doc.uploadedFile %>" target="_blank" download class="text-blue-500 hover:text-blue-700">Download</a>
+                <% } else { %>
+                  N/A
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+    
+    <!-- Application Status Update Section -->
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">Application Status</h2>
+      <div class="flex space-x-4">
+        <button onclick="updateStatus('completed')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Mark as Completed</button>
+        <button onclick="updateStatus('started')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Mark as Started</button>
+      </div>
+    </div>
+    
+    <!-- You can add further fields or submission options here -->
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+  <script>
+    async function updateStatus(newStatus) {
+      try {
+        const response = await fetch(`/api/application-status/<%= serviceRequest._id %>`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert("Application status updated to: " + newStatus);
+          // Optionally reload the page or update UI accordingly.
+          window.location.reload();
+        } else {
+          alert("Status update failed: " + result.error);
+        }
+      } catch (error) {
+        console.error(error);
+        alert("An error occurred while updating status");
+      }
+    }
+  </script>
+</body>
+</html>

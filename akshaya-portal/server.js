@@ -67,27 +67,36 @@ const ServiceRequest = require('./models/ServiceRequest');
 
 app.get('/dashboard', async (req, res) => {
   if (!req.session.user) return res.redirect('/');
-  // If the logged-in user is an admin, redirect to admin-dashboard
   if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
   
   try {
-    // Fetch recent documents
     const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-    // Fetch service requests for this user.
-    // (Assumes that the user's centre id is stored in req.session.user.centerId)
-    // Make sure that your login route also stores the centerId in the session.
     const serviceRequests = await ServiceRequest.find({ centreId: req.session.user.centerId });
-    
-    res.render('dashboard', { 
-      user: req.session.user, 
-      documents, 
-      serviceRequests 
-    });
+    res.render('dashboard', { user: req.session.user, documents, serviceRequests });
   } catch (error) {
     res.status(500).send(error.message);
   }
 });
 
+app.get('/continue-application/:serviceRequestId', async (req, res) => {
+  try {
+    const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
+    if (!serviceRequest) {
+      return res.status(404).send("Service request not found.");
+    }
+    // For now, customer details are blank.
+    res.render('continueApplication', {
+      customerName: "",  // to be filled later
+      mobile: "",        // to be filled later
+      email: "",         // to be filled later
+      address: "",       // to be filled later
+      dob: "",           // to be filled later
+      serviceRequest: serviceRequest
+    });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

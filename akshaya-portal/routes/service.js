@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+
 const ServiceRequest = require('../models/ServiceRequest');
 const Centre = require('../models/Centre'); // To check centre details
-const multer = require('multer');
-const path = require('path');
 
 // POST /api/service-request
 // Create a new service request (for example, Income Certificate)
@@ -15,7 +16,7 @@ router.post('/api/service-request', async (req, res) => {
     const { "document-type": documentType, "centre-id": centreId } = req.body;
     
     // Verify that the centre exists and is approved.
-    // Note: Make sure your Centres model uses the field "centerId" (or adjust accordingly).
+    // Note: Ensure that your Centres model uses the field "centerId" (or adjust accordingly).
     const centre = await Centre.findOne({ centerId: centreId });
     if (!centre) {
       return res.status(400).json({ error: 'Centre not found' });
@@ -42,7 +43,7 @@ router.post('/api/service-request', async (req, res) => {
       documentType,
       centreId,
       requiredDocuments,
-      status: "started",  // Make sure "started" is allowed in your model's enum
+      status: "started",  // "started" must be allowed in your model's enum
       uploadToken
     });
     await serviceRequest.save();
@@ -75,7 +76,7 @@ router.get('/api/service-request/:id', async (req, res) => {
   }
 });
 
-// Ensure the upload directory exists before saving files
+// Ensure the upload directory exists
 const uploadDir = 'uploads/service-documents/';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -111,9 +112,31 @@ router.post('/api/upload-documents/:serviceRequestId', upload.array('files', 10)
         serviceRequest.requiredDocuments[index].uploadedFile = imageUrl;
       }
     });
+    // Update status after document upload. (You can choose "submitted" or let user update further.)
     serviceRequest.status = "submitted";
     await serviceRequest.save();
     res.status(200).json({ message: "Documents uploaded successfully", serviceRequest });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/application-status/:serviceRequestId
+// Update the application status to either "completed" or "started"
+// (You can extend allowed statuses as needed.)
+router.post('/api/application-status/:serviceRequestId', async (req, res) => {
+  try {
+    const { status } = req.body; // Expecting status: "completed" or "started"
+    if (!["completed", "started"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+    const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
+    if (!serviceRequest) {
+      return res.status(404).json({ error: "Service request not found" });
+    }
+    serviceRequest.status = status;
+    await serviceRequest.save();
+    res.status(200).json({ message: "Application status updated successfully", serviceRequest });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
