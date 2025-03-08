@@ -113,7 +113,7 @@ router.post('/api/upload-documents/:serviceRequestId', upload.array('files', 10)
       }
     });
     // Update status after document upload. (You can choose "submitted" or let user update further.)
-    serviceRequest.status = "submitted";
+    serviceRequest.status = "received";
     await serviceRequest.save();
     res.status(200).json({ message: "Documents uploaded successfully", serviceRequest });
   } catch (error) {

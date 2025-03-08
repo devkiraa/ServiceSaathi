@@ -108,10 +108,14 @@
     
     <!-- Application Status Update Section -->
     <div class="mb-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-2">Application Status</h2>
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">Application Status: <span class="<%= serviceRequest.status === 'started' ? 'text-blue-600' : serviceRequest.status === 'completed' ? 'text-green-600' : 'text-yellow-600' %>"><%= serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1) %></h2>
       <div class="flex space-x-4">
-        <button onclick="updateStatus('completed')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Mark as Completed</button>
-        <button onclick="updateStatus('started')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Mark as Started</button>
+        <% if(serviceRequest.status === 'started'){%>
+          <button onclick="updateStatus('completed')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Mark as Completed</button>
+        <% }%>
+        <% if(serviceRequest.status === 'received'){%>
+          <button onclick="updateStatus('started')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Mark as Started</button>
+        <% }%>
       </div>
     </div>
     
