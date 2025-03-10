@@ -20,7 +20,11 @@
       </div>
       <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200">Login</button>
     </form>
+    <div class="mt-4 text-center">
+      <p class="text-gray-600">Don't have an account? <a href="/signup" class="text-blue-500 hover:underline">Sign Up</a></p>
+    </div>
   </div>
+
   <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -30,7 +34,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(Object.fromEntries(formData))
       });
-      
+
       const result = await response.json();
       if(response.ok) {
         if(result.role === 'admin') {
@@ -39,7 +43,11 @@
           window.location.href = '/dashboard';
         }
       } else {
-        alert('Login failed: ' + result.error);
+        if (result.error === 'User does not exist') {
+          alert('User does not exist. Please <a href="/signup" class="text-blue-500 hover:underline">Sign Up</a>');
+        } else {
+          alert('Login failed: ' + result.error);
+        }
       }
     });
   </script>  

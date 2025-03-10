@@ -74,8 +74,8 @@
           });
           const result = await response.json();
           if (response.ok) {
-            alert('Signup successful. Please log in.');
-            window.location.href = '/';
+            // Show the signup success modal
+            document.getElementById("successModal").style.display = "flex";
           } else {
             alert('Signup failed: ' + result.error);
           }
@@ -86,6 +86,28 @@
       });
     });
   </script>
+  <style>
+    /* Modal Background */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    /* Modal Content */
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body class="bg-gray-100 flex justify-center items-center h-screen">
   <div class="bg-white shadow-md rounded-md p-8 w-96">
@@ -145,5 +167,21 @@
       </div>
     </form>
   </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-4">Signup Successful</h3>
+      <p>You have successfully signed up. Please log in to continue.</p>
+      <button id="okButton" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">OK</button>
+    </div>
+  </div>
+
+  <script>
+    // Handle OK button click to navigate back to the login page
+    document.getElementById("okButton").addEventListener("click", function() {
+      window.location.href = '/'; // Redirect to login page
+    });
+  </script>
 </body>
 </html>
