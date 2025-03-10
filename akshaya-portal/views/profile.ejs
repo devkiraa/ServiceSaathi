@@ -1,82 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Profile</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
-</head>
-<body class="bg-gray-100 p-6">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 p-6">
     <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">User Profile</h2>
-        
-        <!-- User Profile Form -->
-        <form id="profileForm" class="space-y-4">
-            <div>
-                <label class="block text-gray-700">Email</label>
-                <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.email || "" %>" disabled>
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">User Profile</h2>
 
-            </div>
-            
-            <div>
-                <label class="block text-gray-700">Shop Name</label>
-                <input type="text" id="shopName" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.shopName %>" disabled>
-            </div>
-            
-            <div>
-                <label class="block text-gray-700">Person Name</label>
-                <input type="text" id="personName" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.personName %>" disabled>
-            </div>
-            
-            <div>
-                <label class="block text-gray-700">Center ID</label>
-                <input type="text" id="centerId" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.centerId %>" disabled>
-            </div>
-            
-            <!-- Edit & Save Buttons -->
-            <div class="flex justify-between">
-                <button type="button" id="editBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg">Edit</button>
-                <button type="submit" id="saveBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hidden">Save</button>
-            </div>
-        </form>
+      <!-- User Profile Form -->
+      <form id="profileForm" class="space-y-4">
+        <div>
+          <label class="block text-gray-700">Email</label>
+          <input type="email" id="email" class="w-full px-3 py-2 border
+          rounded-lg" value="<%= user?.email || "" %>" disabled>
+        </div>
+
+        <div>
+          <label class="block text-gray-700">Shop Name</label>
+          <input
+            type="text"
+            id="shopName"
+            class="w-full px-3 py-2 border rounded-lg"
+            value="<%= user?.shopName || 'Not Available' %>"
+            disabled
+          />
+        </div>
+
+        <div>
+          <label class="block text-gray-700">Person Name</label>
+          <input
+            type="text"
+            id="personName"
+            class="w-full px-3 py-2 border rounded-lg"
+            value="<%= user?.personName || 'Not Available' %>"
+            disabled
+          />
+        </div>
+
+        <div>
+          <label class="block text-gray-700">Center ID</label>
+          <input
+            type="text"
+            id="centerId"
+            class="w-full px-3 py-2 border rounded-lg"
+            value="<%= user?.centerId || 'Not Available' %>"
+            disabled
+          />
+        </div>
+
+        <div>
+          <label class="block text-gray-700">Phone Number</label>
+          <input
+            type="text"
+            id="phoneNumber"
+            class="w-full px-3 py-2 border rounded-lg"
+            value="<%= user?.phoneNumber || 'Not Available' %>"
+            disabled
+          />
+        </div>
+
+        <div>
+          <label class="block text-gray-700">District</label>
+          <input
+            type="text"
+            id="district"
+            class="w-full px-3 py-2 border rounded-lg"
+            value="<%= user?.district || 'Not Available' %>"
+            disabled
+          />
+        </div>
+
+        <div>
+          <label class="block text-gray-700">Centre Type</label>
+          <input
+            type="text"
+            id="businessCategory"
+            class="w-full px-3 py-2 border rounded-lg"
+            value="<%= user?.businessCategory || 'Not Available' %>"
+            disabled
+          />
+        </div>
+
+        <!-- Edit & Save Buttons -->
+        <div class="flex justify-between">
+          <button
+            type="button"
+            id="editBtn"
+            class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          >
+            Edit
+          </button>
+          <button
+            type="submit"
+            id="saveBtn"
+            class="px-4 py-2 bg-green-500 text-white rounded-lg hidden"
+          >
+            Save
+          </button>
+        </div>
+      </form>
     </div>
 
     <script>
-        const editBtn = document.getElementById('editBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const emailInput = document.getElementById('email');
+      const editBtn = document.getElementById("editBtn");
+      const saveBtn = document.getElementById("saveBtn");
+      const emailInput = document.getElementById("email");
+      const phoneNumberInput = document.getElementById("phoneNumber");
+      const businessCategoryInput = document.getElementById("businessCategory");
 
-        // Enable editing only for the email field
-        editBtn.addEventListener('click', () => {
-            emailInput.disabled = false;
-            editBtn.classList.add('hidden');
-            saveBtn.classList.remove('hidden');
-        });
+      // Enable editing for email, phone number, and centre type
+      editBtn.addEventListener("click", () => {
+        emailInput.disabled = false;
+        phoneNumberInput.disabled = false;
+        businessCategoryInput.disabled = false;
+        editBtn.classList.add("hidden");
+        saveBtn.classList.remove("hidden");
+      });
 
-        // Handle form submission to update email
-        document.getElementById('profileForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+      // Handle form submission to update details
+      document.getElementById("profileForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-            const newEmail = emailInput.value;
+        const newEmail = emailInput.value;
+        const newPhoneNumber = phoneNumberInput.value;
+        const newBusinessCategory = businessCategoryInput.value;
 
-            try {
-                const response = await fetch('/profile/update-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: newEmail })
-                });
+        try {
+          const response = await fetch("/profile/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: newEmail,
+              phoneNumber: newPhoneNumber,
+              businessCategory: newBusinessCategory
+            }),
+          });
 
-                if (!response.ok) throw new Error('Failed to update email.');
+          if (!response.ok) throw new Error("Failed to update profile.");
 
-                alert('Email updated successfully!');
-                emailInput.disabled = true;
-                editBtn.classList.remove('hidden');
-                saveBtn.classList.add('hidden');
-            } catch (error) {
-                alert(error.message);
-            }
-        });
+          alert("Profile updated successfully!");
+          emailInput.disabled = true;
+          phoneNumberInput.disabled = true;
+          businessCategoryInput.disabled = true;
+          editBtn.classList.remove("hidden");
+          saveBtn.classList.add("hidden");
+        } catch (error) {
+          alert(error.message);
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
