@@ -87,6 +87,32 @@
             disabled
           />
         </div>
+        <div>
+            <label class="block text-gray-700">Services Available Online</label>
+            <div class="flex flex-col mt-2">
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="services" value="aadhaar_enrollment" class="mr-2" disabled>
+                Aadhaar Enrollment
+              </label>
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="services" value="income_certificate" class="mr-2" disabled>
+                Income Certificate
+              </label>
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="services" value="voter_registration" class="mr-2" disabled>
+                Voter Registration (Election ID Card)
+              </label>
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="services" value="passport_service" class="mr-2" disabled>
+                Passport Service
+              </label>
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="services" value="utility_payments" class="mr-2" disabled>
+                Utility Payments (KSEB, BSNL, Water Bills)
+              </label>
+            </div>
+          </div>
+          
 
         <!-- Edit & Save Buttons -->
         <div class="flex justify-between">
@@ -114,17 +140,17 @@
       const emailInput = document.getElementById("email");
       const phoneNumberInput = document.getElementById("phoneNumber");
       const businessCategoryInput = document.getElementById("businessCategory");
+      const checkboxes = document.querySelectorAll("input[name='services']");
 
-      // Enable editing for email, phone number, and centre type
       editBtn.addEventListener("click", () => {
         emailInput.disabled = false;
         phoneNumberInput.disabled = false;
         businessCategoryInput.disabled = false;
+        checkboxes.forEach(checkbox => checkbox.disabled = false);
         editBtn.classList.add("hidden");
         saveBtn.classList.remove("hidden");
       });
 
-      // Handle form submission to update details
       document.getElementById("profileForm").addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -149,6 +175,7 @@
           emailInput.disabled = true;
           phoneNumberInput.disabled = true;
           businessCategoryInput.disabled = true;
+          checkboxes.forEach(checkbox => checkbox.disabled = true);
           editBtn.classList.remove("hidden");
           saveBtn.classList.add("hidden");
         } catch (error) {
