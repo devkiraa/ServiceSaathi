@@ -110,7 +110,11 @@ app.get('/profile', async (req, res) => {
         email: user.email,
         shopName: user.shopName ,
         personName: user.personName,
-        centerId: user.centerId 
+        centerId: user.centerId,
+        phone:user.phone,
+        district:user.district,
+        type:user.type
+
       }
     });
   } catch (error) {

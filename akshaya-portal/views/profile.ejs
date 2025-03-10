@@ -59,9 +59,9 @@
           <label class="block text-gray-700">Phone Number</label>
           <input
             type="text"
-            id="phoneNumber"
+            id="phone"
             class="w-full px-3 py-2 border rounded-lg"
-            value="<%= user?.phoneNumber || 'Not Available' %>"
+            value="<%= user?.phone|| 'Not Available' %>"
             disabled
           />
         </div>
@@ -91,23 +91,23 @@
             <label class="block text-gray-700">Services Available Online</label>
             <div class="flex flex-col mt-2">
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="aadhaar_enrollment" class="mr-2" disabled>
-                Aadhaar Enrollment
+                <input type="checkbox" name="services" value="<%= user?.aadhaar_enrollment%>" class="mr-2" disabled>
+              
               </label>
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="income_certificate" class="mr-2" disabled>
+                <input type="checkbox" name="services" value="<%= user?.income_certificate%>" class="mr-2" disabled>
                 Income Certificate
               </label>
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="voter_registration" class="mr-2" disabled>
+                <input type="checkbox" name="services" value="<%= user?.voter_registration%>" class="mr-2" disabled>
                 Voter Registration (Election ID Card)
               </label>
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="passport_service" class="mr-2" disabled>
+                <input type="checkbox" name="services" value="<%= user?passport_service%>" class="mr-2" disabled>
                 Passport Service
               </label>
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="utility_payments" class="mr-2" disabled>
+                <input type="checkbox" name="services" value="<%=user.?utility_payments%>" class="mr-2" disabled>
                 Utility Payments (KSEB, BSNL, Water Bills)
               </label>
             </div>
@@ -126,8 +126,8 @@
           <button
             type="submit"
             id="saveBtn"
-            class="px-4 py-2 bg-green-500 text-white rounded-lg hidden"
-          >
+            class="px-4 py-2 bg-green-500 text-white rounded-lg hidden">
+          
             Save
           </button>
         </div>
