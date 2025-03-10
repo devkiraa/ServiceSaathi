@@ -109,7 +109,6 @@ router.post('/api/login', async (req, res) => {
     if (!user) {
       return res.status(400).json({ error: 'Invalid mobile number or password' });
     }
-    
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -138,6 +137,15 @@ router.post('/api/login', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+router.post("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+        return res.status(500).json({ success: false, message: "Logout failed" });
+    }
+    return res.json({ success: true, message: "Logged out successfully" });
+  });
 });
 
 module.exports = router;
