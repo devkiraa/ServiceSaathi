@@ -146,7 +146,6 @@
             </div>
           </div>
           
-
         <!-- Edit & Save Buttons -->
         <div class="flex justify-between">
           <button
@@ -164,13 +163,46 @@
             Save
           </button>
         </div>
+          
+          <!-- Change Password Button -->
+          <button type="button" id="changePasswordBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
+            Change Password
+          </button>
+          
+          <!-- Hidden New Password Fields -->
+          <div id="passwordFields" class="hidden space-y-4 mt-2">
+            <div>
+              <label class="block text-gray-700">New Password</label>
+              <div class="relative">
+                <input type="password" id="newPassword" class="w-full px-3 py-2 border rounded-lg pr-10" />
+                <button type="button" class="absolute inset-y-0 right-0 px-3 flex items-center" onclick="togglePassword('newPassword', 'toggleNewPassword')">
+                  <span class="text-blue-700">show</span>
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-gray-700">Confirm New Password</label>
+              <div class="relative">
+                <input type="password" id="confirmNewPassword" class="w-full px-3 py-2 border rounded-lg pr-10" />
+                <button type="button" class="absolute inset-y-0 right-0 px-3 flex items-center" onclick="togglePassword('confirmNewPassword', 'toggleConfirmPassword')">
+                  <span class="text-blue-700">show</span>
+                </button>
+              </div>
+            </div>
+            
+          </div>
+          <button id="submit-password" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+            Save Changes
+        </button>
+          
+          
+
         
       </form>
     </div>
 
     <script>
-
-      console.log("<%= user.services %>");
       const editBtn = document.getElementById("editBtn");
       const saveBtn = document.getElementById("saveBtn");
       const emailInput = document.getElementById("email");
@@ -199,54 +231,40 @@
         saveBtn.classList.remove("hidden");
       });
     
-      document.getElementById("profileForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
+      // Verify Current Password Before Showing New Password Fields
+      document.getElementById("verifyPasswordBtn").addEventListener("click", async () => {
+        const currentPassword = document.getElementById("currentPassword").value;
     
-        const newEmail = emailInput.value;
-        const newPhoneNumber = phoneNumberInput.value;
-        const newBuilding = buildingInput.value;
-        const newStreet = streetInput.value;
-        const newLocality = localityInput.value;
-        const newPincode = pincodeInput.value;
-    
-        const selectedBusinessCategory = [...businessCategoryInputs].find(input => input.checked)?.value;
+        if (!currentPassword) {
+          alert("Please enter your current password.");
+          return;
+        }
     
         try {
-          const response = await fetch("/profile/update", {
+          const response = await fetch("/profile/verify-password", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: newEmail,
-              phoneNumber: newPhoneNumber,
-              buildingName: newBuilding,
-              street: newStreet,
-              locality: newLocality,
-              pincode: newPincode,
-              businessCategory: selectedBusinessCategory
-            }),
+            body: JSON.stringify({ currentPassword }),
           });
     
-          if (!response.ok) throw new Error("Failed to update profile.");
+          if (!response.ok) {
+            throw new Error("Incorrect current password.");
+          }
     
-          alert("Profile updated successfully!");
-    
-          emailInput.disabled = true;
-          phoneNumberInput.disabled = true;
-          buildingInput.disabled = true;
-          streetInput.disabled = true;
-          localityInput.disabled = true;
-          pincodeInput.disabled = true;
-    
-          businessCategoryInputs.forEach(input => input.disabled = true);
-          checkboxes.forEach(checkbox => checkbox.disabled = true);
-    
-          editBtn.classList.remove("hidden");
-          saveBtn.classList.add("hidden");
+          alert("Password verified successfully!");
+          passwordFields.classList.remove("hidden");
+          currentPasswordContainer.classList.add("hidden");
         } catch (error) {
           alert(error.message);
         }
       });
+    
+      function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        input.type = input.type === "password" ? "text" : "password";
+      }
     </script>
+      
     
   </body>
 </html>
