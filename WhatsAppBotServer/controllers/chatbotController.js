@@ -3,8 +3,6 @@ const Chat = require('../models/chat');
 const client = require('../config/twilio');
 const axios = require('axios');
 
-const BOT_NAME = "SERVICE SAATHI";
-
 // Base API URLs (without endpoints)
 const CHAT_API_BASE = "https://ef02-34-32-230-121.ngrok-free.app";
 const TRANSLATE_API_BASE = "https://593c-34-44-123-63.ngrok-free.app";
@@ -80,7 +78,7 @@ const handleMessage = async (req, res) => {
             user.language = null;
             user.lastOption = null;
             await user.save();
-            const resetMsg = `${BOT_NAME}: Language preference reset. Please choose your language:\n1️⃣ English\n2️⃣ Malayalam`;
+            const resetMsg = `*Language preference reset. Please choose your language:*\n1️⃣ English\n2️⃣ Malayalam`;
             await sendMessage(From, resetMsg);
             return res.status(200).end();
         }
@@ -90,8 +88,8 @@ const handleMessage = async (req, res) => {
             user.lastOption = null;
             await user.save();
             const menuMsg = user.language === "malayalam" ?
-                `${BOT_NAME}: പ്രധാന മെനുവിലേക്ക് തിരികെ പോവുന്നു. ദയവായി ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക:\n1️⃣ ചാറ്റ്\n2️⃣ ഡോക്യുമെന്റ് അപേക്ഷ` :
-                `${BOT_NAME}: Returning to main menu. Please choose an option:\n1️⃣ Chat\n2️⃣ Apply for Document`;
+                `*പ്രധാന മെനുവിലേക്ക് തിരികെ പോവുന്നു. ദയവായി ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക:*\n1️⃣ ചാറ്റ്\n2️⃣ ഡോക്യുമെന്റ് അപേക്ഷ` :
+                `*Returning to main menu. Please choose an option:*\n1️⃣ Chat\n2️⃣ Apply for Document`;
             await sendMessage(From, menuMsg);
             return res.status(200).end();
         }
@@ -100,20 +98,20 @@ const handleMessage = async (req, res) => {
         if (!user.language) {
             if (Body.toLowerCase() === "hi") {
                 // Stylish greeting with language selection prompt
-                const greet = `${BOT_NAME}: ✨ Welcome to SERVICE SAATHI - Akshaya Centre! ✨\nPlease choose your language:\n1️⃣ English\n2️⃣ Malayalam`;
+                const greet = `*✨ Welcome to SERVICE SAATHI - Akshaya Centre! ✨*\nPlease choose your language:\n1️⃣ English\n2️⃣ Malayalam`;
                 await sendMessage(From, greet);
             } else if (Body.trim() === "1") {
                 user.language = "english";
                 await user.save();
-                const greetEng = `${BOT_NAME}: Hello! Welcome to SERVICE SAATHI.\nPlease choose an option:\n1️⃣ Chat\n2️⃣ Apply for Document\n(To change language at any time, send /LANG)`;
+                const greetEng = `*Hello! Welcome to SERVICE SAATHI.*\nPlease choose an option:\n1️⃣ Chat\n2️⃣ Apply for Document\n(To change language at any time, send /LANG)`;
                 await sendMessage(From, greetEng);
             } else if (Body.trim() === "2") {
                 user.language = "malayalam";
                 await user.save();
-                const greetMal = `${BOT_NAME}: ഹലോ! SERVICE SAATHI - ആകശ്യ സെന്ററിലേക്ക് സ്വാഗതം.\nദയവായി ഒരു ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക:\n1️⃣ ചാറ്റ്\n2️⃣ ഡോക്യുമെന്റ് അപേക്ഷ\n(ഭാഷ മാറ്റത്തിന് /LANG)`;
+                const greetMal = `*ഹലോ! SERVICE SAATHI - ആകശ്യ സെന്ററിലേക്ക് സ്വാഗതം.*\nദയവായി ഒരു ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക:\n1️⃣ ചാറ്റ്\n2️⃣ ഡോക്യുമെന്റ് അപേക്ഷ\n(ഭാഷ മാറ്റത്തിന് /LANG)`;
                 await sendMessage(From, greetMal);
             } else {
-                await sendMessage(From, `${BOT_NAME}: Invalid input. Please type 'hi' to start and then choose:\n1️⃣ English\n2️⃣ Malayalam`);
+                await sendMessage(From, `*Invalid input. Please type 'hi' to start and then choose:*\n1️⃣ English\n2️⃣ Malayalam`);
             }
             return res.status(200).end();
         }
@@ -124,20 +122,20 @@ const handleMessage = async (req, res) => {
                 user.lastOption = "chat";
                 await user.save();
                 const msg = user.language === "malayalam" ?
-                    `${BOT_NAME}: ചാറ്റ് മോഡ് സജീവമാക്കി. എന്തെങ്കിലും ടൈപ്പ് ചെയ്യുക. മെയിൻ മെനുവിലേക്ക് തിരികെ പോവാൻ 'back' അല്ലെങ്കിൽ '0' അയക്കുക.\n(ഭാഷ മാറ്റത്തിന് /LANG)` :
-                    `${BOT_NAME}: Chat mode activated. Type anything to chat. Send 'back' or '0' to return to the main menu.\n(To change language, send /LANG)`;
+                    `*ചാറ്റ് മോഡ് സജീവമാക്കി. എന്തെങ്കിലും ടൈപ്പ് ചെയ്യുക. മെയിൻ മെനുവിലേക്ക് തിരികെ പോവാൻ 'back' അല്ലെങ്കിൽ '0' അയക്കുക.*\n(ഭാഷ മാറ്റത്തിന് /LANG)` :
+                    `*Chat mode activated. Type anything to chat. Send 'back' or '0' to return to the main menu.*\n(To change language, send /LANG)`;
                 await sendMessage(From, msg);
             } else if (Body.trim() === "2") {
                 user.lastOption = "apply";
                 await user.save();
                 const msg = user.language === "malayalam" ?
-                    `${BOT_NAME}: ഡോക്യുമെന്റ് അപേക്ഷ സവിശേഷത വികസനഘട്ടത്തിലാണ്.\n(ഭാഷ മാറ്റത്തിന് /LANG)` :
-                    `${BOT_NAME}: Apply for document feature is under development.\n(To change language, send /LANG)`;
+                    `*ഡോക്യുമെന്റ് അപേക്ഷ സവിശേഷത വികസനഘട്ടത്തിലാണ്.*\n(ഭാഷ മാറ്റത്തിന് /LANG)` :
+                    `*Apply for document feature is under development.*\n(To change language, send /LANG)`;
                 await sendMessage(From, msg);
             } else {
                 const invalidMsg = user.language === "malayalam" ?
-                    `${BOT_NAME}: അസാധുവായ ഓപ്ഷൻ. ദയവായി വീണ്ടും 'hi' അയയ്ക്കുക.` :
-                    `${BOT_NAME}: Invalid option. Type 'hi' to restart.`;
+                    `*അസാധുവായ ഓപ്ഷൻ. ദയവായി വീണ്ടും 'hi' അയയ്ക്കുക.*` :
+                    `*Invalid option. Type 'hi' to restart.*`;
                 await sendMessage(From, invalidMsg);
             }
             return res.status(200).end();
@@ -174,7 +172,7 @@ const handleMessage = async (req, res) => {
                 chatResponse = await translateText(chatResponse, "ENG-MAL");
             }
 
-            await sendMessage(From, `${BOT_NAME}: ${chatResponse}`);
+            await sendMessage(From, `*${chatResponse}*`);
         }
 
         // (Additional processing for "apply" mode can be added here if needed)
@@ -189,7 +187,9 @@ const handleMessage = async (req, res) => {
 const handleStatusCallback = async (req, res) => {
     const { MessageSid, MessageStatus, To, From } = req.body;
     console.log(`Status update for MessageSid ${MessageSid}: ${MessageStatus}`);
-    // Optionally update your DB or log status updates here
+    // You can use this callback to update your DB or log the delivery status.
+    // For Twilio, set the Status Callback URL in your Twilio Console to point to this endpoint.
+    // For example: https://your-domain.com/webhook/status
     return res.status(200).end();
 };
 
