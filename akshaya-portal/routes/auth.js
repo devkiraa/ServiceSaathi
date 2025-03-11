@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/api/users', async (req, res) => {
   try {
     // Expecting: username (mobile number), phone, email, shopName, personName, password, role, type, centerId
-    const { username,phone,email, shopName, personName, password, role, type, centerId,district } = req.body;
+    const { username,phone,email, shopName, personName, password, role, type, centerId,district,services,address } = req.body;
     
     // Check if user already exists (using mobile number as username)
     const existingUser = await User.findOne({ username });
@@ -58,7 +58,7 @@ router.post('/api/users', async (req, res) => {
 router.post('/api/signup', async (req, res) => {
   try {
     // Expecting: phone, email, shopName, personName, password, type, centerId
-    const { phone, email, shopName, personName, password, type, centerId,district } = req.body;
+    const { phone, email, shopName, personName, password, type, centerId,district} = req.body;
     
     // Use mobile number as the username
     const existingUser = await User.findOne({ username: phone });
@@ -138,14 +138,41 @@ router.post('/api/login', async (req, res) => {
         type: user.type,
         centerId: user.centerId, // include the centre identifier
         phone:user.phone,
-        district:user.district
-      };      
+        district:user.district,
+        services:user.services,
+        address:user.address
+      };
     
     res.status(200).json({ message: 'Logged in successfully', role: user.role });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+// Handle service update
+router.post("/update-services", async (req, res) => {
+  try {
+      const { services } = req.body;
+
+      // Convert checkbox data to boolean values
+      const updatedServices = {};
+      for (let key in services) {
+          updatedServices[key] = services[key] === "true";
+      }
+
+      // Update the user document
+      await User.updateOne(
+          { username: "" }, // Example user
+          { $set: { services: updatedServices } }
+      );
+
+      res.redirect("/profile");
+  }
+   catch (error) {
+      console.error(error);
+      res.status(500).send("Error updating services");
+  }
+});
+
 
 router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
