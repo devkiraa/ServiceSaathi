@@ -109,8 +109,9 @@
     }
   </style>
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
-  <div class="bg-white shadow-md rounded-md p-8 w-96">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white shadow-md rounded-md p-8 w-96 flex flex-col justify-center items-center mx-auto">
+
     <h2 class="text-2xl font-bold text-center mb-6">Service Saathi Sign Up</h2>
     <form id="signupForm">
       <!-- Step 1: Mobile Number Only -->
@@ -122,10 +123,10 @@
         </div>
         <button type="button" onclick="validateStep1()" class="w-full bg-gray-800 text-white p-2 rounded hover:bg-gray-700">Continue</button>
       </div>
-
+    
       <!-- Step 2: Centre Details -->
       <div id="step2" class="hidden">
-        <div class="mb-4">
+        <div class="mb-4" class="hidden">
           <label for="shopName" class="block text-gray-700 font-medium">Shop Name</label>
           <input type="text" id="shopName" name="shopName" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
         </div>
@@ -164,9 +165,30 @@
           <input type="text" id="center-id" name="centerId" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
         </div>
         <div class="mb-4">
+          <label for="buildingName" class="block text-gray-700 font-medium">Building/House Name</label>
+          <input type="text" id="buildingName" name="buildingName" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+        </div>
+        
+        <div class="mb-4">
+          <label for="street" class="block text-gray-700 font-medium">Street</label>
+          <input type="text" id="street" name="street" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+        </div>
+        
+        <div class="mb-4">
+          <label for="locality" class="block text-gray-700 font-medium">Locality</label>
+          <input type="text" id="locality" name="locality" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+        </div>
+        
+        <div class="mb-4">
           <label for="district" class="block text-gray-700 font-medium">District</label>
           <input type="text" id="district" name="district" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
         </div>
+        
+        <div class="mb-4">
+          <label for="pincode" class="block text-gray-700 font-medium">Pincode</label>
+          <input type="text" id="pincode" name="pincode" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+        </div>
+        
         <button type="submit" class="w-full bg-gray-800 text-white p-2 rounded hover:bg-gray-700">Sign Up</button>
       </div>
     </form>

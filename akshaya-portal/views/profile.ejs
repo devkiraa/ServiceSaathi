@@ -19,7 +19,7 @@
         <div>
           <label class="block text-gray-700">Email</label>
           <input type="email" id="email" class="w-full px-3 py-2 border
-          rounded-lg" value="<%= user?.email || "" %>" disabled>
+          rounded-lg" value="<%= user?.email  %>" disabled>
         </div>
 
         <div>
@@ -59,9 +59,9 @@
           <label class="block text-gray-700">Phone Number</label>
           <input
             type="text"
-            id="phoneNumber"
+            id="phone"
             class="w-full px-3 py-2 border rounded-lg"
-            value="<%= user?.phoneNumber || 'Not Available' %>"
+            value="<%= user?.phone|| 'Not Available' %>"
             disabled
           />
         </div>
@@ -78,42 +78,86 @@
         </div>
 
         <div>
-          <label class="block text-gray-700">Centre Type</label>
-          <input
-            type="text"
-            id="businessCategory"
-            class="w-full px-3 py-2 border rounded-lg"
-            value="<%= user?.businessCategory || 'Not Available' %>"
-            disabled
-          />
+          <label class="block text-gray-700 ">Centre Type</label>
+          <div class="flex items-center mt-2">
+            <input type="radio" id="csc" name="businessCategory" value="CSC" class="mr-2" disabled>
+            <label for="csc" class="text-gray-700">CSC</label>
+          </div>
+          <div class="flex items-center mt-2">
+            <input type="radio" id="akshaya" name="businessCategory" value="Akshaya" class="mr-2" disabled>
+            <label for="akshaya" class="text-gray-700">Akshaya</label>
+          </div>
         </div>
+        
         <div>
+          <b><p class="block text-gray-700">Address</p></b>
+          </div>
+          <div>
+            <label class="block text-gray-700">Building/House Name</label>
+            <input
+              type="text"
+              id="buildingName"
+              class="w-full px-3 py-2 border rounded-lg"
+              value="<%= user?.buildingName || 'Not Available' %>"
+              disabled
+            />
+          </div>
+          
+          <div>
+            <label class="block text-gray-700">Street</label>
+            <input
+              type="text"
+              id="street"
+              class="w-full px-3 py-2 border rounded-lg"
+              value="<%= user?.street || 'Not Available' %>"
+              disabled
+            />
+          </div>
+          
+          <div>
+            <label class="block text-gray-700">Locality</label>
+            <input
+              type="text"
+              id="locality"
+              class="w-full px-3 py-2 border rounded-lg"
+              value="<%= user?.locality || 'Not Available' %>"
+              disabled
+            />
+          </div>
+          
+          <div>
+            <label class="block text-gray-700">Pincode</label>
+            <input
+              type="text"
+              id="pincode"
+              class="w-full px-3 py-2 border rounded-lg"
+              value="<%= user?.pincode || 'Not Available' %>"
+              disabled
+            />
+          </div>
+          <div>
             <label class="block text-gray-700">Services Available Online</label>
             <div class="flex flex-col mt-2">
+             
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="aadhaar_enrollment" class="mr-2" disabled>
-                Aadhaar Enrollment
-              </label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="income_certificate" class="mr-2" disabled>
+                <input type="checkbox" name="services" value="<%= user?.income_certificate%>" class="mr-2" disabled>
                 Income Certificate
               </label>
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="voter_registration" class="mr-2" disabled>
+                <input type="checkbox" name="services" value="<%= user?.voter_registration%>" class="mr-2" disabled>
                 Voter Registration (Election ID Card)
               </label>
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="passport_service" class="mr-2" disabled>
+                <input type="checkbox" name="services" value="<%= user?.passport_service%>" class="mr-2" disabled>
                 Passport Service
               </label>
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="utility_payments" class="mr-2" disabled>
+                <input type="checkbox" name="services" value="<%=user?.utility_payments%>" class="mr-2" disabled>
                 Utility Payments (KSEB, BSNL, Water Bills)
               </label>
             </div>
           </div>
           
-
         <!-- Edit & Save Buttons -->
         <div class="flex justify-between">
           <button
@@ -126,62 +170,112 @@
           <button
             type="submit"
             id="saveBtn"
-            class="px-4 py-2 bg-green-500 text-white rounded-lg hidden"
-          >
+            class="px-4 py-2 bg-green-500 text-white rounded-lg hidden">
+          
             Save
           </button>
         </div>
+          
+          <!-- Change Password Button -->
+          <button type="button" id="changePasswordBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
+            Change Password
+          </button>
+          
+          <!-- Hidden New Password Fields -->
+          <div id="passwordFields" class="hidden space-y-4 mt-2">
+            <div>
+              <label class="block text-gray-700">New Password</label>
+              <div class="relative">
+                <input type="password" id="newPassword" class="w-full px-3 py-2 border rounded-lg pr-10" />
+                <button type="button" class="absolute inset-y-0 right-0 px-3 flex items-center" onclick="togglePassword('newPassword', 'toggleNewPassword')">
+                  <span class="text-blue-700">show</span>
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-gray-700">Confirm New Password</label>
+              <div class="relative">
+                <input type="password" id="confirmNewPassword" class="w-full px-3 py-2 border rounded-lg pr-10" />
+                <button type="button" class="absolute inset-y-0 right-0 px-3 flex items-center" onclick="togglePassword('confirmNewPassword', 'toggleConfirmPassword')">
+                  <span class="text-blue-700">show</span>
+                </button>
+              </div>
+            </div>
+            
+          </div>
+          <button id="submit-password" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+            Save Changes
+        </button>
+          
+          
+
+        
       </form>
     </div>
 
     <script>
-      const editBtn = document.getElementById("editBtn");
-      const saveBtn = document.getElementById("saveBtn");
-      const emailInput = document.getElementById("email");
-      const phoneNumberInput = document.getElementById("phoneNumber");
-      const businessCategoryInput = document.getElementById("businessCategory");
-      const checkboxes = document.querySelectorAll("input[name='services']");
-
-      editBtn.addEventListener("click", () => {
-        emailInput.disabled = false;
-        phoneNumberInput.disabled = false;
-        businessCategoryInput.disabled = false;
-        checkboxes.forEach(checkbox => checkbox.disabled = false);
-        editBtn.classList.add("hidden");
-        saveBtn.classList.remove("hidden");
+      const changePasswordBtn = document.getElementById("changePasswordBtn");
+      const passwordFields = document.getElementById("passwordFields");
+      const submitPasswordBtn = document.getElementById("submit-password");
+      
+      // Create Current Password Input Field (Initially Hidden)
+      const currentPasswordContainer = document.createElement("div");
+      currentPasswordContainer.innerHTML = `
+        <div>
+          <label class="block text-gray-700">Current Password</label>
+          <div class="relative">
+            <input type="password" id="currentPassword" class="w-full px-3 py-2 border rounded-lg pr-10" />
+            <button type="button" class="absolute inset-y-0 right-0 px-3 flex items-center" onclick="togglePassword('currentPassword')">
+              <span class="text-blue-700">show</span>
+            </button>
+          </div>
+          <button type="button" id="verifyPasswordBtn" class="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg">Verify</button>
+        </div>
+      `;
+      passwordFields.parentNode.insertBefore(currentPasswordContainer, passwordFields);
+      passwordFields.classList.add("hidden");
+      currentPasswordContainer.classList.add("hidden");
+    
+      // Show Current Password Field on Change Password Click
+      changePasswordBtn.addEventListener("click", () => {
+        currentPasswordContainer.classList.toggle("hidden");
       });
-
-      document.getElementById("profileForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const newEmail = emailInput.value;
-        const newPhoneNumber = phoneNumberInput.value;
-        const newBusinessCategory = businessCategoryInput.value;
-
+    
+      // Verify Current Password Before Showing New Password Fields
+      document.getElementById("verifyPasswordBtn").addEventListener("click", async () => {
+        const currentPassword = document.getElementById("currentPassword").value;
+    
+        if (!currentPassword) {
+          alert("Please enter your current password.");
+          return;
+        }
+    
         try {
-          const response = await fetch("/profile/update", {
+          const response = await fetch("/profile/verify-password", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: newEmail,
-              phoneNumber: newPhoneNumber,
-              businessCategory: newBusinessCategory
-            }),
+            body: JSON.stringify({ currentPassword }),
           });
-
-          if (!response.ok) throw new Error("Failed to update profile.");
-
-          alert("Profile updated successfully!");
-          emailInput.disabled = true;
-          phoneNumberInput.disabled = true;
-          businessCategoryInput.disabled = true;
-          checkboxes.forEach(checkbox => checkbox.disabled = true);
-          editBtn.classList.remove("hidden");
-          saveBtn.classList.add("hidden");
+    
+          if (!response.ok) {
+            throw new Error("Incorrect current password.");
+          }
+    
+          alert("Password verified successfully!");
+          passwordFields.classList.remove("hidden");
+          currentPasswordContainer.classList.add("hidden");
         } catch (error) {
           alert(error.message);
         }
       });
+    
+      function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        input.type = input.type === "password" ? "text" : "password";
+      }
     </script>
+      
+    
   </body>
 </html>

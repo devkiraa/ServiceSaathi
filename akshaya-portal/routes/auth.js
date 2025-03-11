@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/api/users', async (req, res) => {
   try {
     // Expecting: username (mobile number), phone, email, shopName, personName, password, role, type, centerId
-    const { username, phone, email, shopName, personName, password, role, type, centerId } = req.body;
+    const { username,phone,email, shopName, personName, password, role, type, centerId,district } = req.body;
     
     // Check if user already exists (using mobile number as username)
     const existingUser = await User.findOne({ username });
@@ -17,7 +17,7 @@ router.post('/api/users', async (req, res) => {
     
     // Create new user with provided details
     const user = new User({
-      username,   // mobile number used for login
+      username:phone,
       phone,
       email,
       shopName,
@@ -25,7 +25,8 @@ router.post('/api/users', async (req, res) => {
       password,
       role,
       type,
-      centerId
+      centerId,
+      district
     });
     await user.save();
     
@@ -36,9 +37,11 @@ router.post('/api/users', async (req, res) => {
         centreName: centerId,   // using centerId as the centre identifier
         ownerName: personName,
         contact: phone,
+        phone,
         email,
         type,
         centerId,
+        district,
         // Optionally, auto-approve admin-created centres or leave them pending:
         status: role === 'admin' ? 'approved' : 'pending'
       });
@@ -55,7 +58,7 @@ router.post('/api/users', async (req, res) => {
 router.post('/api/signup', async (req, res) => {
   try {
     // Expecting: phone, email, shopName, personName, password, type, centerId
-    const { phone, email, shopName, personName, password, type, centerId } = req.body;
+    const { phone, email, shopName, personName, password, type, centerId,district } = req.body;
     
     // Use mobile number as the username
     const existingUser = await User.findOne({ username: phone });
@@ -73,6 +76,7 @@ router.post('/api/signup', async (req, res) => {
       password,
       type,
       centerId,
+      district,
       role: 'user'
     });
     await user.save();
@@ -84,9 +88,11 @@ router.post('/api/signup', async (req, res) => {
         centreName: centerId,
         ownerName: personName,
         contact: phone,
+        phone,
         email,
         type,
         centerId,
+        district,
         status: 'pending'
       });
       await centre.save();
@@ -130,7 +136,9 @@ router.post('/api/login', async (req, res) => {
         username: user.username,
         role: user.role,
         type: user.type,
-        centerId: user.centerId  // include the centre identifier
+        centerId: user.centerId, // include the centre identifier
+        phone:user.phone,
+        district:user.district
       };      
     
     res.status(200).json({ message: 'Logged in successfully', role: user.role });

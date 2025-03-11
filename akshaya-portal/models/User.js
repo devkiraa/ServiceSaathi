@@ -46,6 +46,10 @@ const userSchema = new mongoose.Schema({
   // Centre ID as entered by the user (may be an identifier)
   centerId: { 
     type: String 
+  },
+  district: {
+    type:String,
+    required:true
   }
 });
 
