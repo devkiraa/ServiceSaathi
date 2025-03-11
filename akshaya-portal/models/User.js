@@ -50,8 +50,21 @@ const userSchema = new mongoose.Schema({
   district: {
     type:String,
     required:true
-  }
-});
+  },
+  services:{
+    income_certificate: Boolean,
+    voter_registration: Boolean,
+    passport_service: Boolean,
+    utility_payments: Boolean,
+    possession_certificate: Boolean
+  },
+  address: {
+    buildingName: { type: String, default: null },
+    street: { type: String, default: null },
+    locality: { type: String, default:null},
+    pincode: { type: Number, default: null }
+      
+}});
 
 // Hash the password before saving
 userSchema.pre('save', async function(next) {

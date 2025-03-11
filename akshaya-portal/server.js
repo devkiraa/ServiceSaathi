@@ -44,6 +44,7 @@ const authRoutes = require('./routes/auth');
 const documentRoutes = require('./routes/documents');
 const adminRoutes = require('./routes/admin');
 const serviceRoutes = require('./routes/service');
+const { json } = require('stream/consumers');
 
 app.use(authRoutes);
 app.use(documentRoutes);
@@ -113,8 +114,9 @@ app.get('/profile', async (req, res) => {
         centerId: user.centerId,
         phone:user.phone,
         district:user.district,
-        type:user.type
-
+        type:user.type,
+        services:user.services.toObject(),
+        address:user.address.toObject() 
       }
     });
   } catch (error) {
