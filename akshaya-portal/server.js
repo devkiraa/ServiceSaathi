@@ -83,6 +83,10 @@ app.get('/add-user', (req, res) => {
 app.get('/signup', (req, res) => {
   res.render('signup');
 });
+// Signup Page
+app.get('/change_password', (req, res) => {
+  res.render('change_password');
+});
 
 // Dashboard Route
 app.get('/dashboard', async (req, res) => {
