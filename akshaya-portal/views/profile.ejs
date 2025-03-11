@@ -158,7 +158,6 @@
             </div>
           </div>
           
-
         <!-- Edit & Save Buttons -->
         <div class="flex justify-between">
           <button
@@ -176,86 +175,128 @@
             Save
           </button>
         </div>
+          <div>
+            <label class="block text-gray-700">Current Password</label>
+            <input type="password" id="currentPassword" class="w-full px-3 py-2 border rounded-lg" value="********" disabled />
+          </div>
+          
+          <!-- Change Password Button -->
+          <button type="button" id="changePasswordBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
+            Change Password
+          </button>
+          
+          <!-- Hidden New Password Fields -->
+          <div id="passwordFields" class="hidden space-y-4 mt-2">
+            <div>
+              <label class="block text-gray-700">New Password</label>
+              <input type="password" id="newPassword" class="w-full px-3 py-2 border rounded-lg" />
+            </div>
+          
+            <div>
+              <label class="block text-gray-700">Confirm New Password</label>
+              <input type="password" id="confirmNewPassword" class="w-full px-3 py-2 border rounded-lg" />
+            </div>
+          </div>
+          
+          
+          
+
         
       </form>
     </div>
 
     <script>
       const editBtn = document.getElementById("editBtn");
-      const saveBtn = document.getElementById("saveBtn");
-      const emailInput = document.getElementById("email");
-      const phoneNumberInput = document.getElementById("phone");
-      const businessCategoryInputs = document.querySelectorAll("input[name='businessCategory']");
-      const checkboxes = document.querySelectorAll("input[name='services']");
-    
-      // Newly added fields
-      const buildingInput = document.getElementById("buildingName");
-      const streetInput = document.getElementById("street");
-      const localityInput = document.getElementById("locality");
-      const pincodeInput = document.getElementById("pincode");
-    
-      editBtn.addEventListener("click", () => {
-        emailInput.disabled = false;
-        phoneNumberInput.disabled = false;
-        buildingInput.disabled = false;
-        streetInput.disabled = false;
-        localityInput.disabled = false;
-        pincodeInput.disabled = false;
-    
-        businessCategoryInputs.forEach(input => input.disabled = false);
-        checkboxes.forEach(checkbox => checkbox.disabled = false);
-    
-        editBtn.classList.add("hidden");
-        saveBtn.classList.remove("hidden");
-      });
-    
-      document.getElementById("profileForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-    
-        const newEmail = emailInput.value;
-        const newPhoneNumber = phoneNumberInput.value;
-        const newBuilding = buildingInput.value;
-        const newStreet = streetInput.value;
-        const newLocality = localityInput.value;
-        const newPincode = pincodeInput.value;
-    
-        const selectedBusinessCategory = [...businessCategoryInputs].find(input => input.checked)?.value;
-    
-        try {
-          const response = await fetch("/profile/update", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: newEmail,
-              phoneNumber: newPhoneNumber,
-              buildingName: newBuilding,
-              street: newStreet,
-              locality: newLocality,
-              pincode: newPincode,
-              businessCategory: selectedBusinessCategory
-            }),
-          });
-    
-          if (!response.ok) throw new Error("Failed to update profile.");
-    
-          alert("Profile updated successfully!");
-    
-          emailInput.disabled = true;
-          phoneNumberInput.disabled = true;
-          buildingInput.disabled = true;
-          streetInput.disabled = true;
-          localityInput.disabled = true;
-          pincodeInput.disabled = true;
-    
-          businessCategoryInputs.forEach(input => input.disabled = true);
-          checkboxes.forEach(checkbox => checkbox.disabled = true);
-    
-          editBtn.classList.remove("hidden");
-          saveBtn.classList.add("hidden");
-        } catch (error) {
-          alert(error.message);
-        }
-      });
+const saveBtn = document.getElementById("saveBtn");
+const emailInput = document.getElementById("email");
+const phoneNumberInput = document.getElementById("phone");
+const businessCategoryInputs = document.querySelectorAll("input[name='businessCategory']");
+const checkboxes = document.querySelectorAll("input[name='services']");
+
+// Newly added fields
+const buildingInput = document.getElementById("buildingName");
+const streetInput = document.getElementById("street");
+const localityInput = document.getElementById("locality");
+const pincodeInput = document.getElementById("pincode");
+
+// Password fields
+const changePasswordBtn = document.getElementById("changePasswordBtn");
+const passwordFields = document.getElementById("passwordFields");
+const newPasswordInput = document.getElementById("newPassword");
+const confirmNewPasswordInput = document.getElementById("confirmNewPassword");
+
+editBtn.addEventListener("click", () => {
+  emailInput.disabled = false;
+  phoneNumberInput.disabled = false;
+  buildingInput.disabled = false;
+  streetInput.disabled = false;
+  localityInput.disabled = false;
+  pincodeInput.disabled = false;
+
+  businessCategoryInputs.forEach(input => input.disabled = false);
+  checkboxes.forEach(checkbox => checkbox.disabled = false);
+
+  editBtn.classList.add("hidden");
+  saveBtn.classList.remove("hidden");
+  changePasswordBtn.classList.remove("hidden"); // Show Change Password button
+});
+
+changePasswordBtn.addEventListener("click", () => {
+  passwordFields.classList.toggle("hidden"); // Toggle password fields
+});
+
+// Handle Form Submission
+document.getElementById("profileForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (!passwordFields.classList.contains("hidden")) {
+    const newPassword = newPasswordInput.value;
+    const confirmNewPassword = confirmNewPasswordInput.value;
+
+    if (newPassword !== confirmNewPassword) {
+      alert("New passwords do not match!");
+      return;
+    }
+  }
+
+  // Prepare Data for Submission
+  const payload = {
+    email: emailInput.value,
+    phoneNumber: phoneNumberInput.value,
+    buildingName: buildingInput.value,
+    street: streetInput.value,
+    locality: localityInput.value,
+    pincode: pincodeInput.value,
+    businessCategory: [...businessCategoryInputs].find(input => input.checked)?.value,
+  };
+
+  if (!passwordFields.classList.contains("hidden")) {
+    payload.newPassword = newPasswordInput.value;
+  }
+
+  try {
+    const response = await fetch("/profile/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) throw new Error("Failed to update profile.");
+
+    alert("Profile updated successfully!");
+
+    passwordFields.classList.add("hidden");
+    newPasswordInput.value = "";
+    confirmNewPasswordInput.value = "";
+
+    editBtn.classList.remove("hidden");
+    saveBtn.classList.add("hidden");
+    changePasswordBtn.classList.add("hidden"); // Hide Change Password button after saving
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
     </script>
     
   </body>
