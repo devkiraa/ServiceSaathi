@@ -44,6 +44,7 @@ const authRoutes = require('./routes/auth');
 const documentRoutes = require('./routes/documents');
 const adminRoutes = require('./routes/admin');
 const serviceRoutes = require('./routes/service');
+const { json } = require('stream/consumers');
 
 app.use(authRoutes);
 app.use(documentRoutes);
@@ -82,6 +83,10 @@ app.get('/add-user', (req, res) => {
 app.get('/signup', (req, res) => {
   res.render('signup');
 });
+// Signup Page
+app.get('/change-password', (req, res) => {
+  res.render('changePassword');
+});
 
 // Dashboard Route
 app.get('/dashboard', async (req, res) => {
@@ -113,8 +118,9 @@ app.get('/profile', async (req, res) => {
         centerId: user.centerId,
         phone:user.phone,
         district:user.district,
-        type:user.type
-
+        type:user.type,
+        services:user.services.toObject(),
+        address:user.address.toObject() 
       }
     });
   } catch (error) {
