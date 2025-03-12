@@ -84,8 +84,8 @@ app.get('/signup', (req, res) => {
   res.render('signup');
 });
 // Signup Page
-app.get('/change_password', (req, res) => {
-  res.render('change_password');
+app.get('/change-password', (req, res) => {
+  res.render('changePassword');
 });
 
 // Dashboard Route
