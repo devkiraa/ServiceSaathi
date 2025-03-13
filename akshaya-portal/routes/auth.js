@@ -26,7 +26,8 @@ router.post('/api/users', async (req, res) => {
       role,
       type,
       centerId,
-      district
+      district,
+      
     });
     await user.save();
     
