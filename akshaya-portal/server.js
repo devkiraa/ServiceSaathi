@@ -71,8 +71,6 @@ app.post('/logout', (req, res) => {
   });
 }); 
 
-
-
 // Admin: Add User Page
 app.get('/add-user', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
@@ -129,27 +127,38 @@ app.get('/profile', async (req, res) => {
 });
 
 app.post('/profile/update-email', async (req, res) => {
-  if (!req.session.user || !req.session.user.id) 
+  if (!req.session.user || !req.session.user.id) {
     return res.status(401).json({ error: "Unauthorized access" });
+  }
 
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
 
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
+
   try {
-    const user = await User.findById(req.session.user.id);
+    const user = await User.findById(req.session.user.id).exec();
     if (!user) return res.status(404).json({ error: "User not found" });
 
     user.email = email;
     await user.save();
 
-    // Update session data so the new email reflects in the profile page
+    // Ensure session is updated and saved properly
     req.session.user.email = email;
+    req.session.save((err) => {
+      if (err) return res.status(500).json({ error: "Session update failed" });
+      res.json({ success: true, message: "Email updated successfully!" });
+    });
 
-    res.json({ success: true, message: "Email updated successfully!" });
   } catch (error) {
     res.status(500).json({ error: "Database error: " + error.message });
   }
 });
+
 
 // Continue Application Route (Fixed)
 app.get('/continue-application/:serviceRequestId', async (req, res) => {

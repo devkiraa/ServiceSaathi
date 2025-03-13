@@ -98,7 +98,7 @@
               type="text"
               id="buildingName"
               class="w-full px-3 py-2 border rounded-lg"
-              value="<%= user?.buildingName || 'Not Available' %>"
+              value="<%= user?.address?.buildingName || 'Not Available' %>"
               disabled
             />
           </div>
@@ -109,7 +109,7 @@
               type="text"
               id="street"
               class="w-full px-3 py-2 border rounded-lg"
-              value="<%= user?.street || 'Not Available' %>"
+              value="<%= user?.address?.street || 'Not Available' %>"
               disabled
             />
           </div>
@@ -120,7 +120,7 @@
               type="text"
               id="locality"
               class="w-full px-3 py-2 border rounded-lg"
-              value="<%= user?.locality || 'Not Available' %>"
+              value="<%= user?.address?.locality || 'Not Available' %>"
               disabled
             />
           </div>
@@ -131,7 +131,7 @@
               type="text"
               id="pincode"
               class="w-full px-3 py-2 border rounded-lg"
-              value="<%= user?.pincode || 'Not Available' %>"
+              value="<%= user?.address?.pincode || 'Not Available' %>"
               disabled
             />
           </div>
@@ -140,7 +140,7 @@
             <div class="flex flex-col mt-2">
              
               <label class="inline-flex items-center">
-                <input type="checkbox" name="services" value="<%= user?.income_certificate%>" class="mr-2" disabled>
+                <input type="checkbox" name="services" value="<%= user?.services?.income_certificate%>" class="mr-2" disabled>
                 Income Certificate
               </label>
               <label class="inline-flex items-center">
@@ -196,6 +196,8 @@
     
       const businessCategoryInputs = document.querySelectorAll("input[name='businessCategory']");
       const checkboxes = document.querySelectorAll("input[name='services']");
+
+      console.log("<%=user?.address%>");
     
       editBtn.addEventListener("click", () => {
         // Enable all input fields

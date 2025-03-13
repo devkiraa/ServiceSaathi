@@ -103,6 +103,39 @@ router.post('/api/signup', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.post('/profile/update', async (req, res) => {
+  if (!req.session.user || !req.session.user.id) {
+    return res.status(401).json({ error: "Unauthorized access" });
+  }
+
+  const { email, phone, district, address, services } = req.body;
+  if (!email || !phone || !district || !address || !services) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    const user = await User.findById(req.session.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    user.email = email;
+    user.phone = phone;
+    user.district = district;
+    user.address = address;
+    user.services = services;
+
+    await user.save();
+
+    req.session.user = user; // Update session
+    req.session.save((err) => {
+      if (err) return res.status(500).json({ error: "Session update failed" });
+      res.json({ success: true, message: "Profile updated successfully!" });
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: "Database error: " + error.message });
+  }
+});
+
 
 // Login Route
 router.post('/api/login', async (req, res) => {
@@ -134,6 +167,7 @@ router.post('/api/login', async (req, res) => {
     req.session.user = {
         id: user._id,
         username: user.username,
+        email:user.email,
         role: user.role,
         type: user.type,
         centerId: user.centerId, // include the centre identifier
