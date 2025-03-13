@@ -102,8 +102,9 @@ router.post('/api/signup', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-app.post('/profile/update', async (req, res) => {
+})
+
+router.post('/profile/update', async (req, res) => {
   if (!req.session.user || !req.session.user.id) {
     return res.status(401).json({ error: "Unauthorized access" });
   }
@@ -135,7 +136,6 @@ app.post('/profile/update', async (req, res) => {
     res.status(500).json({ error: "Database error: " + error.message });
   }
 });
-
 
 // Login Route
 router.post('/api/login', async (req, res) => {
