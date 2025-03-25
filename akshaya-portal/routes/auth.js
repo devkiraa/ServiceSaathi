@@ -218,4 +218,36 @@ router.post("/logout", (req, res) => {
   });
 });
 
+// Change Password Route
+router.post('/api/change-password', async (req, res) => {
+  console.log("Session data:", req.session.user); // Debugging: Print session data
+
+  if (!req.session.user || !req.session.user.id) {
+    return res.status(401).json({ error: "Unauthorized access - Session not found" });
+  }
+
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    const user = await User.findById(req.session.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Compare entered current password with hashed password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Current password is incorrect" });
+    }
+
+    // Hash new password and save
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ success: true, message: "Password changed successfully!" });
+  } catch (error) {
+    res.status(500).json({ error: "Database error: " + error.message });
+  }
+});
+
+
 module.exports = router;
