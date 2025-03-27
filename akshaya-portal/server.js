@@ -106,6 +106,7 @@ app.get('/profile', async (req, res) => {
 
   try {
     const user = await User.findOne({ _id: req.session.user.id });
+   
     if (!user) return res.status(404).send("User not found");
 
     res.render('profile', { 
@@ -116,7 +117,7 @@ app.get('/profile', async (req, res) => {
         centerId: user.centerId,
         phone:user.phone,
         district:user.district,
-        type:user.type,
+        centreType:user.centreType,
         services:user.services.toObject(),
         address:user.address.toObject() 
       }
@@ -124,41 +125,83 @@ app.get('/profile', async (req, res) => {
   } catch (error) {
     res.status(500).send("Server error: " + error.message);
   }
-});
-
-app.post('/profile/update-email', async (req, res) => {
-  if (!req.session.user || !req.session.user.id) {
-    return res.status(401).json({ error: "Unauthorized access" });
-  }
-
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: "Email is required" });
-
-  // Email format validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ error: "Invalid email format" });
-  }
-
+}); 
+app.use(express.json()); // Built-in middleware for JSON request body parsing
+app.post('/profile', async (req, res) => {
   try {
-    const user = await User.findById(req.session.user.id).exec();
-    if (!user) return res.status(404).json({ error: "User not found" });
+      const { email, shopName, personName, centerId, phone, centreType, district, address, services } = req.body;
 
-    user.email = email;
-    await user.save();
+      if (!email || !shopName || !personName || !centerId || !phone || !centreType || !district || !address || !services) {
+          return res.status(400).json({ message: 'All fields are required!' });
+      }
 
-    // Ensure session is updated and saved properly
-    req.session.user.email = email;
-    req.session.save((err) => {
-      if (err) return res.status(500).json({ error: "Session update failed" });
-      res.json({ success: true, message: "Email updated successfully!" });
-    });
+      let user = await User.findOne({ email });
 
+      if (user) {
+          // Update existing profile
+          user.shopName = shopName;
+          user.personName = personName;
+          user.centerId = centerId;
+          user.phone = phone;
+          user.centreType = centreType;
+          user.district = district;
+          user.address = address;
+          user.services = services;
+
+          await user.save();
+          req.session.user = user; // Update session data
+          return res.status(200).json({ message: 'Profile updated successfully!', data: user });
+      } else {
+          // Create new profile
+          const newUser = new User({ email, shopName, personName, centerId, phone, centreType, district, address, services });
+          await newUser.save();
+          req.session.user = newUser; // Store in session
+          return res.status(201).json({ message: 'Profile created successfully!', data: newUser });
+      }
   } catch (error) {
-    res.status(500).json({ error: "Database error: " + error.message });
+      console.error('Error:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
+/* app.put('/profile/update-profile', async (req, res) => {
+  try {
+      const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      if (!user) return res.status(404).json({ message: 'User not found' });
+
+      // Update session data
+      req.session.user = user;
+      await req.session.save();
+
+      res.json({ message: 'Profile updated successfully', user });
+  } catch (error) {
+      res.status(500).json({ message: 'Server Error', error });
+  }
+});
+*/
+/* app.post('/profile', (req, res) => {
+  const { email, shopName, personName, centerId, phoneNumber, district,address,services } = req.body;
+
+  if (!userProfile.email) {
+      return res.status(404).json({ message: 'Profile not found' });
+  }
+
+  // Update only the provided fields
+  userProfile = {
+      ...userProfile,
+      email: email || user.email,
+      shopName: shopName || user.shopName,
+      personName: personName || user.personName,
+      centerId: centerId || user.centerId,
+      phoneNumber: phoneNumber || user.phoneNumber,
+      district: district || user.district,
+      address:address || user.address,
+      services:services || user.services
+  };
+
+  res.json({ message: 'Profile updated successfully', data: userProfile });
+});
+*/
 
 // Continue Application Route (Fixed)
 app.get('/continue-application/:serviceRequestId', async (req, res) => {
