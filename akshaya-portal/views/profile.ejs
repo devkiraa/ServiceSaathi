@@ -62,10 +62,9 @@
                         Income Certificate
                     </label>
                     <label class="inline-flex items-center">
-                        <input type="checkbox" name="services" value="voter_registration" class="mr-2" <%= user?.services?.includes('voters_id') ? 'checked' : '' %> disabled>
-                        Voter Registration (Election ID Card)
-                    </label>
-                    <label class="inline-flex items-center">
+                      <input type="checkbox" name="services" value="possession_certificate" class="mr-2" <%= user?.services?.includes('income_certificate') ? 'checked' : '' %> disabled>
+                      Possession Certificate
+                      <label class="inline-flex items-center">
                         <input type="checkbox" name="services" value="passport_service" class="mr-2" <%= user?.services?.includes('passport_service') ? 'checked' : '' %> disabled>
                         Passport Service
                     </label>
@@ -73,6 +72,12 @@
                         <input type="checkbox" name="services" value="utility_payments" class="mr-2" <%= user?.services?.includes('utility_payments') ? 'checked' : '' %> disabled>
                         Utility Payments (KSEB, BSNL, Water Bills)
                     </label>
+                  </label>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="services" value="voter_id" class="mr-2" <%= user?.services?.includes('voters_id') ? 'checked' : '' %> disabled>
+                        Voter Registration (Election ID Card)
+                    </label>
+                    
                 </div>
             </div>
 
