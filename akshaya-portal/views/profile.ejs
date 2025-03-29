@@ -22,12 +22,26 @@
                 <label class="block text-gray-700">Shop Name</label>
                 <input type="text" id="shopName" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.shopName || 'Not Available' %>" disabled>
             </div>
-
+            <div>
+                <label class="block text-gray-700">Person Name</label>
+                <input type="text" id="personName" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.personName || 'Not Available' %>" disabled>
+            </div>
             <div>
                 <label class="block text-gray-700">Phone Number</label>
                 <input type="text" id="phone" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.phone|| 'Not Available' %>" disabled>
             </div>
-
+            <div>
+                <label class="block text-gray-700 ">Centre Type</label>
+                <div class="flex items-center mt-2">
+                  <input type="radio" id="CSC" name="type" value="CSC" class="mr-2" disabled>
+                  <label for="CSC" class="text-gray-700">CSC</label>
+                </div>
+                <div class="flex items-center mt-2">
+                  <input type="radio" id="Akshaya" name="type" value="Akshaya" class="mr-2" disabled>
+                  <label for="Akshaya" class="text-gray-700">Akshaya</label>
+                </div>
+              </div>
+              
             <div>
                 <label class="block text-gray-700">District</label>
                 <input type="text" id="district" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.district || 'Not Available' %>" disabled>
@@ -57,26 +71,27 @@
             <div>
                 <label class="block text-gray-700">Services Available Online</label>
                 <div class="flex flex-col mt-2">
+                    <label class="inline-flex items-center"> 
+                    <input type="checkbox" name="services[income_certificate]" value="true" 
+  class="mr-2" <%= user?.services?.income_certificate ? 'checked' : '' %> >
+                Income Certificate
+                </label>
                     <label class="inline-flex items-center">
-                        <input type="checkbox" name="services" value="income_certificate" class="mr-2" <%= user?.services?.includes('income_certificate') ? 'checked' : '' %> disabled>
-                        Income Certificate
-                    </label>
-                    <label class="inline-flex items-center">
-                      <input type="checkbox" name="services" value="possession_certificate" class="mr-2" <%= user?.services?.includes('income_certificate') ? 'checked' : '' %> disabled>
-                      Possession Certificate
+                        <input type="checkbox" name="services[possession_certificate]" value="true" 
+                        class="mr-2" <%= user?.services?.possession_certificate ? 'checked' : '' %> >
+                        Posession Certificate
+                    </label> 
                       <label class="inline-flex items-center">
-                        <input type="checkbox" name="services" value="passport_service" class="mr-2" <%= user?.services?.includes('passport_service') ? 'checked' : '' %> disabled>
-                        Passport Service
+                        <input type="checkbox" name="services[passport_service]" value="true" 
+  class="mr-2" <%= user?.services?.passport_service ? 'checked' : '' %> >
+                         Passport Service
                     </label>
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" name="services" value="utility_payments" class="mr-2" <%= user?.services?.includes('utility_payments') ? 'checked' : '' %> disabled>
-                        Utility Payments (KSEB, BSNL, Water Bills)
+                    <label class="inline-flex items-center"> 
+                        <input type="checkbox" name="services[utility_payments]" value="true" 
+  class="mr-2" <%= user?.services?.utility_payments ? 'checked' : '' %> >
+                     Utility Payments
                     </label>
-                  </label>
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" name="services" value="voter_id" class="mr-2" <%= user?.services?.includes('voters_id') ? 'checked' : '' %> disabled>
-                        Voter Registration (Election ID Card)
-                    </label>
+                  
                     
                 </div>
             </div>
@@ -88,7 +103,7 @@
             </div>
         </form>
     </div>
-
+</body>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const editBtn = document.getElementById("editBtn");
@@ -102,12 +117,21 @@
             });
 
             saveBtn.addEventListener("click", async function () {
-                const selectedServices = Array.from(document.querySelectorAll("input[name='services']:checked")).map(cb => cb.value);
+                const selectedServices = {};
+                document.querySelectorAll("input[name^='services']").forEach(cb => {
+                    const serviceKey = cb.name.match(/\[(.*?)\]/)[1]; // Extract key from name (e.g., "income_certificate")
+                    selectedServices[serviceKey] = cb.checked; // Store as an object
+                });
+                 // Capture selected centre type
+                const typeField = document.querySelector("input[name='type']:checked");
+                const typeValue = typeField ? typeField.value : null;
 
                 const formData = {
                     email: document.getElementById("email").value,
                     shopName: document.getElementById("shopName").value,
+                    personName:document.getElementById("personName").value,
                     phone: document.getElementById("phone").value,
+                    type:typeValue,
                     district: document.getElementById("district").value,
                     address: {
                         buildingName: document.getElementById("buildingName").value,
@@ -117,6 +141,8 @@
                     },
                     services: selectedServices
                 };
+                console.log("Form Data Being Sent:", formData);
+                console.log("Selected Services:", selectedServices);
 
                 try {
                     const response = await fetch("/profile", {
@@ -137,9 +163,13 @@
                     }
                 } catch (error) {
                     console.error("Error updating profile:", error);
+                alert("An unexpected error occurred. Please try again.");
+                formFields.forEach(field => field.setAttribute("disabled", "true"));
+                editBtn.classList.remove("hidden");
+                saveBtn.classList.add("hidden");
                 }
             });
         });
     </script>
-</body>
+
 </html>

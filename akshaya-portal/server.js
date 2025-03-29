@@ -116,8 +116,8 @@ app.get('/profile', async (req, res) => {
         centerId: user.centerId,
         phone:user.phone,
         district:user.district,
-        centreType:user.centreType,
-        services:user.services.toObject(),
+        type:user.type,
+        services:user.services,
         address:user.address.toObject() 
       }
     });
@@ -128,9 +128,11 @@ app.get('/profile', async (req, res) => {
 app.use(express.json()); // Built-in middleware for JSON request body parsing
 app.post('/profile', async (req, res) => {
   try {
-      const { email, shopName, personName, centerId, phone, centreType, district, address, services } = req.body;
+      const { email, shopName, personName, phone, type, district, address, services } = req.body;
+      console.log("📌 Received Form Data:", req.body); // ✅ Log received data
 
-      if (!email || !shopName || !personName || !centerId || !phone || !centreType || !district || !address || !services) {
+
+      if (!email || !shopName || !personName  || !phone || !type || !district || !address || !services) {
           return res.status(400).json({ message: 'All fields are required!' });
       }
 
@@ -140,19 +142,18 @@ app.post('/profile', async (req, res) => {
           // Update existing profile
           user.shopName = shopName;
           user.personName = personName;
-          user.centerId = centerId;
           user.phone = phone;
-          user.centreType = centreType;
+          user.type = type;
           user.district = district;
-          user.address = address;
-          user.services = services;
+          user.address = { ...user.address, ...address }; // Merging old & new address
+          user.services = { ...user.services, ...services }; // Merging services
 
           await user.save();
           req.session.user = user; // Update session data
           return res.status(200).json({ message: 'Profile updated successfully!', data: user });
       } else {
           // Create new profile
-          const newUser = new User({ email, shopName, personName, centerId, phone, centreType, district, address, services });
+          const newUser = new User({ email, shopName, personName, centerId, phone, type, district, address, services });
           await newUser.save();
           req.session.user = newUser; // Store in session
           return res.status(201).json({ message: 'Profile created successfully!', data: newUser });
