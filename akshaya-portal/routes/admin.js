@@ -19,7 +19,16 @@ router.get('/admin-dashboard', async (req, res) => {
       res.status(500).send(error.message);
     }
   });
-
+// Pending centres route
+router.get('/pending-centres/:id', async (req, res) => {
+  try {
+      // Fetch only centres with status "pending"
+      await Centre.findByIdAndUpdate(req.params.id, { status: 'pending' });
+      res.redirect('/admin-dashboard');
+  } catch (error) {
+      res.status(500).send(error.message);
+  }
+});
 
 // Approve centre route
 router.get('/approve-centre/:id', async (req, res) => {

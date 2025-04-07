@@ -88,7 +88,8 @@
                         </button>
                       <% } %>
                       <% if (sr.status==='completed') { %>
-                        <span class="text-grey-500">N/A</span>
+                      
+                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
                       <% } else if(sr.status==='received') { %>
                         <a href="/continue-application/<%= sr._id %>" class="text-green-500 hover:text-green-700">Continue Application</a>
                       <% } else if(sr.status==='started') { %>

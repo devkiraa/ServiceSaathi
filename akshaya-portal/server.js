@@ -164,46 +164,8 @@ app.post('/profile', async (req, res) => {
   }
 });
 
-/* app.put('/profile/update-profile', async (req, res) => {
-  try {
-      const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-      if (!user) return res.status(404).json({ message: 'User not found' });
 
-      // Update session data
-      req.session.user = user;
-      await req.session.save();
 
-      res.json({ message: 'Profile updated successfully', user });
-  } catch (error) {
-      res.status(500).json({ message: 'Server Error', error });
-  }
-});
-*/
-/* app.post('/profile', (req, res) => {
-  const { email, shopName, personName, centerId, phoneNumber, district,address,services } = req.body;
-
-  if (!userProfile.email) {
-      return res.status(404).json({ message: 'Profile not found' });
-  }
-
-  // Update only the provided fields
-  userProfile = {
-      ...userProfile,
-      email: email || user.email,
-      shopName: shopName || user.shopName,
-      personName: personName || user.personName,
-      centerId: centerId || user.centerId,
-      phoneNumber: phoneNumber || user.phoneNumber,
-      district: district || user.district,
-      address:address || user.address,
-      services:services || user.services
-  };
-
-  res.json({ message: 'Profile updated successfully', data: userProfile });
-});
-*/
-
-// Continue Application Route (Fixed)
 app.get('/continue-application/:serviceRequestId', async (req, res) => {
   try {
     const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
