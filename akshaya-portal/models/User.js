@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
   // Centre type: either CSC or Akshaya
   type: { 
     type: String,
-    enum: ['csc', 'akshaya'],
+    enum: ['CSC', 'Akshaya'],
     required: true
   },
   // Centre ID as entered by the user (may be an identifier)

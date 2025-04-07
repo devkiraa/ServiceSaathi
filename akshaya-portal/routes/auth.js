@@ -1,13 +1,17 @@
 const express = require('express');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 const router = express.Router();
+const bodyParser = require('body-parser');
+const app = express();
+
 
 // Admin-created user route
 router.post('/api/users', async (req, res) => {
   try {
     // Expecting: username (mobile number), phone, email, shopName, personName, password, role, type, centerId
-    const { username,phone,email, shopName, personName, password, role, type, centerId,district,services,address } = req.body;
+    const { username,phone,email, shopName, personName, password, role, type, centerId,district } = req.body;
     
     // Check if user already exists (using mobile number as username)
     const existingUser = await User.findOne({ username });
@@ -26,7 +30,7 @@ router.post('/api/users', async (req, res) => {
       role,
       type,
       centerId,
-      district,
+      district
       
     });
     await user.save();
@@ -105,38 +109,7 @@ router.post('/api/signup', async (req, res) => {
   }
 })
 
-router.post('/profile/update', async (req, res) => {
-  if (!req.session.user || !req.session.user.id) {
-    return res.status(401).json({ error: "Unauthorized access" });
-  }
-
-  const { email, phone, district, address, services } = req.body;
-  if (!email || !phone || !district || !address || !services) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-
-  try {
-    const user = await User.findById(req.session.user.id);
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    user.email = email;
-    user.phone = phone;
-    user.district = district;
-    user.address = address;
-    user.services = services;
-
-    await user.save();
-
-    req.session.user = user; // Update session
-    req.session.save((err) => {
-      if (err) return res.status(500).json({ error: "Session update failed" });
-      res.json({ success: true, message: "Profile updated successfully!" });
-    });
-
-  } catch (error) {
-    res.status(500).json({ error: "Database error: " + error.message });
-  }
-});
+ 
 
 // Login Route
 router.post('/api/login', async (req, res) => {
@@ -154,7 +127,7 @@ router.post('/api/login', async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid mobile number or password' });
     }
-    
+   
     // For non-admin users, ensure the centre is approved before login
     if (user.role !== 'admin' && user.centerId) {
       const Centre = require('../models/Centre');
@@ -173,9 +146,7 @@ router.post('/api/login', async (req, res) => {
         type: user.type,
         centerId: user.centerId, // include the centre identifier
         phone:user.phone,
-        district:user.district,
-        services:user.services,
-        address:user.address
+        district:user.district
       };
     
     res.status(200).json({ message: 'Logged in successfully', role: user.role });
@@ -183,8 +154,10 @@ router.post('/api/login', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
 // Handle service update
-router.post("/update-services", async (req, res) => {
+/*router.post("/update-services", async (req, res) => {
   try {
       const { services } = req.body;
 
@@ -206,7 +179,7 @@ router.post("/update-services", async (req, res) => {
       console.error(error);
       res.status(500).send("Error updating services");
   }
-});
+}); */
 
 
 router.post("/logout", (req, res) => {
