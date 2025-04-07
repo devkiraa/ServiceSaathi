@@ -7,41 +7,24 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
 </head>
-<body class="bg-gray-100">
+<body class="bg-white">
   <!-- Sidebar -->
-  <div class="flex h-screen">
+  <div class="min-h-screen bg-white">
     <!-- Left Sidebar -->
-    <aside class="w-64 bg-white shadow-md">
-      <div class="flex items-center justify-center py-4 border-b border-gray-200">
-        <h2 class="text-xl font-bold text-gray-800">Service Saathi</h2>
-      </div>
-      <nav class="mt-4">
-        <ul>
-          <li class="py-2 px-4 hover:bg-gray-100 cursor-pointer">
-            <a href="/dashboard" class="flex items-center text-gray-600">
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0H6a1 1 0 00-1 1v3M6 7h7m-3 4H9m3 0a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 011-1h3a1 1 0 011 1v3z"></path>
-              </svg>
-              Dashboard
-            </a>
-          </li>
-         
-        </ul>
-      </nav>
-    </aside>
+    
 
     <!-- Main Content -->
     <div class="flex-1 p-6 bg-white">
       <!-- Header -->
-      <header class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+      <header class="flex justify-between items-start mb-6">
+        <div>
+          <h1 class="font-bold text-gray-800" style="font-size:100px;color: rgb(8, 62, 109);">Welcome!</h1>
+          <h3 class="text-md font-medium text-gray-600 mt-1">Dashboard</h3>
+        </div>
         <div class="relative">
           <button id="userDropdownBtn">
             <img src="../uploads/images/image-removebg-preview.png" alt="Profile Icon" class="w-10 h-10 rounded-full">
-            </svg>
           </button>
-          <div class="relative">
-          
           <div id="userDropdown" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg hidden">
             <span class="text-gray-800 px-8 font-medium"><%= user.centerId%></span>
             <a href="/profile" class="block text-sm px-6 py-2 text-gray-700 hover:bg-gray-100">User Profile</a>
@@ -50,9 +33,10 @@
           </div>
         </div>
       </header>
+      
 
       <!-- Service Requests Section -->
-      <div class="bg-white p-6 rounded-lg shadow mb-6">
+      <div class="bg-gray-50 p-6 rounded-2xl border-2 border-blue-200 shadow-lg mb-6">
         <h3 class="text-lg font-semibold mb-4 text-gray-800">My Service Requests</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left text-gray-600">
@@ -94,45 +78,6 @@
                       <% } else if(sr.status==='started') { %>
                         <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
                       <% } %>
-                    </td>
-                  </tr>
-                <% }); %>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Existing Documents Section -->
-      <div class="bg-white p-6 rounded-lg shadow">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">Recent Documents</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left text-gray-600">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th class="px-6 py-3">Service</th>
-                <th class="px-6 py-3">Customer</th>
-                <th class="px-6 py-3">Contact</th>
-                <th class="px-6 py-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if (documents.length === 0) { %>
-                <tr>
-                  <td colspan="4" class="px-6 py-4 text-center">No documents found.</td>
-                </tr>
-              <% } else { %>
-                <% documents.forEach(function(doc) { %>
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4"><%= doc.serviceName %></td>
-                    <td class="px-6 py-4"><%= doc.customerName %></td>
-                    <td class="px-6 py-4"><%= doc.contactNumber %></td>
-                    <td class="px-6 py-4">
-                      <a href="/documents" class="text-blue-500 hover:text-blue-700">
-                        <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                      </a>
                     </td>
                   </tr>
                 <% }); %>
