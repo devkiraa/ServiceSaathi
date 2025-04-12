@@ -1,0 +1,31 @@
+{
+  "name": "servicesathi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for Akshaya Portal and WhatsApp Bot Server",
+  "scripts": {
+    "start": "concurrently \"npm run start --workspace=akshaya-portal\" \"npm run start --workspace=WhatsAppBotServer\"",
+    "start:akshaya": "npm run start --workspace=akshaya-portal",
+    "start:whatsapp": "npm run start --workspace=WhatsAppBotServer",
+    "install-all": "npm install --workspaces"
+  },
+  "workspaces": [
+    "akshaya-portal",
+    "WhatsAppBotServer"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devkiraa/ServiceSathi.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/devkiraa/ServiceSathi/issues"
+  },
+  "homepage": "https://github.com/devkiraa/ServiceSathi#readme"
+}

@@ -4,8 +4,8 @@ const client = require('../config/twilio');
 const axios = require('axios');
 
 // Base API URLs (without endpoints)
-const CHAT_API_BASE = "https://ef02-34-32-230-121.ngrok-free.app";
-const TRANSLATE_API_BASE = "https://593c-34-44-123-63.ngrok-free.app";
+const CHAT_API_BASE = "https://f5ae-34-83-103-241.ngrok-free.app";
+const TRANSLATE_API_BASE = "https://62b0-34-55-220-72.ngrok-free.app";
 
 // Helper: Store chat message in DB
 const storeChatMessage = async (userPhone, message, direction) => {
