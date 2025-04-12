@@ -5,7 +5,10 @@ const client = require('../config/twilio');
 const axios  = require('axios');
 
 module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
-  // Persist chats
+  //
+  // ─── HELPERS ──────────────────────────────────────────────────────────────────
+  //
+
   const storeChatMessage = async (userPhone, message, direction) => {
     try {
       await Chat.create({ userPhone, message, direction });
@@ -14,7 +17,6 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
     }
   };
 
-  // Translate via external API
   const translateText = async (text, mode) => {
     try {
       const res = await axios.post(`${TRANSLATE_API_BASE}/translate`, { text, mode });
@@ -25,7 +27,6 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
     }
   };
 
-  // Send WhatsApp message & store outbound
   const sendMessage = async (to, body) => {
     try {
       if (!to.startsWith("whatsapp:")) to = `whatsapp:${to}`;
@@ -40,66 +41,19 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
     }
   };
 
-  // Inbound user messages
-  const handleMessage = async (req, res) => {
-    const Body = (req.body.Body || "").trim();
-    const From = (req.body.From || "").trim();
-    const userPhone = From.replace(/^whatsapp:/i, "");
+  //
+  // ─── MODULE: LANGUAGE SELECTION ──────────────────────────────────────────────
+  //
 
-    // Ignore blank or “ok”
-    if (!Body || Body.toLowerCase() === "ok") return res.sendStatus(200);
-
-    await storeChatMessage(userPhone, Body, 'inbound');
-    let user = await User.findOne({ phoneNumber: userPhone });
-    if (!user) {
-      user = new User({ phoneNumber: userPhone, lastOption: null, language: null });
-      await user.save();
-    }
-    const lower = Body.toLowerCase();
-
-    // /LANG → reset
-    if (lower === "/lang") {
-      user.language = null;
-      user.lastOption = null;
-      await user.save();
+  const languageModule = {
+    prompt: async (From) => {
       await sendMessage(From,
-        "*Language reset.*\nPlease choose your language:\n1️⃣ English\n2️⃣ Malayalam"
+        "*✨ Welcome to SERVICE SAATHI - Akshaya Centre! ✨*\n" +
+        "Please choose your language:\n1️⃣ English\n2️⃣ Malayalam\n" +
+        "_(Change language anytime with /LANG)_"
       );
-      return res.sendStatus(200);
-    }
-
-    // back or 0 → main menu
-    if (user.lastOption && (lower === "back" || lower === "0")) {
-      user.lastOption = null;
-      await user.save();
-      const menu = user.language === "malayalam"
-        ? "*പ്രധാന മെനുവിലേക്ക് തിരികെ പോവുന്നു.*\n1️⃣ ചാറ്റ്\n2️⃣ ഡോക്യുമെന്റ് അപേക്ഷ"
-        : "*Returning to main menu.*\n1️⃣ Chat\n2️⃣ Apply for Document";
-      await sendMessage(From, menu);
-      return res.sendStatus(200);
-    }
-
-    // hi always resets into menu
-    if (lower === "hi") {
-      user.lastOption = null;
-      await user.save();
-      if (!user.language) {
-        await sendMessage(From,
-          "*✨ Welcome to SERVICE SAATHI - Akshaya Centre! ✨*\n" +
-          "Please choose your language:\n1️⃣ English\n2️⃣ Malayalam\n" +
-          "_(Change language anytime with /LANG)_"
-        );
-      } else {
-        const opts = user.language === "malayalam"
-          ? "*ദയവായി തിരഞ്ഞെടുക്കുക:*\n1️⃣ ചാറ്റ്\n2️⃣ ഡോക്യുമെന്റ് അപേക്ഷ\n(ഭാഷ മാറ്റത്തിന് /LANG)"
-          : "*Please choose an option:*\n1️⃣ Chat\n2️⃣ Apply for Document\n(To change language, send /LANG)";
-        await sendMessage(From, opts);
-      }
-      return res.sendStatus(200);
-    }
-
-    // STEP 1: language selection
-    if (!user.language) {
+    },
+    choose: async (Body, user, From) => {
       if (Body === "1") {
         user.language = "english";
         await user.save();
@@ -119,11 +73,21 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
           "*Invalid input.* Please type 'hi' to start and then choose:\n1️⃣ English\n2️⃣ Malayalam"
         );
       }
-      return res.sendStatus(200);
     }
+  };
 
-    // STEP 2: option selection
-    if (!user.lastOption) {
+  //
+  // ─── MODULE: OPTION SELECTION ─────────────────────────────────────────────────
+  //
+
+  const optionModule = {
+    prompt: async (user, From) => {
+      const msg = user.language === "malayalam"
+        ? "*ദയവായി തിരഞ്ഞെടുക്കുക:*\n1️⃣ ചാറ്റ്\n2️⃣ ഡോക്യുമെന്റ് അപേക്ഷ\n(ഭാഷ മാറ്റത്തിന് /LANG)"
+        : "*Please choose an option:*\n1️⃣ Chat\n2️⃣ Apply for Document\n(To change language, send /LANG)";
+      await sendMessage(From, msg);
+    },
+    choose: async (Body, user, From) => {
       if (Body === "1") {
         user.lastOption = "chat";
         await user.save();
@@ -144,15 +108,20 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
           : "*Invalid option.* Type 'hi' to restart.";
         await sendMessage(From, inv);
       }
-      return res.sendStatus(200);
     }
+  };
 
-    // STEP 3: chat mode
-    if (user.lastOption === "chat") {
+  //
+  // ─── MODULE: CHAT MODE ─────────────────────────────────────────────────────────
+  //
+
+  const chatModule = {
+    process: async (Body, user, From) => {
       let userMsg = Body;
       if (user.language === "malayalam") {
         userMsg = await translateText(Body, "MAL-ENG");
       }
+
       let reply;
       try {
         const apiRes = await axios.post(`${CHAT_API_BASE}/generate`, { query: userMsg });
@@ -169,6 +138,92 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
         reply = await translateText(reply, "ENG-MAL");
       }
       await sendMessage(From, reply);
+    }
+  };
+
+  //
+  // ─── MODULE: APPLY MODE ────────────────────────────────────────────────────────
+  //
+
+  const applyModule = {
+    process: async (Body, user, From) => {
+      // stub — implement your apply-for-document flow here
+      const msg = user.language === "malayalam"
+        ? "*ഡോക്യുമെന്റ് അപേക്ഷ സവിശേഷത വികസനഘട്ടത്തിലാണ്.*"
+        : "*Apply for document feature is under development.*";
+      await sendMessage(From, msg);
+    }
+  };
+
+  //
+  // ─── HANDLER: Inbound user messages ────────────────────────────────────────────
+  //
+
+  const handleMessage = async (req, res) => {
+    const Body = (req.body.Body || "").trim();
+    const From = (req.body.From || "").trim();
+    const userPhone = From.replace(/^whatsapp:/i, "");
+
+    // Ignore blank or “ok”
+    if (!Body || Body.toLowerCase() === "ok") return res.sendStatus(200);
+
+    // log & persist inbound
+    await storeChatMessage(userPhone, Body, 'inbound');
+
+    // load or create user
+    let user = await User.findOne({ phoneNumber: userPhone });
+    if (!user) {
+      user = new User({ phoneNumber: userPhone, lastOption: null, language: null });
+      await user.save();
+    }
+
+    const lower = Body.toLowerCase();
+
+    // /LANG resets everything
+    if (lower === "/lang") {
+      user.language = null;
+      user.lastOption = null;
+      await user.save();
+      return languageModule.prompt(From).then(() => res.sendStatus(200));
+    }
+
+    // back/0 returns to options
+    if (user.lastOption && (lower === "back" || lower === "0")) {
+      user.lastOption = null;
+      await user.save();
+      return optionModule.prompt(user, From).then(() => res.sendStatus(200));
+    }
+
+    // hi always resets into menu
+    if (lower === "hi") {
+      user.lastOption = null;
+      await user.save();
+      if (!user.language) {
+        return languageModule.prompt(From).then(() => res.sendStatus(200));
+      } else {
+        return optionModule.prompt(user, From).then(() => res.sendStatus(200));
+      }
+    }
+
+    // STEP 1: language selection
+    if (!user.language) {
+      await languageModule.choose(Body, user, From);
+      return res.sendStatus(200);
+    }
+
+    // STEP 2: option selection
+    if (!user.lastOption) {
+      await optionModule.choose(Body, user, From);
+      return res.sendStatus(200);
+    }
+
+    // STEP 3: chat vs apply
+    if (user.lastOption === "chat") {
+      await chatModule.process(Body, user, From);
+      return res.sendStatus(200);
+    }
+    if (user.lastOption === "apply") {
+      await applyModule.process(Body, user, From);
       return res.sendStatus(200);
     }
 
@@ -177,7 +232,10 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
     return res.sendStatus(200);
   };
 
-  // Delivery status callbacks
+  //
+  // ─── HANDLER: Delivery status callbacks ───────────────────────────────────────
+  //
+
   const handleStatusCallback = (req, res) => {
     return res.sendStatus(200);
   };
