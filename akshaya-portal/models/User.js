@@ -63,8 +63,19 @@ const userSchema = new mongoose.Schema({
     street: { type: String, default: null },
     locality: { type: String, default:null},
     pincode: { type: Number, default: null }
-      
-}});
+  },
+  applyState: {
+    type: String,
+    enum: ['district','subdistrict','centre','service', null],
+    default: null
+  },
+  applyData: {
+    district:     { type: String, default: null },
+    subdistrict:  { type: String, default: null },
+    centreId:     { type: String, default: null },
+    serviceName:  { type: String, default: null }
+  }
+});
 
 // Hash the password before saving
 userSchema.pre('save', async function(next) {

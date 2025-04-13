@@ -1,29 +1,18 @@
 // controllers/chatbotController.js
-const User   = require('../models/user');
 const Chat   = require('../models/chat');
+const User   = require('../models/wha-user');
 const client = require('../config/twilio');
 const axios  = require('axios');
 
-module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
+module.exports = function({ CHAT_API_BASE }) {
   //
-  // ─── HELPERS ──────────────────────────────────────────────────────────────────
+  // ─── HELPERS ────────────────────────────────────────────────────────────────
   //
-
   const storeChatMessage = async (userPhone, message, direction) => {
     try {
       await Chat.create({ userPhone, message, direction });
     } catch (err) {
       console.error("Error storing chat:", err);
-    }
-  };
-
-  const translateText = async (text, mode) => {
-    try {
-      const res = await axios.post(`${TRANSLATE_API_BASE}/translate`, { text, mode });
-      return res.data?.response || text;
-    } catch (err) {
-      console.error("Translation error:", err);
-      return text;
     }
   };
 
@@ -42,135 +31,28 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
   };
 
   //
-  // ─── MODULE: LANGUAGE SELECTION ──────────────────────────────────────────────
+  // ─── LOAD MODULES ───────────────────────────────────────────────────────────
   //
-
-  const languageModule = {
-    prompt: async (From) => {
-      await sendMessage(From,
-        "*✨ Welcome to SERVICE SAATHI - Akshaya Centre! ✨*\n" +
-        "Please choose your language:\n1️⃣ English\n2️⃣ Malayalam\n" +
-        "_(Change language anytime with /LANG)_"
-      );
-    },
-    choose: async (Body, user, From) => {
-      if (Body === "1") {
-        user.language = "english";
-        await user.save();
-        await sendMessage(From,
-          "*Hello!* Please choose:\n1️⃣ Chat\n2️⃣ Apply for Document\n" +
-          "_(Change language with /LANG)_"
-        );
-      } else if (Body === "2") {
-        user.language = "malayalam";
-        await user.save();
-        await sendMessage(From,
-          "*ഹലോ!* ദയവായി തിരഞ്ഞെടുക്കുക:\n1️⃣ ചാറ്റ്\n2️⃣ ഡോക്യുമെന്റ് അപേക്ഷ\n" +
-          "_(ഭാഷ മാറ്റത്തിന് /LANG)_"
-        );
-      } else {
-        await sendMessage(From,
-          "*Invalid input.* Please type 'hi' to start and then choose:\n1️⃣ English\n2️⃣ Malayalam"
-        );
-      }
-    }
-  };
+  const languageModule = require('./modules/languageModule')(sendMessage);
+  // Pass applyModule into optionModule so "2️⃣ Apply" triggers the flow
+  const applyModule   = require('./modules/applyModule')(sendMessage, CHAT_API_BASE);
+  const optionModule  = require('./modules/optionModule')(sendMessage, applyModule);
+  const chatModule    = require('./modules/chatModule')(sendMessage, CHAT_API_BASE);
 
   //
-  // ─── MODULE: OPTION SELECTION ─────────────────────────────────────────────────
+  // ─── HANDLER: Inbound user messages ─────────────────────────────────────────
   //
-
-  const optionModule = {
-    prompt: async (user, From) => {
-      const msg = user.language === "malayalam"
-        ? "*ദയവായി തിരഞ്ഞെടുക്കുക:*\n1️⃣ ചാറ്റ്\n2️⃣ ഡോക്യുമെന്റ് അപേക്ഷ\n(ഭാഷ മാറ്റത്തിന് /LANG)"
-        : "*Please choose an option:*\n1️⃣ Chat\n2️⃣ Apply for Document\n(To change language, send /LANG)";
-      await sendMessage(From, msg);
-    },
-    choose: async (Body, user, From) => {
-      if (Body === "1") {
-        user.lastOption = "chat";
-        await user.save();
-        const msg = user.language === "malayalam"
-          ? "*ചാറ്റ് മോഡ് സജീവമാക്കി.* ടൈപ്പ് ചെയ്യുക. മെയിൻ മെനുവിലേക്ക് 'back' അല്ലെങ്കിൽ '0'."
-          : "*Chat mode activated.* Type anything. Return to menu with 'back' or '0'.";
-        await sendMessage(From, msg);
-      } else if (Body === "2") {
-        user.lastOption = "apply";
-        await user.save();
-        const msg = user.language === "malayalam"
-          ? "*ഡോക്യുമെന്റ് അപേക്ഷ ഡെവലപ്‌മെന്റ് ഘട്ടത്തിലാണ്.*"
-          : "*Apply for document feature is under development.*";
-        await sendMessage(From, msg);
-      } else {
-        const inv = user.language === "malayalam"
-          ? "*അസാധുവായ ഓപ്ഷൻ.* 'hi' ടൈപ്പ് ചെയ്ത് വീണ്ടും ആരംഭിക്കുക."
-          : "*Invalid option.* Type 'hi' to restart.";
-        await sendMessage(From, inv);
-      }
-    }
-  };
-
-  //
-  // ─── MODULE: CHAT MODE ─────────────────────────────────────────────────────────
-  //
-
-  const chatModule = {
-    process: async (Body, user, From) => {
-      let userMsg = Body;
-      if (user.language === "malayalam") {
-        userMsg = await translateText(Body, "MAL-ENG");
-      }
-
-      let reply;
-      try {
-        const apiRes = await axios.post(`${CHAT_API_BASE}/generate`, { query: userMsg });
-        reply = apiRes.data?.response;
-      } catch (e) {
-        console.error("Chat API error:", e);
-      }
-      if (!reply) {
-        reply = user.language === "malayalam"
-          ? "ക്ഷമിക്കണം, പ്രശ്നം വന്നിരിക്കുന്നു. വീണ്ടും ശ്രമിക്കുക."
-          : "Sorry, something went wrong. Please try again.";
-      }
-      if (user.language === "malayalam") {
-        reply = await translateText(reply, "ENG-MAL");
-      }
-      await sendMessage(From, reply);
-    }
-  };
-
-  //
-  // ─── MODULE: APPLY MODE ────────────────────────────────────────────────────────
-  //
-
-  const applyModule = {
-    process: async (Body, user, From) => {
-      // stub — implement your apply-for-document flow here
-      const msg = user.language === "malayalam"
-        ? "*ഡോക്യുമെന്റ് അപേക്ഷ സവിശേഷത വികസനഘട്ടത്തിലാണ്.*"
-        : "*Apply for document feature is under development.*";
-      await sendMessage(From, msg);
-    }
-  };
-
-  //
-  // ─── HANDLER: Inbound user messages ────────────────────────────────────────────
-  //
-
   const handleMessage = async (req, res) => {
-    const Body = (req.body.Body || "").trim();
-    const From = (req.body.From || "").trim();
+    const Body      = (req.body.Body || "").trim();
+    const From      = (req.body.From || "").trim();
     const userPhone = From.replace(/^whatsapp:/i, "");
 
-    // Ignore blank or “ok”
-    if (!Body || Body.toLowerCase() === "ok") return res.sendStatus(200);
-
-    // log & persist inbound
+    if (!Body || Body.toLowerCase() === "ok") {
+      return res.sendStatus(200);
+    }
     await storeChatMessage(userPhone, Body, 'inbound');
 
-    // load or create user
+    // Load or create chat‑bot user
     let user = await User.findOne({ phoneNumber: userPhone });
     if (!user) {
       user = new User({ phoneNumber: userPhone, lastOption: null, language: null });
@@ -179,30 +61,33 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
 
     const lower = Body.toLowerCase();
 
-    // /LANG resets everything
+    // /LANG → reset
     if (lower === "/lang") {
-      user.language = null;
+      user.language   = null;
       user.lastOption = null;
       await user.save();
-      return languageModule.prompt(From).then(() => res.sendStatus(200));
+      await languageModule.prompt(From);
+      return res.sendStatus(200);
     }
 
-    // back/0 returns to options
+    // back/0 → main menu
     if (user.lastOption && (lower === "back" || lower === "0")) {
       user.lastOption = null;
       await user.save();
-      return optionModule.prompt(user, From).then(() => res.sendStatus(200));
+      await optionModule.prompt(user, From);
+      return res.sendStatus(200);
     }
 
-    // hi always resets into menu
+    // hi → always show menu
     if (lower === "hi") {
       user.lastOption = null;
       await user.save();
       if (!user.language) {
-        return languageModule.prompt(From).then(() => res.sendStatus(200));
+        await languageModule.prompt(From);
       } else {
-        return optionModule.prompt(user, From).then(() => res.sendStatus(200));
+        await optionModule.prompt(user, From);
       }
+      return res.sendStatus(200);
     }
 
     // STEP 1: language selection
@@ -233,12 +118,9 @@ module.exports = function({ CHAT_API_BASE, TRANSLATE_API_BASE }) {
   };
 
   //
-  // ─── HANDLER: Delivery status callbacks ───────────────────────────────────────
+  // ─── HANDLER: Delivery status callbacks ─────────────────────────────────────
   //
-
-  const handleStatusCallback = (req, res) => {
-    return res.sendStatus(200);
-  };
+  const handleStatusCallback = (req, res) => res.sendStatus(200);
 
   return { handleMessage, handleStatusCallback };
 };
