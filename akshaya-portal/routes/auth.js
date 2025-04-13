@@ -1,27 +1,55 @@
-const express = require('express');
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose');
-const router = express.Router();
-const bodyParser = require('body-parser');
-const app = express();
+// routes/auth.js
+const express   = require('express');
+const router    = express.Router();
+const User      = require('../models/User');
+const Centre    = require('../models/Centre');
+const bcrypt    = require('bcryptjs');
 
-
-// Admin-created user route
+// Admin‑created user route
 router.post('/api/users', async (req, res) => {
   try {
-    // Expecting: username (mobile number), phone, email, shopName, personName, password, role, type, centerId
-    const { username,phone,email, shopName, personName, password, role, type, centerId,district } = req.body;
-    
-    // Check if user already exists (using mobile number as username)
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
+    // Now also expect subdistrict + address + services
+    const {
+      username,       // mobile number
+      phone,
+      email,
+      shopName,
+      personName,
+      password,
+      role,           // 'admin' or 'user'
+      type,           // 'CSC' or 'Akshaya'
+      centerId,
+      district,
+      subdistrict,
+      buildingName,
+      street,
+      locality,
+      pincode,
+      // services flags
+      income_certificate,
+      voter_registration,
+      passport_service,
+      utility_payments,
+      possession_certificate
+    } = req.body;
+
+    // check duplicate
+    if (await User.findOne({ username: phone })) {
       return res.status(400).json({ error: 'Mobile number already registered' });
     }
-    
-    // Create new user with provided details
+
+    // build services object
+    const services = {
+      income_certificate:   !!income_certificate,
+      voter_registration:   !!voter_registration,
+      passport_service:     !!passport_service,
+      utility_payments:     !!utility_payments,
+      possession_certificate: !!possession_certificate
+    };
+
+    // create user
     const user = new User({
-      username:phone,
+      username:   phone,
       phone,
       email,
       shopName,
@@ -30,50 +58,46 @@ router.post('/api/users', async (req, res) => {
       role,
       type,
       centerId,
-      district
-      
+      district,
+      subdistrict,
+      services,
+      address: {
+        buildingName,
+        street,
+        locality,
+        pincode: pincode ? Number(pincode) : null
+      }
     });
     await user.save();
-    
-    // Create Centre record for CSC or Akshaya types
-    if (type === 'akshaya' || type === 'csc') {
-      const Centre = require('../models/Centre');
+
+    // create centre if needed
+    if (['csc','akshaya'].includes(type.toLowerCase())) {
       const centre = new Centre({
-        centreName: centerId,   // using centerId as the centre identifier
-        ownerName: personName,
-        contact: phone,
-        phone,
+        centreName:  centerId,
+        ownerName:   personName,
+        contact:     phone,
         email,
-        type,
+        type:        type.toLowerCase(),
         centerId,
         district,
-        // Optionally, auto-approve admin-created centres or leave them pending:
-        status: role === 'admin' ? 'approved' : 'pending'
+        subdistrict,
+        services,
+        status:      role === 'admin' ? 'approved' : 'pending'
       });
       await centre.save();
     }
-    
+
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Self Signup Route
+// Public signup route
 router.post('/api/signup', async (req, res) => {
   try {
-    // Expecting: phone, email, shopName, personName, password, type, centerId
-    const { phone, email, shopName, personName, password, type, centerId,district} = req.body;
-    
-    // Use mobile number as the username
-    const existingUser = await User.findOne({ username: phone });
-    if (existingUser) {
-      return res.status(400).json({ error: 'Mobile number already registered' });
-    }
-    
-    // Create new user with role 'user'
-    const user = new User({
-      username: phone,
+    const {
       phone,
       email,
       shopName,
@@ -82,33 +106,74 @@ router.post('/api/signup', async (req, res) => {
       type,
       centerId,
       district,
-      role: 'user'
+      subdistrict,
+      buildingName,
+      street,
+      locality,
+      pincode,
+      income_certificate,
+      voter_registration,
+      passport_service,
+      utility_payments,
+      possession_certificate
+    } = req.body;
+
+    if (await User.findOne({ username: phone })) {
+      return res.status(400).json({ error: 'Mobile number already registered' });
+    }
+
+    const services = {
+      income_certificate:   !!income_certificate,
+      voter_registration:   !!voter_registration,
+      passport_service:     !!passport_service,
+      utility_payments:     !!utility_payments,
+      possession_certificate: !!possession_certificate
+    };
+
+    const user = new User({
+      username:   phone,
+      phone,
+      email,
+      shopName,
+      personName,
+      password,
+      role:       'user',
+      type,
+      centerId,
+      district,
+      subdistrict,
+      services,
+      address: {
+        buildingName,
+        street,
+        locality,
+        pincode: pincode ? Number(pincode) : null
+      }
     });
     await user.save();
-    
-    // For both CSC and Akshaya types, create a Centre record (status pending)
-    if (type === 'akshaya' || type === 'csc') {
-      const Centre = require('../models/Centre');
+
+    if (['csc','akshaya'].includes(type.toLowerCase())) {
       const centre = new Centre({
-        centreName: centerId,
-        ownerName: personName,
-        contact: phone,
-        phone,
+        centreName:  centerId,
+        ownerName:   personName,
+        contact:     phone,
         email,
-        type,
+        type:        type.toLowerCase(),
         centerId,
         district,
-        status: 'pending'
+        subdistrict,
+        services,
+        status:      'pending'
       });
       await centre.save();
     }
-    
+
     res.status(201).json({ message: 'Signup successful. Await admin approval.' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
-})
-
+});
  
 
 // Login Route

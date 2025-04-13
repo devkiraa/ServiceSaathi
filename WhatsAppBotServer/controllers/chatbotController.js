@@ -2,7 +2,6 @@
 const Chat   = require('../models/chat');
 const User   = require('../models/wha-user');
 const client = require('../config/twilio');
-const axios  = require('axios');
 
 module.exports = function({ CHAT_API_BASE }) {
   //
@@ -34,10 +33,9 @@ module.exports = function({ CHAT_API_BASE }) {
   // ─── LOAD MODULES ───────────────────────────────────────────────────────────
   //
   const languageModule = require('./modules/languageModule')(sendMessage);
-  // Pass applyModule into optionModule so "2️⃣ Apply" triggers the flow
-  const applyModule   = require('./modules/applyModule')(sendMessage, CHAT_API_BASE);
-  const optionModule  = require('./modules/optionModule')(sendMessage, applyModule);
-  const chatModule    = require('./modules/chatModule')(sendMessage, CHAT_API_BASE);
+  const applyModule    = require('./modules/applyModule')(sendMessage, CHAT_API_BASE);
+  const optionModule   = require('./modules/optionModule')(sendMessage, applyModule);
+  const chatModule     = require('./modules/chatModule')(sendMessage, CHAT_API_BASE);
 
   //
   // ─── HANDLER: Inbound user messages ─────────────────────────────────────────

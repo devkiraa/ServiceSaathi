@@ -1,106 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Service Saathi Sign Up</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    // Step 1: Validate Mobile Number
-    function validateStep1() {
-      const phone = document.getElementById("phone");
-      const phoneError = document.getElementById("phone-error");
-      const phonePattern = /^[6789][0-9]{9}$/;
-      phoneError.textContent = "";
-      
-      if (!phonePattern.test(phone.value)) {
-        phoneError.textContent = "Phone number must start with 9, 8, 7, or 6 and be 10 digits long.";
-        return;
-      }
-      // If valid, proceed to Step 2
-      document.getElementById("step1").classList.add("hidden");
-      document.getElementById("step2").classList.remove("hidden");
-    }
-    
-    // Step 2: Validate other details
-    function validateStep2() {
-      const email = document.getElementById("email");
-      const shopName = document.getElementById("shopName");
-      const personName = document.getElementById("personName");
-      const password = document.getElementById("password");
-      const confirmPassword = document.getElementById("confirm-password");
-      const emailError = document.getElementById("email-error");
-      const passwordError = document.getElementById("password-error");
-      const confirmPasswordError = document.getElementById("confirm-password-error");
-
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      emailError.textContent = "";
-      passwordError.textContent = "";
-      confirmPasswordError.textContent = "";
-
-      let isValid = true;
-
-      if (!emailPattern.test(email.value)) {
-        emailError.textContent = "Please enter a valid email address.";
-        isValid = false;
-      }
-      if (password.value.length < 6) {
-        passwordError.textContent = "Password must be at least 6 characters long.";
-        isValid = false;
-      }
-      if (password.value !== confirmPassword.value) {
-        confirmPasswordError.textContent = "Passwords do not match.";
-        isValid = false;
-      }
-      return isValid;
-    }
-
-    // On form submission, validate Step 2 and send data to /api/signup
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('signupForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        if (!validateStep2()) {
-          return;
-        }
-        // Gather all form data
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData);
-        
-        try {
-          const response = await fetch('/api/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-          });
-          const result = await response.json();
-          if (response.ok) {
-            // Show the signup success modal
-            document.getElementById("successModal").style.display = "flex";
-          } else {
-            alert('Signup failed: ' + result.error);
-          }
-        } catch (err) {
-          console.error(err);
-          alert('An error occurred during signup.');
-        }
-      });
-    });
-  </script>
   <style>
-    /* Modal Background */
     .modal {
       display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      position: fixed; inset: 0;
       background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
+      justify-content: center; align-items: center;
       z-index: 999;
     }
-    /* Modal Content */
     .modal-content {
       background-color: white;
       padding: 20px;
@@ -110,86 +22,127 @@
   </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-  <div class="bg-white shadow-md rounded-md p-8 w-96 flex flex-col justify-center items-center mx-auto">
-
+  <div class="bg-white shadow-md rounded-md p-8 w-96">
     <h2 class="text-2xl font-bold text-center mb-6">Service Saathi Sign Up</h2>
     <form id="signupForm">
       <!-- Step 1: Mobile Number Only -->
       <div id="step1">
         <div class="mb-4">
-          <label for="phone" class="block text-gray-700 font-medium">Mobile Number</label>
-          <input type="text" id="phone" name="phone" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="phone" class="block text-gray-700">Mobile Number</label>
+          <input type="text" id="phone" name="phone"
+                 class="w-full p-2 border rounded mt-1" required />
           <p id="phone-error" class="text-red-500 text-sm"></p>
         </div>
-        <button type="button" onclick="validateStep1()" class="w-full bg-gray-800 text-white p-2 rounded hover:bg-gray-700">Continue</button>
+        <button type="button" onclick="validateStep1()"
+                class="w-full bg-gray-800 text-white p-2 rounded">Continue</button>
       </div>
-    
-      <!-- Step 2: Centre Details -->
+
+      <!-- Step 2: All Other Details -->
       <div id="step2" class="hidden">
-        <div class="mb-4" class="hidden">
-          <label for="shopName" class="block text-gray-700 font-medium">Shop Name</label>
-          <input type="text" id="shopName" name="shopName" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
-        </div>
         <div class="mb-4">
-          <label for="personName" class="block text-gray-700 font-medium">Person Name</label>
-          <input type="text" id="personName" name="personName" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="shopName" class="block text-gray-700">Shop Name</label>
+          <input type="text" id="shopName" name="shopName"
+                 class="w-full p-2 border rounded mt-1" required />
         </div>
+
         <div class="mb-4">
-          <label for="email" class="block text-gray-700 font-medium">Email</label>
-          <input type="email" id="email" name="email" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="personName" class="block text-gray-700">Person Name</label>
+          <input type="text" id="personName" name="personName"
+                 class="w-full p-2 border rounded mt-1" required />
+        </div>
+
+        <div class="mb-4">
+          <label for="email" class="block text-gray-700">Email</label>
+          <input type="email" id="email" name="email"
+                 class="w-full p-2 border rounded mt-1" required />
           <p id="email-error" class="text-red-500 text-sm"></p>
         </div>
+
         <div class="mb-4">
-          <label for="password" class="block text-gray-700 font-medium">Password</label>
-          <input type="password" id="password" name="password" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="password" class="block text-gray-700">Password</label>
+          <input type="password" id="password" name="password"
+                 class="w-full p-2 border rounded mt-1" required />
           <p id="password-error" class="text-red-500 text-sm"></p>
         </div>
+
         <div class="mb-6">
-          <label for="confirm-password" class="block text-gray-700 font-medium">Confirm Password</label>
-          <input type="password" id="confirm-password" name="confirmPassword" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="confirm-password" class="block text-gray-700">Confirm Password</label>
+          <input type="password" id="confirm-password" name="confirmPassword"
+                 class="w-full p-2 border rounded mt-1" required />
           <p id="confirm-password-error" class="text-red-500 text-sm"></p>
         </div>
+
         <div class="mb-4">
-          <label class="block text-gray-700 font-medium">Select Centre Type</label>
-          <div class="flex items-center mt-2">
-            <input type="radio" id="csc" name="type" value="CSC" class="mr-2" required>
-            <label for="csc" class="text-gray-700">CSC</label>
-          </div>
-          <div class="flex items-center mt-2">
-            <input type="radio" id="akshaya" name="type" value="Akshaya" class="mr-2" required>
-            <label for="akshaya" class="text-gray-700">Akshaya</label>
-          </div>
+          <span class="block text-gray-700">Select Centre Type</span>
+          <label class="inline-flex items-center mt-2">
+            <input type="radio" name="type" value="CSC" class="mr-2" required> CSC
+          </label>
+          <label class="inline-flex items-center mt-2 ml-4">
+            <input type="radio" name="type" value="Akshaya" class="mr-2"> Akshaya
+          </label>
+        </div>
+
+        <div class="mb-4">
+          <label for="center-id" class="block text-gray-700">Center ID</label>
+          <input type="text" id="center-id" name="centerId"
+                 class="w-full p-2 border rounded mt-1" required />
+        </div>
+
+        <!-- Address -->
+        <div class="mb-4">
+          <label for="buildingName" class="block text-gray-700">Building/House Name</label>
+          <input type="text" id="buildingName" name="buildingName"
+                 class="w-full p-2 border rounded mt-1" required />
         </div>
         <div class="mb-4">
-          <label for="center-id" class="block text-gray-700 font-medium">Center ID</label>
-          <input type="text" id="center-id" name="centerId" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="street" class="block text-gray-700">Street</label>
+          <input type="text" id="street" name="street"
+                 class="w-full p-2 border rounded mt-1" required />
         </div>
         <div class="mb-4">
-          <label for="buildingName" class="block text-gray-700 font-medium">Building/House Name</label>
-          <input type="text" id="buildingName" name="buildingName" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="locality" class="block text-gray-700">Locality</label>
+          <input type="text" id="locality" name="locality"
+                 class="w-full p-2 border rounded mt-1" required />
         </div>
-        
         <div class="mb-4">
-          <label for="street" class="block text-gray-700 font-medium">Street</label>
-          <input type="text" id="street" name="street" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="district" class="block text-gray-700">District</label>
+          <input type="text" id="district" name="district"
+                 class="w-full p-2 border rounded mt-1" required />
         </div>
-        
         <div class="mb-4">
-          <label for="locality" class="block text-gray-700 font-medium">Locality</label>
-          <input type="text" id="locality" name="locality" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="subdistrict" class="block text-gray-700">Subdistrict</label>
+          <input type="text" id="subdistrict" name="subdistrict"
+                 class="w-full p-2 border rounded mt-1" required />
         </div>
-        
         <div class="mb-4">
-          <label for="district" class="block text-gray-700 font-medium">District</label>
-          <input type="text" id="district" name="district" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+          <label for="pincode" class="block text-gray-700">Pincode</label>
+          <input type="text" id="pincode" name="pincode"
+                 class="w-full p-2 border rounded mt-1" required />
         </div>
-        
-        <div class="mb-4">
-          <label for="pincode" class="block text-gray-700 font-medium">Pincode</label>
-          <input type="text" id="pincode" name="pincode" class="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
-        </div>
-        
-        <button type="submit" class="w-full bg-gray-800 text-white p-2 rounded hover:bg-gray-700">Sign Up</button>
+
+        <!-- Services Offered -->
+        <fieldset class="mb-6">
+          <legend class="block text-gray-700 mb-2">Services You Offer</legend>
+          <label class="inline-flex items-center mr-4">
+            <input type="checkbox" name="income_certificate" class="mr-1"> Income Certificate
+          </label>
+          <label class="inline-flex items-center mr-4">
+            <input type="checkbox" name="voter_registration" class="mr-1"> Voter Registration
+          </label>
+          <label class="inline-flex items-center mr-4">
+            <input type="checkbox" name="passport_service" class="mr-1"> Passport Service
+          </label>
+          <label class="inline-flex items-center mr-4">
+            <input type="checkbox" name="utility_payments" class="mr-1"> Utility Payments
+          </label>
+          <label class="inline-flex items-center">
+            <input type="checkbox" name="possession_certificate" class="mr-1"> Possession Certificate
+          </label>
+        </fieldset>
+
+        <button type="submit" class="w-full bg-gray-800 text-white p-2 rounded">
+          Sign Up
+        </button>
       </div>
     </form>
   </div>
@@ -199,15 +152,76 @@
     <div class="modal-content">
       <h3 class="text-xl font-bold mb-4">Signup Successful</h3>
       <p>You have successfully signed up. Please log in to continue.</p>
-      <button id="okButton" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">OK</button>
+      <button id="okButton" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded">
+        OK
+      </button>
     </div>
   </div>
 
   <script>
-    // Handle OK button click to navigate back to the login page
-    document.getElementById("okButton").addEventListener("click", function() {
-      window.location.href = '/'; // Redirect to login page
+    function validateStep1() {
+      const phone = document.getElementById("phone");
+      const err   = document.getElementById("phone-error");
+      const re    = /^[6789][0-9]{9}$/;
+      err.textContent = "";
+      if (!re.test(phone.value)) {
+        err.textContent = "Phone must start with 6/7/8/9 and be 10 digits.";
+        return;
+      }
+      document.getElementById("step1").classList.add("hidden");
+      document.getElementById("step2").classList.remove("hidden");
+    }
+
+    function validateStep2() {
+      let ok = true;
+      const email = document.getElementById("email");
+      const emErr = document.getElementById("email-error");
+      const pw    = document.getElementById("password");
+      const pwErr = document.getElementById("password-error");
+      const cpw   = document.getElementById("confirm-password");
+      const cpwErr= document.getElementById("confirm-password-error");
+      emErr.textContent = pwErr.textContent = cpwErr.textContent = "";
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+        emErr.textContent = "Invalid email.";
+        ok = false;
+      }
+      if (pw.value.length < 6) {
+        pwErr.textContent = "Min 6 characters.";
+        ok = false;
+      }
+      if (pw.value !== cpw.value) {
+        cpwErr.textContent = "Passwords must match.";
+        ok = false;
+      }
+      return ok;
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (!validateStep2()) return;
+
+      const data = Object.fromEntries(new FormData(e.target));
+      try {
+        const res = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        if (res.ok) {
+          document.getElementById("successModal").style.display = "flex";
+        } else {
+          alert("Signup failed: " + json.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("An error occurred during signup.");
+      }
     });
+
+    document.getElementById("okButton").onclick = () =>
+      window.location.href = '/';
   </script>
 </body>
 </html>

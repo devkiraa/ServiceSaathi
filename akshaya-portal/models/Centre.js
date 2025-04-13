@@ -1,46 +1,26 @@
+// models/Centre.js
 const mongoose = require('mongoose');
 
 const centreSchema = new mongoose.Schema({
-  // Shop name is used as the centre name
-  centreName: { 
-    type: String, 
-    required: true 
+  centreName:  { type: String, required: true },
+  ownerName:   { type: String, required: true },
+  contact:     { type: String, required: true },
+  email:       { type: String, required: true },
+  type:        { type: String, enum: ['csc','akshaya'], required: true },
+  centerId:    { type: String },
+  status:      { type: String, enum: ['pending','approved','rejected'], default: 'pending' },
+  district:    { type: String, required: true },   // ← newly added
+  subdistrict: { type: String, required: true },   // ← newly added
+  services: {
+    income_certificate:   Boolean,
+    voter_registration:   Boolean,
+    passport_service:     Boolean,
+    utility_payments:     Boolean,
+    possession_certificate:Boolean
   },
-  // Person name for the centre owner
-  ownerName: { 
-    type: String, 
-    required: true 
-  },
-  // Contact mobile number
-  contact: { 
-    type: String, 
-    required: true 
-  },
-  // Email address provided during signup
-  email: { 
-    type: String, 
-    required: true 
-  },
-  // Centre type: CSC or Akshaya
-  type: { 
-    type: String, 
-    enum: ['csc', 'akshaya'], 
-    required: true 
-  },
-  // Centre ID provided during signup
-  centerId: { 
-    type: String 
-  },
-  // Approval status – user cannot login until this is approved
-  status: { 
-    type: String, 
-    enum: ['pending', 'approved', 'rejected'], 
-    default: 'pending' 
-  },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
+  createdAt:   { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Centre', centreSchema);
+// Avoid OverwriteModelError
+module.exports = mongoose.models.Centre 
+  || mongoose.model('Centre', centreSchema);

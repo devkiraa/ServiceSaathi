@@ -1,83 +1,37 @@
+// models/user.js
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const bcrypt   = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  // Mobile number is used as the username for login
-  username: { 
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
-  },
-  // Storing mobile number (same as username)
-  phone: { 
-    type: String,
-    required: true
-  },
-  // Additional signup details
-  email: { 
-    type: String, 
-    required: true 
-  },
-  shopName: { 
-    type: String, 
-    required: true 
-  },
-  personName: { 
-    type: String, 
-    required: true 
-  },
-  password: { 
-    type: String, 
-    required: true,
-    minlength: 6
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
-  },
-  // Centre type: either CSC or Akshaya
-  type: { 
-    type: String,
-    enum: ['CSC', 'Akshaya'],
-    required: true
-  },
-  // Centre ID as entered by the user (may be an identifier)
-  centerId: { 
-    type: String 
-  },
-  district: {
-    type:String,
-    required:true
-  },
-  services:{
-    income_certificate: Boolean,
-    voter_registration: Boolean,
-    passport_service: Boolean,
-    utility_payments: Boolean,
-    possession_certificate: Boolean
+  username:   { type: String, required: true, unique: true, trim: true },
+  phone:      { type: String, required: true },
+  email:      { type: String, required: true },
+  shopName:   { type: String, required: true },
+  personName: { type: String, required: true },
+  password:   { type: String, required: true, minlength: 6 },
+  role:       { type: String, enum: ['user','admin'], default: 'user' },
+  type:       { type: String, enum: ['CSC','Akshaya'], required: true },
+  centerId:   { type: String },
+  district:   { type: String, required: true },
+  subdistrict:{ type: String, required: true },   // ← newly added
+  services: {
+    income_certificate:   Boolean,
+    voter_registration:   Boolean,
+    passport_service:     Boolean,
+    utility_payments:     Boolean,
+    possession_certificate:Boolean
   },
   address: {
     buildingName: { type: String, default: null },
-    street: { type: String, default: null },
-    locality: { type: String, default:null},
-    pincode: { type: Number, default: null }
-  },
-  applyState: {
-    type: String,
-    enum: ['district','subdistrict','centre','service', null],
-    default: null
-  },
-  applyData: {
-    district:     { type: String, default: null },
-    subdistrict:  { type: String, default: null },
-    centreId:     { type: String, default: null },
-    serviceName:  { type: String, default: null }
+    street:       { type: String, default: null },
+    locality:     { type: String, default: null },
+    pincode:      { type: Number, default: null }
   }
+}, {
+  collection: 'user'
 });
 
-// Hash the password before saving
+// Hash password
 userSchema.pre('save', async function(next) {
   if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 10);
@@ -85,4 +39,5 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-module.exports = mongoose.model('User', userSchema);
+// Avoid OverwriteModelError
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);
