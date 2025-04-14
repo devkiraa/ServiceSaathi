@@ -3,7 +3,7 @@ const Chat   = require('../models/chat');
 const User   = require('../models/wha-user');
 const client = require('../config/twilio');
 
-module.exports = function({ CHAT_API_BASE }) {
+module.exports = function({ CHAT_API_BASE,DOCUMENT_SERVICE_API_BASE }) {
   //
   // ─── HELPERS ────────────────────────────────────────────────────────────────
   //
@@ -33,7 +33,7 @@ module.exports = function({ CHAT_API_BASE }) {
   // ─── LOAD MODULES ───────────────────────────────────────────────────────────
   //
   const languageModule = require('./modules/languageModule')(sendMessage);
-  const applyModule    = require('./modules/applyModule')(sendMessage, CHAT_API_BASE);
+  const applyModule    = require('./modules/applyModule')(sendMessage, DOCUMENT_SERVICE_API_BASE);
   const optionModule   = require('./modules/optionModule')(sendMessage, applyModule);
   const chatModule     = require('./modules/chatModule')(sendMessage, CHAT_API_BASE);
 

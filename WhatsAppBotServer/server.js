@@ -12,9 +12,10 @@ app.use(bodyParser.json());
 connectDB();
 
 const CHAT_API_BASE = process.env.CHAT_API_BASE;
+const DOCUMENT_SERVICE_API_BASE = process.env.DOCUMENT_SERVICE_API_BASE;
 
 const chatbotController = require('./controllers/chatbotController')({
-  CHAT_API_BASE
+  CHAT_API_BASE,DOCUMENT_SERVICE_API_BASE
 });
 
 app.use('/', createChatbotRoutes(chatbotController));
