@@ -163,5 +163,5 @@ router.get('/sendimage/:uploadToken', async (req, res) => {
     res.status(500).send("Server error: " + error.message);
   }
 });
-
+router.get('/api/ping', (req, res) => res.json({ ok: true }));
 module.exports = router;

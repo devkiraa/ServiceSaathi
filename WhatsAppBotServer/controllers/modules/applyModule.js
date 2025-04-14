@@ -18,74 +18,43 @@ const DISTRICTS = [
   "Kannur","Kasaragod"
 ];
 
-module.exports = function(sendMessage, CHAT_API_BASE) {
+module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
   return {
     process: async (Body, user, From) => {
       const text  = Body.trim();
       const lower = text.toLowerCase();
       const num   = parseInt(text, 10);
 
-      // Handle "back"/"0" to step backwards
+      // ─── Cancel / Back ─────────────────────────────────────
       if (lower === '0' || lower === 'back') {
-        switch(user.applyState) {
-          case 'subdistrict':
-            user.applyState = 'district';
-            user.applyDataTemp = {};
-            await user.save();
-            // fall through to district prompt
-          case 'district':
-            // If we just reset or were at district, exit apply flow
-            user.applyState = null;
-            user.applyDataTemp = {};
-            await user.save();
-            return sendMessage(From, "*Returning to main menu.*\n1️⃣ Chat\n2️⃣ Apply for Document");
-          case 'document':
-            user.applyState = 'subdistrict';
-            await user.save();
-            // re-prompt subdistrict
-            {
-              const subs = await CentreModel.distinct(
-                'subdistrict',
-                { district: user.applyDataTemp.district }
-              );
-              const msg = `*Select subdistrict in ${user.applyDataTemp.district}:*\n` +
-                subs.map((s,i) => `${i+1}. ${s}`).join('\n');
-              return sendMessage(From, msg);
-            }
-          case 'centre':
-            user.applyState = 'document';
-            await user.save();
-            // re-prompt document types
-            return sendMessage(From,
-              "*Select document to apply:*\n" +
-              DOCUMENT_TYPES.map((d,i) => `${i+1}. ${d.name}`).join('\n')
-            );
-          default:
-            // not in apply flow
-            return sendMessage(From, "*Returning to main menu.*\n1️⃣ Chat\n2️⃣ Apply for Document");
-        }
-      }
-
-      // STEP 0: Prompt District
-      if (!user.applyState) {
-        user.applyState = 'district';
+        user.applyState    = null;
         user.applyDataTemp = {};
         await user.save();
-
         return sendMessage(From,
-          "*Select your district:*\n" +
+          "*❌ Application cancelled.*\n0️⃣ Cancel\n1️⃣ Chat\n2️⃣ Apply for Document"
+        );
+      }
+
+      // ─── STEP 0: District ───────────────────────────────────
+      if (!user.applyState) {
+        user.applyState    = 'district';
+        user.applyDataTemp = {};
+        await user.save();
+        return sendMessage(From,
+          "*Select your district:* (0️⃣ Cancel)\n" +
           DISTRICTS.map((d,i) => `${i+1}. ${d}`).join('\n')
         );
       }
 
-      // STEP 1: District → Subdistrict
+      // ─── STEP 1: District → Subdistrict ────────────────────
       if (user.applyState === 'district') {
-        const idx = num - 1;
-        if (isNaN(idx) || idx < 0 || idx >= DISTRICTS.length) {
-          return sendMessage(From, "Invalid district. Enter a number between 1 and 14.");
+        if (isNaN(num) || num < 1 || num > DISTRICTS.length) {
+          return sendMessage(From,
+            `Invalid district. Enter 1–${DISTRICTS.length} or 0️⃣ to cancel.`
+          );
         }
-        user.applyDataTemp.district = DISTRICTS[idx];
-        user.applyState = 'subdistrict';
+        user.applyDataTemp.district = DISTRICTS[num-1];
+        user.applyState             = 'subdistrict';
         await user.save();
 
         const subs = await CentreModel.distinct(
@@ -93,98 +62,105 @@ module.exports = function(sendMessage, CHAT_API_BASE) {
           { district: user.applyDataTemp.district }
         );
         if (!subs.length) {
-          // no subdistricts: reset to district
           user.applyState = 'district';
           await user.save();
-          return sendMessage(From, `No subdistricts found. Select district again:\n` +
-            DISTRICTS.map((d,i) => `${i+1}. ${d}`).join('\n')
+          return sendMessage(From,
+            `No subdistricts in ${user.applyDataTemp.district}. Try again:\n` +
+            DISTRICTS.map((d,i) => `${i+1}. ${d}`).join('\n') +
+            "\n0️⃣ Cancel"
           );
         }
-
         return sendMessage(From,
-          `*Select subdistrict in ${user.applyDataTemp.district}:*\n` +
+          `*Select subdistrict in ${user.applyDataTemp.district}:* (0️⃣ Cancel)\n` +
           subs.map((s,i) => `${i+1}. ${s}`).join('\n')
         );
       }
 
-      // STEP 2: Subdistrict → Document Type
+      // ─── STEP 2: Subdistrict → Document ────────────────────
       if (user.applyState === 'subdistrict') {
         const subs = await CentreModel.distinct(
           'subdistrict',
           { district: user.applyDataTemp.district }
         );
-        const idx = num - 1;
-        if (isNaN(idx) || idx < 0 || idx >= subs.length) {
-          return sendMessage(From, `Invalid subdistrict. Enter 1–${subs.length}.`);
+        if (isNaN(num) || num < 1 || num > subs.length) {
+          return sendMessage(From,
+            `Invalid subdistrict. Enter 1–${subs.length} or 0️⃣ to cancel.`
+          );
         }
-        user.applyDataTemp.subdistrict = subs[idx];
-        user.applyState = 'document';
+        user.applyDataTemp.subdistrict = subs[num-1];
+        user.applyState               = 'document';
         await user.save();
-
         return sendMessage(From,
-          "*Select document to apply:*\n" +
+          "*Select document to apply:* (0️⃣ Cancel)\n" +
           DOCUMENT_TYPES.map((d,i) => `${i+1}. ${d.name}`).join('\n')
         );
       }
 
-      // STEP 3: Document Type → Centre list
-if (user.applyState === 'document') {
-  const idx = num - 1;
-  if (isNaN(idx) || idx < 0 || idx >= DOCUMENT_TYPES.length) {
-    return sendMessage(From, `Invalid choice. Enter 1–${DOCUMENT_TYPES.length}.`);
-  }
-  const doc = DOCUMENT_TYPES[idx];
-  user.applyDataTemp.documentType = doc.key;
-  user.applyDataTemp.documentName = doc.name;
-  user.applyState = 'centre';
-  await user.save();
+      // ─── STEP 3: Document → Centre list ────────────────────
+      if (user.applyState === 'document') {
+        if (isNaN(num) || num < 1 || num > DOCUMENT_TYPES.length) {
+          return sendMessage(From,
+            `Invalid choice. Enter 1–${DOCUMENT_TYPES.length} or 0️⃣ to cancel.`
+          );
+        }
+        const doc = DOCUMENT_TYPES[num-1];
+        user.applyDataTemp.documentType = doc.key;
+        user.applyDataTemp.documentName = doc.name;
+        user.applyState                 = 'centre';
+        await user.save();
 
-  // 🔧 Fixed: Use `$eq` to match Boolean true and prevent undefined issues
-  const centres = await CentreModel.find({
-    type: { $in: ['akshaya', 'csc'] }, // ✅ Support both types
-    district: user.applyDataTemp.district,
-    subdistrict: user.applyDataTemp.subdistrict,
-    [`services.${doc.key}`]: true
-  }).limit(5);  
+        console.log("🔍 Searching centres:", {
+          district:    user.applyDataTemp.district,
+          subdistrict: user.applyDataTemp.subdistrict,
+          service:     doc.key
+        });
 
-  if (!centres.length) {
-    // ⛔ Still no match — show fallback message
-    user.applyState = 'document';
-    await user.save();
-    return sendMessage(From, "❌ No centres offer that service here. Choose another document:\n" +
-      DOCUMENT_TYPES.map((d,i) => `${i+1}. ${d.name}`).join('\n')
-    );
-  }
+        const centres = await CentreModel.find({
+          type:        { $in: ['csc','akshaya'] },
+          district:    user.applyDataTemp.district,
+          subdistrict: user.applyDataTemp.subdistrict,
+          [`services.${doc.key}`]: true
+        }).limit(5);
 
-  user.applyDataTemp.centres = centres.map(c => ({
-    centreId:   c.centerId,
-    centreName: c.centreName,
-    type:       c.type,
-    address:    c.address,
-    phone:      c.phone
-  }));
-  await user.save();
-  
-  return sendMessage(From,
-    "*Select Centre:*\n" +
-    user.applyDataTemp.centres.map((c, i) => 
-      `${i+1}. ${c.centreName} (${c.type.toUpperCase()})\n📍 ${c.address}\n📞 ${c.phone}\n🆔 ${c.centreId}`
-    ).join('\n\n')
-  );  
-}
+        console.log("🏥 Centres found:", centres.length);
 
-      // STEP 4: Centre → Create Service Request & Persist
+        if (!centres.length) {
+          user.applyState = 'document';
+          await user.save();
+          return sendMessage(From,
+            "❌ No centres offer that service here.\nChoose another document or 0️⃣ to cancel:\n" +
+            DOCUMENT_TYPES.map((d,i) => `${i+1}. ${d.name}`).join('\n')
+          );
+        }
+
+        user.applyDataTemp.centres = centres.map(c => ({
+          centreId:   c.centerId || "N/A",
+          centreName: c.centreName || "Unnamed Centre",
+          contact:    c.contact || "No contact info",
+          address:    `${c.district || "Unknown District"}, ${c.subdistrict || "Unknown Subdistrict"}`
+        }));
+        await user.save();
+        
+        return sendMessage(From,
+          "*Select centre:* (0️⃣ Cancel)\n" +
+          user.applyDataTemp.centres.map((c, i) =>
+            `${i+1}. *${c.centreName}*\n📍 ${c.address}\n📞 ${c.contact}\n🆔 ${c.centreId}`
+          ).join('\n\n')
+        );        
+      }
+
+      // ─── STEP 4: Centre → Create Request ───────────────────
       if (user.applyState === 'centre') {
         const list = user.applyDataTemp.centres || [];
-        const idx  = num - 1;
-        if (isNaN(idx) || idx < 0 || idx >= list.length) {
-          return sendMessage(From, `Invalid choice. Enter 1–${list.length}.`);
+        if (isNaN(num) || num < 1 || num > list.length) {
+          return sendMessage(From,
+            `Invalid choice. Enter 1–${list.length} or 0️⃣ to cancel.`
+          );
         }
-        const chosen = list[idx];
-
+        const chosen = list[num-1];
         try {
           const apiRes = await axios.post(
-            `${CHAT_API_BASE}/api/service-request`,
+            `${DOCUMENT_SERVICE_API_BASE}/api/service-request`,
             {
               "document-type": user.applyDataTemp.documentName,
               "centre-id":     chosen.centreId
@@ -192,7 +168,7 @@ if (user.applyState === 'document') {
           );
           const data = apiRes.data;
 
-          const application = {
+          user.applications.push({
             district:         user.applyDataTemp.district,
             subdistrict:      user.applyDataTemp.subdistrict,
             centreId:         chosen.centreId,
@@ -200,33 +176,33 @@ if (user.applyState === 'document') {
             documentName:     user.applyDataTemp.documentName,
             serviceRequestId: data.serviceRequestId,
             requiredDocuments:data.requiredDocuments.map(d=>({
-              name: d.name,
-              uploadedFile: d.uploadedFile||""
+              name: d.name, uploadedFile: d.uploadedFile || ""
             })),
             uploadLink:       data.uploadLink
-          };
-
-          user.applications.push(application);
-          user.applyState = null;
+          });
+          user.applyState    = null;
           user.applyDataTemp = {};
           await user.save();
 
-          const resp =
+          return sendMessage(From,
             `*${data.message}*\n` +
             `Request ID: ${data.serviceRequestId}\n` +
             `Required Docs:\n` +
             data.requiredDocuments.map(d=>`• ${d.name}`).join('\n') +
-            `\nUpload Link: ${data.uploadLink}`;
-          return sendMessage(From, resp);
-
+            `\nUpload Link: ${data.uploadLink}`
+          );
         } catch (err) {
-          console.error("Service‑request API error:", err);
-          return sendMessage(From, "Error creating request. Please try again later.");
+          console.error("❌ Service‑request API error:", err);
+          return sendMessage(From,
+            "Error creating request. Please try again later or 0️⃣ to cancel."
+          );
         }
       }
 
-      // final fallback
-      return sendMessage(From, "Unexpected state. Type 'hi' to restart.");
+      // ─── Final fallback ─────────────────────────────────────
+      return sendMessage(From,
+        "Unexpected state. Type 'hi' to restart or 0️⃣ to cancel."
+      );
     }
   };
 };

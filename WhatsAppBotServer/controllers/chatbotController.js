@@ -3,7 +3,7 @@ const Chat   = require('../models/chat');
 const User   = require('../models/wha-user');
 const client = require('../config/twilio');
 
-module.exports = function({ CHAT_API_BASE }) {
+module.exports = function({ CHAT_API_BASE,DOCUMENT_SERVICE_API_BASE }) {
   //
   // ─── HELPERS ────────────────────────────────────────────────────────────────
   //
@@ -17,15 +17,17 @@ module.exports = function({ CHAT_API_BASE }) {
 
   const sendMessage = async (to, body) => {
     try {
+      console.log(`Attempting to send to <span class="math-inline">\{to\}\: "</span>{body}"`); // <-- Add logging
       if (!to.startsWith("whatsapp:")) to = `whatsapp:${to}`;
       await client.messages.create({
         from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
         to,
         body
       });
+      console.log(`Successfully sent to <span class="math-inline">\{to\}\: "</span>{body}"`); // <-- Add logging
       await storeChatMessage(to.replace("whatsapp:", ""), body, 'outbound');
     } catch (err) {
-      console.error("Error sending message:", err);
+      console.error(`Error sending message to ${to}:`, err); // <-- Improve error logging
     }
   };
 
@@ -33,7 +35,7 @@ module.exports = function({ CHAT_API_BASE }) {
   // ─── LOAD MODULES ───────────────────────────────────────────────────────────
   //
   const languageModule = require('./modules/languageModule')(sendMessage);
-  const applyModule    = require('./modules/applyModule')(sendMessage, CHAT_API_BASE);
+  const applyModule    = require('./modules/applyModule')(sendMessage, DOCUMENT_SERVICE_API_BASE);
   const optionModule   = require('./modules/optionModule')(sendMessage, applyModule);
   const chatModule     = require('./modules/chatModule')(sendMessage, CHAT_API_BASE);
 
@@ -46,7 +48,7 @@ module.exports = function({ CHAT_API_BASE }) {
     const userPhone = From.replace(/^whatsapp:/i, "");
 
     if (!Body || Body.toLowerCase() === "ok") {
-      return res.sendStatus(200);
+        return res.status(204).end();
     }
     await storeChatMessage(userPhone, Body, 'inbound');
 

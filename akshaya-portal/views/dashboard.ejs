@@ -1,153 +1,221 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Service Saathi Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+  <script type="module" src="https://unpkg.com/cally"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="/css/timeWeather.css">
+  <link rel="stylesheet" href="/css/calender.css">
 </head>
-<body class="bg-white">
-  <!-- Sidebar -->
-  <div class="min-h-screen bg-white">
-    <!-- Left Sidebar -->
-    
-
-    <!-- Main Content -->
-    <div class="flex-1 p-6 bg-white">
-      <!-- Header -->
-      <header class="flex justify-between items-start mb-6">
-        <div>
-          <h1 class="font-bold text-gray-800" style="font-size:50px;color: rgb(8, 62, 109);">Welcome!</h1>
-          <h3 class="text-md font-medium text-gray-600 mt-1">Dashboard</h3>
+<body class="bg-base-100 text-base-content transition-all duration-300">
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 w-full bg-base-200 shadow-md z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex space-x-4">
+        <a href="/dashboard" class="font-semibold hover:text-primary">Dashboard</a>
+        <a href="/service" class="font-semibold hover:text-primary">Service</a>
+      </div>
+      <div class="relative">
+        <button id="userDropdownBtn" class="btn btn-ghost btn-circle">
+          <img src="../uploads/images/image-removebg-preview.png" alt="Profile Icon" class="w-10 h-10 rounded-full">
+        </button>
+        <div id="userDropdown" class="absolute right-0 top-full mt-2 w-48 bg-base-100 rounded-lg shadow-lg hidden">
+          <span class="text-base-content px-8 font-medium block"><%= user.centerId %></span>
+          <a href="/profile" class="block text-sm px-6 py-2 hover:bg-base-300">User Profile</a>
+          <a href="/change-password" class="block text-sm px-6 py-2 hover:bg-base-300">Change Password</a>
+          <a href="/logout" class="block text-sm px-6 py-2 text-error hover:bg-base-300">Logout</a>
         </div>
-        <div class="relative">
-          <button id="userDropdownBtn">
-            <img src="../uploads/images/image-removebg-preview.png" alt="Profile Icon" class="w-10 h-10 rounded-full">
-          </button>
-          <div id="userDropdown" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg hidden">
-            <span class="text-gray-800 px-8 font-medium"><%= user.centerId%></span>
-            <a href="/profile" class="block text-sm px-6 py-2 text-gray-700 hover:bg-gray-100">User Profile</a>
-            <a href="/change-password" class="block text-sm px-6 py-2 text-gray-700 hover:bg-gray-100">Change Password</a>
-            <a href="/logout" class="block text-sm px-6 py-2 text-red-500 hover:bg-gray-100">Logout</a>
+      </div>
+      <!-- Theme Toggle Button -->
+      <button id="theme-toggle" class="btn btn-ghost btn-circle">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+  <!-- Main Content -->
+  <div class="flex flex-col min-h-screen pt-20">
+    <div class="flex-1 p-6 overflow-y-auto">
+      <!-- Main Container -->
+      <div class="flex flex-wrap gap-6 justify-between h-full">
+        <!-- First Container (Time and Weather) -->
+        <div class="w-full sm:w-[48%] md:w-[31%] p-4 h-full flex flex-col">
+          <div class="space-y-4 flex-1 overflow-y-auto">
+            <div class="card">
+              <section class="info-section">
+                <div class="background-design">
+                  <div class="circle"></div>
+                  <div class="circle"></div>
+                  <div class="circle"></div>
+                </div>
+                <div class="left-side">
+                  <div class="weather">
+                    <div id="weather-icon">
+                      <!-- Dynamic Weather Icon -->
+                    </div>
+                    <div id="weather-condition">Loading...</div>
+                  </div>
+                  <div class="temperature" id="current-temperature">--°</div>
+                  <div class="range" id="temperature-range">--°/--°</div>
+                </div>
+                <div class="right-side">
+                  <div>
+                    <div class="hour" id="current-time">--:--</div>
+                    <div class="date" id="current-date">-- --</div>
+                  </div>
+                  <div class="city" id="city-name">Loading...</div>
+                </div>
+              </section>
+              <section class="days-section" id="forecast-section">
+                <!-- Dynamic Forecast Buttons -->
+              </section>
+            </div>
+          </div>
+          <div class="pt-4">
+            <calendar-date class="cally shadow-xl rounded-box">
+              <svg aria-label="Previous" class="fill-current size-4" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+              </svg>
+              <svg aria-label="Next" class="fill-current size-4" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+              </svg>
+              <calendar-month></calendar-month>
+            </calendar-date>
           </div>
         </div>
-      </header>
-      
-
-      <!-- Service Requests Section -->
-      <div class="bg-gray-50 p-6 rounded-2xl border-2 border-blue-200 shadow-lg mb-6">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">My Service Requests</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left text-gray-600">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th class="px-6 py-3">Service Type</th>
-                <th class="px-6 py-3">Mobile Number</th>
-                <th class="px-6 py-3">Status</th>
-                <th class="px-6 py-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if (serviceRequests.length === 0) { %>
-                <tr>
-                  <td colspan="4" class="px-6 py-4 text-center">No service requests found.</td>
-                </tr>
-              <% } else { %>
-                <% serviceRequests.forEach(function(sr) { %>
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4"><%= sr.documentType %></td>
-                    <td class="px-6 py-4"><%= user.username %></td>
-                    <td class="px-6 py-4 <%= 
-                      sr.status === 'received' ? 'text-blue-600' : 
-                      sr.status === 'started' ? 'text-yellow-500' : 
-                      sr.status === 'completed' ? 'text-green-600' : '' 
-                    %>">
-                      <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
-                    </td>
-                    <td class="px-6 py-4 space-x-2">                  
-                      <% if (sr.requiredDocuments && sr.requiredDocuments.length > 0 && sr.status === 'received') { %>
-                        <button class="text-blue-500 hover:text-blue-700" onclick="viewDocuments('<%= sr._id %>')">
-                          View Documents
-                        </button>
-                      <% } %>
-                      <% if (sr.status==='completed') { %>
-                      
-                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
-                      <% } else if(sr.status==='received') { %>
-                        <a href="/continue-application/<%= sr._id %>" class="text-green-500 hover:text-green-700">Continue Application</a>
-                      <% } else if(sr.status==='started') { %>
-                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
-                      <% } %>
-                    </td>
-                  </tr>
-                <% }); %>
-              <% } %>
-            </tbody>
-          </table>
+        <!-- Second Container (1-2-3) -->
+        <div class="w-full sm:w-[48%] md:w-[31%] h-full flex flex-col">
+          <h3 class="text-lg font-semibold mb-4 text-base-content">Container 2</h3>
+          <div class="space-y-4 flex-1 overflow-y-auto">
+            <div class="bg-base-100 p-4 rounded-lg shadow-md">
+              <p class="text-base-content">Card 1</p>
+            </div>
+            <div class="bg-base-100 p-4 rounded-lg shadow-md">
+              <p class="text-base-content">Card 2</p>
+            </div>
+            <div class="bg-base-100 p-4 rounded-lg shadow-md">
+              <p class="text-base-content">Card 3</p>
+            </div>
+          </div>
+        </div>
+        <!-- Third Container (1-2) -->
+        <div class="w-full sm:w-[48%] md:w-[31%] h-full flex flex-col">
+          <h3 class="text-lg font-semibold mb-4 text-base-content">Container 3</h3>
+          <div class="space-y-4 flex-1 overflow-y-auto">
+            <div class="bg-base-100 p-4 rounded-lg shadow-md">
+              <p class="text-base-content">Card 1</p>
+            </div>
+            <div class="bg-base-100 p-4 rounded-lg shadow-md">
+              <p class="text-base-content">Card 2</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Modal for Viewing Uploaded Documents -->
-  <div id="docModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-lg p-6 w-11/12 md:w-2/3 lg:w-1/2 relative">
-      <button class="absolute top-2 right-2 text-gray-600" onclick="closeModal()">✕</button>
-      <h3 class="text-lg font-semibold mb-4">Uploaded Documents</h3>
-      <div id="docContent" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Dynamically filled with images and labels -->
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
   <script>
-    document.getElementById('userDropdownBtn').addEventListener('click', function () {
-      document.getElementById('userDropdown').classList.toggle('hidden');
-    });
-  
-    document.addEventListener('click', function (event) {
-      const dropdown = document.getElementById('userDropdown');
-      const button = document.getElementById('userDropdownBtn');
-      if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-        dropdown.classList.add('hidden');
-      }
-    });
-    // Function to fetch service request details and display in modal.
-    async function viewDocuments(serviceRequestId) {
+    // Fetch weather data dynamically using WeatherAPI
+    async function fetchWeatherData(city = "Ernakulam") {
+      const apiKey = "92918a91522544dbbe3154544251404"; // Replace with your WeatherAPI key
+      const apiUrl = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=no`;
       try {
-        const response = await fetch(`/api/service-request/${serviceRequestId}`);
-        if (!response.ok) {
-          alert("Unable to fetch documents.");
-          return;
-        }
-        const sr = await response.json();
-        const docContent = document.getElementById('docContent');
-        docContent.innerHTML = '';
-        sr.requiredDocuments.forEach(doc => {
-          const card = document.createElement('div');
-          card.className = "border rounded p-2";
-          const title = document.createElement('p');
-          title.className = "font-semibold mb-2";
-          title.textContent = doc.name;
-          card.appendChild(title);
-          const img = document.createElement('img');
-          img.className = "w-full h-40 object-cover rounded";
-          img.src = doc.uploadedFile ? doc.uploadedFile : "https://via.placeholder.com/150?text=Not+Uploaded";
-          card.appendChild(img);
-          docContent.appendChild(card);
-        });
-        document.getElementById('docModal').classList.remove('hidden');
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("Failed to fetch weather data");
+        const data = await response.json();
+        // Update DOM with fetched data
+        document.getElementById("weather-condition").textContent = data.current.condition.text;
+        document.getElementById("current-temperature").textContent = `${Math.round(data.current.temp_c)}°`;
+        document.getElementById("temperature-range").textContent = `--°/--°`; // Range will be updated by forecast data
+        document.getElementById("city-name").textContent = data.location.name;
+        // Set weather icon dynamically
+        const iconUrl = data.current.condition.icon;
+        document.getElementById("weather-icon").innerHTML = `<img src="https:${iconUrl}" alt="Weather Icon" class="w-12 h-12">`;
+        // Fetch forecast data
+        fetchForecastData(city);
       } catch (error) {
-        console.error(error);
-        alert("An error occurred while fetching documents.");
+        console.error("Error fetching weather data:", error);
+        document.getElementById("weather-condition").textContent = "Error";
+        document.getElementById("current-temperature").textContent = "--°";
+        document.getElementById("temperature-range").textContent = "--°/--°";
+        document.getElementById("city-name").textContent = "City Not Found";
       }
     }
-
-    function closeModal() {
-      document.getElementById('docModal').classList.add('hidden');
+    // Fetch forecast data dynamically
+    async function fetchForecastData(city = "Ernakulam") {
+      const apiKey = "92918a91522544dbbe3154544251404"; // Replace with your WeatherAPI key
+      const apiUrl = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${city}&days=4&aqi=no`;
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("Failed to fetch forecast data");
+        const data = await response.json();
+        // Extract forecast for the next 4 days
+        const forecastSection = document.getElementById("forecast-section");
+        forecastSection.innerHTML = ""; // Clear previous forecast
+        data.forecast.forecastday.forEach((dayData) => {
+          const date = new Date(dayData.date);
+          const day = date.toLocaleDateString("en-US", { weekday: "short" });
+          const temp = Math.round(dayData.day.avgtemp_c);
+          const iconUrl = dayData.day.condition.icon;
+          const button = document.createElement("button");
+          button.innerHTML = `
+            <span class="day">${day}</span>
+            <span class="icon-weather-day">
+              <img src="https:${iconUrl}" alt="Weather Icon" class="w-6 h-6">
+            </span>
+            <span>${temp}°</span>
+          `;
+          forecastSection.appendChild(button);
+        });
+        // Update temperature range (min/max) for the first day
+        const firstDay = data.forecast.forecastday[0];
+        const maxTemp = Math.round(firstDay.day.maxtemp_c);
+        const minTemp = Math.round(firstDay.day.mintemp_c);
+        document.getElementById("temperature-range").textContent = `${maxTemp}°/${minTemp}°`;
+      } catch (error) {
+        console.error("Error fetching forecast data:", error);
+      }
     }
+    // Update current time and date dynamically
+    function updateDateTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const day = now.toLocaleDateString("en-US", { weekday: "short" });
+      const month = now.toLocaleDateString("en-US", { month: "short" });
+      const date = now.getDate();
+      document.getElementById("current-time").textContent = `${hours}:${minutes}`;
+      document.getElementById("current-date").textContent = `${day} ${month} ${date}`;
+    }
+    // Initialize the app
+    function init() {
+      fetchWeatherData(); // Fetch weather data for a default city
+      updateDateTime(); // Update time and date
+      setInterval(updateDateTime, 1000); // Update time every second
+      setInterval(fetchWeatherData, 3600000); // Update Weather every hour
+    }
+    // Start the app
+    init();
+
+    // Theme Toggle Functionality
+    const themeToggleBtn = document.getElementById("theme-toggle");
+    const body = document.body;
+
+    themeToggleBtn.addEventListener("click", () => {
+      const currentTheme = body.getAttribute("data-theme");
+      const newTheme = currentTheme === "light" ? "dark" : "light";
+      body.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+    });
+
+    // Check Local Storage for Preferred Theme
+    const savedTheme = localStorage.getItem("theme") || "light";
+    body.setAttribute("data-theme", savedTheme);
   </script>
 </body>
 </html>
