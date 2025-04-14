@@ -116,7 +116,6 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         });
 
         const centres = await CentreModel.find({
-          // include both CSC and Akshaya
           type:        { $in: ['csc','akshaya'] },
           district:    user.applyDataTemp.district,
           subdistrict: user.applyDataTemp.subdistrict,
@@ -135,19 +134,19 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         }
 
         user.applyDataTemp.centres = centres.map(c => ({
-          centreId:   c.centerId,
-          centreName: c.centreName,
-          contact:    c.contact,
-          address:    `${c.district}, ${c.subdistrict}`
+          centreId:   c.centerId || "N/A",
+          centreName: c.centreName || "Unnamed Centre",
+          contact:    c.contact || "No contact info",
+          address:    `${c.district || "Unknown District"}, ${c.subdistrict || "Unknown Subdistrict"}`
         }));
         await user.save();
-
+        
         return sendMessage(From,
           "*Select centre:* (0️⃣ Cancel)\n" +
-          user.applyDataTemp.centres.map((c,i) =>
-            `${i+1}. ${c.centreName}\n📍 ${c.address}\n📞 ${c.contact}\n🆔 ${c.centreId}`
+          user.applyDataTemp.centres.map((c, i) =>
+            `${i+1}. *${c.centreName}*\n📍 ${c.address}\n📞 ${c.contact}\n🆔 ${c.centreId}`
           ).join('\n\n')
-        );
+        );        
       }
 
       // ─── STEP 4: Centre → Create Request ───────────────────
