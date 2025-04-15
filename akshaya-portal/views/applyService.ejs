@@ -1,73 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Apply for Service</title>
+  <!-- Import Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Import Inter Font -->
+  <link href="https://rsms.me/inter/inter.css" rel="stylesheet" />
+  <style>
+    /* Apply the Inter font for all text */
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Style for the corners of the overlay frame */
+    .corner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #fff;
+      position: absolute;
+    }
+    .corner.top-left {
+      top: 0; left: 0;
+      border-bottom: 0;
+      border-right: 0;
+    }
+    .corner.top-right {
+      top: 0; right: 0;
+      border-bottom: 0;
+      border-left: 0;
+    }
+    .corner.bottom-left {
+      bottom: 0; left: 0;
+      border-top: 0;
+      border-right: 0;
+    }
+    .corner.bottom-right {
+      bottom: 0; right: 0;
+      border-top: 0;
+      border-left: 0;
+    }
+  </style>
 </head>
-<body class="bg-gray-100">
-  <div class="max-w-md mx-auto bg-white p-6 mt-10 rounded shadow">
-    <h2 class="text-xl font-bold mb-4">Upload Documents for <%= serviceRequest.documentType %></h2>
-    <div id="document-form">
-      <div id="doc-step" class="mb-4">
-        <!-- The current step's file input will be rendered here -->
-      </div>
-      <div class="flex justify-between">
-        <button id="backBtn" class="bg-gray-500 text-white px-4 py-2 rounded" onclick="prevStep()" disabled>Back</button>
-        <button id="nextBtn" class="bg-blue-500 text-white px-4 py-2 rounded" onclick="nextStep()">Next</button>
+<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center">
+
+  <!-- Camera container -->
+  <div id="cameraContainer" class="relative w-full max-w-md mx-auto">
+    <!-- Video Preview -->
+    <video id="cameraPreview"
+           autoplay
+           playsinline
+           class="w-full object-cover rounded"
+           style="height: 480px;">
+    </video>
+
+    <!-- Overlay Frame for document alignment -->
+    <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+      <!-- Dark overlay -->
+      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <!-- White rectangular frame with corner markers -->
+      <div class="relative w-80 h-48 border-4 border-white">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
       </div>
     </div>
+
+    <!-- Flash Toggle Button (only visible if supported) -->
+    <button id="flashBtn" 
+            class="absolute top-4 right-4 bg-gray-800 bg-opacity-70 px-3 py-1 rounded"
+            title="Toggle Flash" hidden>
+      Flash Off
+    </button>
   </div>
+
+  <!-- Preview container (hidden by default) -->
+  <div id="previewContainer" class="relative w-full max-w-md mx-auto mt-4 hidden">
+    <img id="previewImage" class="w-full rounded" alt="Captured document preview" />
+    <div class="flex justify-around mt-2">
+      <button id="retakeBtn" class="bg-gray-600 px-4 py-2 rounded">Retake</button>
+      <button id="confirmBtn" class="bg-blue-600 px-4 py-2 rounded">Confirm</button>
+    </div>
+  </div>
+
+  <!-- Instructions / Step Info -->
+  <div id="instructionContainer" class="mt-4 text-center">
+    <h2 id="docLabel" class="text-xl font-bold"></h2>
+    <p id="docHint" class="text-sm text-gray-300"></p>
+  </div>
+
+  <!-- Navigation Controls -->
+  <div id="controlContainer" class="flex justify-between w-full max-w-md mt-4 px-4">
+    <button id="backBtn"
+            class="bg-gray-600 px-4 py-2 rounded disabled:opacity-50"
+            onclick="prevStep()"
+            disabled>
+      Back
+    </button>
+    <!-- The next button is used to trigger capture -->
+    <button id="nextBtn" class="bg-blue-600 px-4 py-2 rounded">
+      Capture
+    </button>
+  </div>
+
+  <!-- Hidden File Input (Not used in this version, kept for legacy reasons) -->
+  <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden"/>
+
+  <!-- Service request & required documents data from server -->
   <script id="requiredDocumentsData" type="application/json">
     <%- JSON.stringify(serviceRequest.requiredDocuments) %>
   </script>
+
   <script>
-    // Use the serviceRequest object passed from the server.
+    // Global Variables
     const serviceRequestId = "<%= serviceRequest._id %>";
-    const requiredDocuments = JSON.parse(document.getElementById('requiredDocumentsData').textContent);
-    
+    const requiredDocuments = JSON.parse(document.getElementById('requiredDocumentsData').textContent) || [];
     let currentStep = 0;
     const totalSteps = requiredDocuments.length;
-    const docStepDiv = document.getElementById("doc-step");
-    const backBtn = document.getElementById("backBtn");
-    const nextBtn = document.getElementById("nextBtn");
 
-    // Render the current document upload step
+    // DOM Elements
+    const cameraPreview   = document.getElementById('cameraPreview');
+    const docLabel        = document.getElementById('docLabel');
+    const docHint         = document.getElementById('docHint');
+    const backBtn         = document.getElementById('backBtn');
+    const nextBtn         = document.getElementById('nextBtn');
+    const previewContainer= document.getElementById('previewContainer');
+    const previewImage    = document.getElementById('previewImage');
+    const retakeBtn       = document.getElementById('retakeBtn');
+    const confirmBtn      = document.getElementById('confirmBtn');
+    const flashBtn        = document.getElementById('flashBtn');
+
+    let videoStream = null;
+    let videoTrack = null;
+    let flashEnabled = false;
+    let imageBlob = null; // Holds the captured image blob
+
+    // Initialize camera, set up the flash button if supported
+    async function initCamera() {
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+          audio: false
+        });
+        cameraPreview.srcObject = videoStream;
+        videoTrack = videoStream.getVideoTracks()[0];
+
+        // Check for torch/flash support
+        const capabilities = videoTrack.getCapabilities();
+        if (capabilities.torch) {
+          flashBtn.hidden = false;
+        }
+      } catch (err) {
+        console.error("Camera access denied:", err);
+        alert("Unable to access camera. Please allow camera access or use a device with a camera.");
+      }
+    }
+
+    // Toggle flash/torch if supported
+    async function toggleFlash() {
+      if (!videoTrack) return;
+      
+      try {
+        flashEnabled = !flashEnabled;
+        await videoTrack.applyConstraints({
+          advanced: [{ torch: flashEnabled }]
+        });
+        flashBtn.textContent = flashEnabled ? "Flash On" : "Flash Off";
+      } catch (err) {
+        console.error("Flash toggle failed:", err);
+      }
+    }
+
+    flashBtn.addEventListener("click", toggleFlash);
+
+    // Render the current document step instructions
     function renderStep() {
       if (totalSteps === 0) {
-        docStepDiv.innerHTML = "<p>No documents required.</p>";
+        docLabel.textContent = "No documents required";
+        docHint.textContent = "";
         backBtn.style.display = "none";
         nextBtn.style.display = "none";
         return;
       }
       const doc = requiredDocuments[currentStep];
-      docStepDiv.innerHTML = `
-        <p class="mb-2 font-medium">Upload ${doc.name}</p>
-        <input type="file" id="fileInput" accept="image/*" capture="environment" class="mb-4 p-2 border rounded">
-      `;
+      docLabel.textContent = `Upload ${doc.name}`;
+      docHint.textContent  = `Align the document within the frame and capture clearly.`;
+      
       backBtn.disabled = currentStep === 0;
-      nextBtn.textContent = currentStep === totalSteps - 1 ? "Submit" : "Next";
+      // Change next button label on final step
+      nextBtn.textContent = (currentStep === totalSteps - 1) ? "Capture & Submit" : "Capture";
     }
 
-    function nextStep() {
-      const fileInput = document.getElementById("fileInput");
-      if (!fileInput || fileInput.files.length === 0) {
-        alert("Please capture an image for " + requiredDocuments[currentStep].name);
-        return;
-      }
-      // Save the file in the requiredDocuments object
-      requiredDocuments[currentStep].file = fileInput.files[0];
-      
+    // Handle capture button click (capture the image and show preview)
+    nextBtn.onclick = async function() {
+      await capturePhoto();
+      // Show the preview screen
+      previewContainer.classList.remove("hidden");
+      // Hide the camera container and navigation controls
+      document.getElementById("cameraContainer").classList.add("hidden");
+      document.getElementById("controlContainer").classList.add("hidden");
+      document.getElementById("instructionContainer").classList.add("hidden");
+    };
+
+    // Capture a photo from the video preview using an offscreen canvas
+    async function capturePhoto() {
+      const canvas = document.createElement('canvas');
+      canvas.width = cameraPreview.videoWidth || 640;
+      canvas.height = cameraPreview.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+
+      // Convert canvas to Blob
+      imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+      // Set preview image src using a blob URL
+      previewImage.src = URL.createObjectURL(imageBlob);
+    }
+
+    // Confirm button click (save captured image for the step)
+    confirmBtn.onclick = function() {
+      // Create a File-like object from captured Blob
+      const docFile = new File([imageBlob], `${requiredDocuments[currentStep].name}.jpg`, { type: 'image/jpeg' });
+      requiredDocuments[currentStep].file = docFile;
+
+      // Cleanup blob URL
+      URL.revokeObjectURL(previewImage.src);
+
+      // Proceed to next step if available or submit if final
       if (currentStep < totalSteps - 1) {
         currentStep++;
+        resetToCamera();
         renderStep();
       } else {
-        // All steps completed; submit the documents
+        // Final step: submit all documents
         submitDocuments();
       }
+    };
+
+    // Retake button click (discard captured image and return to camera view)
+    retakeBtn.onclick = function() {
+      // Simply revert back to the camera view without saving the capture
+      resetToCamera();
+    };
+
+    // Reset view: hide preview, show camera and controls again
+    function resetToCamera() {
+      previewContainer.classList.add("hidden");
+      document.getElementById("cameraContainer").classList.remove("hidden");
+      document.getElementById("controlContainer").classList.remove("hidden");
+      document.getElementById("instructionContainer").classList.remove("hidden");
     }
 
+    // Back button to go to previous step
     function prevStep() {
       if (currentStep > 0) {
         currentStep--;
@@ -75,13 +258,15 @@
       }
     }
 
+    // Submit all captured documents to the server
     async function submitDocuments() {
       const formData = new FormData();
-      requiredDocuments.forEach((doc) => {
+      requiredDocuments.forEach(doc => {
         if (doc.file) {
           formData.append('files', doc.file);
         }
       });
+
       try {
         const response = await fetch(`/api/upload-documents/${serviceRequestId}`, {
           method: 'POST',
@@ -89,18 +274,20 @@
         });
         const result = await response.json();
         if (response.ok) {
-          alert("Documents uploaded successfully");
-          // Optionally, redirect or update UI as needed.
+          alert("Documents uploaded successfully!");
+          // Optional: redirect or update UI
+          // window.location.href = "/success-page";
         } else {
           alert("Upload failed: " + result.error);
         }
       } catch (error) {
-        console.error(error);
-        alert("An error occurred while uploading documents");
+        console.error("Error uploading documents:", error);
+        alert("An error occurred while uploading documents.");
       }
     }
 
-    // Initialize the first step
+    // Initialize the camera and the first step
+    initCamera();
     renderStep();
   </script>
 </body>

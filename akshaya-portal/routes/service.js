@@ -112,8 +112,9 @@ router.post('/api/upload-documents/:serviceRequestId', upload.array('files', 10)
         serviceRequest.requiredDocuments[index].uploadedFile = imageUrl;
       }
     });
-    // Update status after document upload. (You can choose "submitted" or let user update further.)
-    serviceRequest.status = "received";
+    // Update status after document upload.
+    // Changed from "received" to "submitted" which is a valid enum value.
+    serviceRequest.status = "submitted";
     await serviceRequest.save();
     res.status(200).json({ message: "Documents uploaded successfully", serviceRequest });
   } catch (error) {
@@ -163,5 +164,7 @@ router.get('/sendimage/:uploadToken', async (req, res) => {
     res.status(500).send("Server error: " + error.message);
   }
 });
+
 router.get('/api/ping', (req, res) => res.json({ ok: true }));
+
 module.exports = router;
