@@ -180,8 +180,6 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
           [`services.${doc.key}`]: true
         }).limit(5);
 
-        console.log("🏥 Centres found:", centres.length);
-
         if (!centres.length) {
           // If no centres found, allow the user to reselect document.
           user.applyState = 'document';
