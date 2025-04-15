@@ -30,7 +30,7 @@ app.listen(PORT, () => {
   console.log('\n==================================');
   console.log('🚀 SERVICE SAATHI WHATSAPP SERVER');
   console.log('==================================');
-  console.log(`🔗 Server URL: ${protocol}://${HOST}:${PORT}`);
+  console.log(`🔗 Server URL: ${protocol}://${HOST}`);
   console.log(`📦 Running on port: ${PORT}`);
   console.log('📅 Start time:', new Date().toLocaleString());
   console.log('🌐 Environment:', process.env.NODE_ENV || 'development');
