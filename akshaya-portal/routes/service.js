@@ -27,7 +27,7 @@ router.post('/api/service-request', async (req, res) => {
     
     // For demonstration, if documentType is "Income-certificate", then required documents are fixed.
     let requiredDocuments = [];
-    if (documentType === "Income-certificate") {
+    if (documentType === "income_certificate") {
       requiredDocuments = [
         { name: "Aadhar Card", uploadedFile: "" },
         { name: "Ration Card", uploadedFile: "" },
