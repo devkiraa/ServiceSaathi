@@ -38,5 +38,3 @@ app.listen(PORT, () => {
   console.log('📄 Document Service API Base:', DOCUMENT_SERVICE_API_BASE);
   console.log('===================================\n');
 });
-
-
