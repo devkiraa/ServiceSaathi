@@ -17,14 +17,12 @@ module.exports = function({ CHAT_API_BASE,DOCUMENT_SERVICE_API_BASE }) {
 
   const sendMessage = async (to, body) => {
     try {
-      console.log(`Attempting to send to <span class="math-inline">\{to\}\: "</span>{body}"`); // <-- Add logging
       if (!to.startsWith("whatsapp:")) to = `whatsapp:${to}`;
       await client.messages.create({
         from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
         to,
         body
       });
-      console.log(`Successfully sent to <span class="math-inline">\{to\}\: "</span>{body}"`); // <-- Add logging
       await storeChatMessage(to.replace("whatsapp:", ""), body, 'outbound');
     } catch (err) {
       console.error(`Error sending message to ${to}:`, err); // <-- Improve error logging

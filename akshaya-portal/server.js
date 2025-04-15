@@ -9,11 +9,16 @@ const app = express();
 
 // MongoDB Atlas Connection
 mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' })
-  .then(() => console.log('✅ MongoDB Atlas connected'))
+  .then(() => {
+    console.log("✅ MongoDB Atlas connected to CHATBOTDB");
+    console.log('\n=======================================');
+    console.log('\nLogs from Service Saathi WhatsApp Server');
+  })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
     process.exit(1); // Stop server if DB fails
   });
+
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -191,4 +196,17 @@ app.get('/continue-application/:serviceRequestId', async (req, res) => {
 
 // Start Server
 const PORT = process.env.PORT || 5601;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  const HOST = process.env.HOST || 'localhost';
+  const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
+
+  console.log('\n================================');
+  console.log('🚀 SERVICE SAATHI WEBSITE SERVER');
+  console.log('================================');
+  console.log(`🔗 Server URL: ${protocol}://${HOST}:${PORT}`);
+  console.log(`📦 Running on port: ${PORT}`);
+  console.log('📅 Start time:', new Date().toLocaleString());
+  console.log('🌐 Environment:', process.env.NODE_ENV || 'development');
+  console.log('================================\n');
+});
+
