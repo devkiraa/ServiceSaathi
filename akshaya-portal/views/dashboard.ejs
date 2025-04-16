@@ -14,12 +14,20 @@
 </head>
 <body class="bg-base-100 text-base-content transition-all duration-300">
   <!-- Navbar -->
-  <nav class="fixed top-0 left-0 w-full bg-base-200 shadow-md z-50">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <div class="flex space-x-4">
-        <a href="/dashboard" class="font-semibold hover:text-primary">Dashboard</a>
-        <a href="/service" class="font-semibold hover:text-primary">Service</a>
-      </div>
+  <nav class="fixed top-0 left-0 w-full bg-base-200 shadow-md z-50 py-1">
+    <div class="container mx-auto flex justify-between items-center px-4">
+      <!-- Logo or Brand Name -->
+      <div class="text-lg font-semibold text-gray-800">Service Saathi</div>
+  
+      <!-- Navigation Links -->
+      <ul class="flex space-x-4">
+        <li><a href="/dashboard" class="text-gray-700 hover:text-primary transition duration-300">Home</a></li>
+        <li><a href="/about" class="text-gray-700 hover:text-primary transition duration-300">About</a></li>
+        <li><a href="/contact" class="text-gray-700 hover:text-primary transition duration-300">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+  
       <div class="relative">
         <button id="userDropdownBtn" class="btn btn-ghost btn-circle">
           <img src="../uploads/images/image-removebg-preview.png" alt="Profile Icon" class="w-10 h-10 rounded-full">
