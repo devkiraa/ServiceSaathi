@@ -283,7 +283,24 @@
       }
     });// Toggle Dropdown Menu
 
-  
+   // Search functionality for Centre Name/Number
+const searchInput = document.querySelector('.input'); // Select the search input field
+const tableRows = document.querySelectorAll('.centre-row'); // Select all rows in the table
+
+searchInput.addEventListener('input', () => {
+  const searchTerm = searchInput.value.toLowerCase().trim(); // Get the search term and normalize it
+  tableRows.forEach(row => {
+    const centreNameCell = row.querySelector('td:first-child'); // First column contains Centre Name/Number
+    if (centreNameCell) {
+      const centreName = centreNameCell.textContent.toLowerCase(); // Normalize the Centre Name/Number
+      if (centreName.includes(searchTerm)) {
+        row.style.display = ''; // Show matching rows
+      } else {
+        row.style.display = 'none'; // Hide non-matching rows
+      }
+    }
+  });
+});
     // Example logout function (adjust as needed)
     function logout() {
       // For example, clear session data or call a logout API endpoint before redirecting:
