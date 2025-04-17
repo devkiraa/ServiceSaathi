@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add New Service</title>
+  <style>
+    .error { color: red; margin-bottom: 1em; }
+    .doc-row { display: flex; align-items: center; margin-bottom: 0.5em; }
+    .doc-row input { margin-right: 0.5em; }
+  </style>
+</head>
+<body>
+  <h1>Add New Service</h1>
+  <% if (error) { %>
+    <div class="error"><%= error %></div>
+  <% } %>
+
+  <form action="/services" method="POST">
+    <div>
+      <label for="key">Service Key (slug):</label><br>
+      <input type="text" id="key" name="key" required value="<%= formData.key || '' %>">
+    </div>
+
+    <div>
+      <label for="name">Service Name:</label><br>
+      <input type="text" id="name" name="name" required value="<%= formData.name || '' %>">
+    </div>
+
+    <div id="documents-section">
+      <label>Required Documents:</label>
+      <div id="documents-container">
+        <% const docs = Array.isArray(formData.requiredDocuments) ? formData.requiredDocuments : [formData.requiredDocuments || '']; %>
+        <% docs.forEach(function(docName, idx) { %>
+          <div class="doc-row">
+            <input type="text" name="requiredDocuments" placeholder="Document Name" required value="<%= docName %>">
+            <button type="button" class="remove-btn">Remove</button>
+          </div>
+        <% }); %>
+      </div>
+      <button type="button" id="add-btn">Add Document</button>
+    </div>
+
+    <div style="margin-top:1em;">
+      <button type="submit">Create Service</button>
+      <a href="/services">Cancel</a>
+    </div>
+  </form>
+
+  <script>
+    document.getElementById('add-btn').addEventListener('click', () => {
+      const container = document.getElementById('documents-container');
+      const div = document.createElement('div');
+      div.className = 'doc-row';
+      div.innerHTML = `
+        <input type="text" name="requiredDocuments" placeholder="Document Name" required>
+        <button type="button" class="remove-btn">Remove</button>
+      `;
+      container.appendChild(div);
+    });
+
+    document.getElementById('documents-container').addEventListener('click', (e) => {
+      if (e.target.classList.contains('remove-btn')) {
+        const row = e.target.closest('.doc-row');
+        row.remove();
+      }
+    });
+  </script>
+</body>
+</html>

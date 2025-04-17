@@ -216,7 +216,7 @@ if (user.applyState === 'centre') {
   const chosen = list[num-1];
   try {
     // Construct the URL using DOCUMENT_SERVICE_API_BASE
-    const apiUrl = `${DOCUMENT_SERVICE_API_BASE}/api/service-request`;
+    const apiUrl = `${DOCUMENT_SERVICE_API_BASE}/service-request`;
     
     // Make the API request with the expected payload.
     const apiRes = await axios.post(apiUrl, {
