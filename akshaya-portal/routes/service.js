@@ -70,6 +70,31 @@ router.post('/service-request', async (req, res) => {
   }
 });
 
+// --- Request reupload for a specific document ---
+router.post('/service-request/:id/reupload', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { documentId } = req.body; // subdoc _id to reupload
+    const serviceRequest = await ServiceRequest.findById(id);
+    if (!serviceRequest) return res.status(404).json({ error: 'Service request not found' });
+
+    const doc = serviceRequest.requiredDocuments.id(documentId);
+    if (!doc) return res.status(404).json({ error: 'Document not found' });
+
+    // Mark for reupload and clear existing data
+    doc.uploadedFile = null;
+    doc.fileData = null;
+    doc.needsReupload = true;
+    serviceRequest.status = 'reupload_required';
+
+    await serviceRequest.save();
+    res.json({ message: 'Reupload requested', documentId, serviceRequest });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // --- Get service request details ---
 router.get('/service-request/:id', async (req, res) => {
   try {
