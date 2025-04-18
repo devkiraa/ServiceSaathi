@@ -112,6 +112,7 @@ async function fetchWeatherData(city = "Ernakulam") {
   function adjustLineHeights() {
     const container4 = document.getElementById("container-4");
     const card5 = document.getElementById("card-5");
+    const linegr = document.getElementById("lineChart");
 
     // Get dimensions of the parent container
     const parentRect = container4.getBoundingClientRect();
@@ -134,12 +135,29 @@ async function fetchWeatherData(city = "Ernakulam") {
       card5.classList.forEach((className) => {
         if (className.startsWith("min-h-")) {
           card5.classList.remove(className);
+          linegr.classList.remove('h-full');
         }
       });
     
       card5.classList.add(`min-h-[${newHeight}px]`);
+      linegr.classList.add(`min-h-[${newHeight-76}px]`);
     } else {
       console.log("Not enough space to adjust card heights.");
+    }
+  }
+  
+  async function redirect(direction) {
+    if(direction === 'logout'){
+      window.location.href = '/logout';
+    }
+    else if(direction === 'profile'){
+      window.location.href = '/profile';
+    }
+    else if(direction === 'change-pass'){
+      window.location.href = '/change-password';
+    }
+    else {
+      console.error("Invalid Redirection!");
     }
   }
 
