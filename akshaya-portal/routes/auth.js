@@ -256,6 +256,7 @@ router.post("/logout", (req, res) => {
   });
 });
 
+
 // Change Password Route
 router.post('/api/change-password', async (req, res) => {
   console.log("Session data:", req.session.user); // Debugging: Print session data

@@ -88,6 +88,43 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' })
     app.get('/change-password', (req, res) => {
       res.render('changePassword');
     });
+    app.get('/services', async (req, res) => {
+      if (!req.session.user) return res.redirect('/');
+      try {
+        const user = await User.findOne({ _id: req.session.user.id });
+        if (!user) return res.status(404).send("User not found");
+    
+        // Fetch service requests for the user
+        const serviceRequests = await ServiceRequest.find({ userId: user._id });
+    
+        
+        res.render('services', {
+          user: {
+            email: user.email,
+            shopName: user.shopName,
+            personName: user.personName,
+            centerId: user.centerId,
+            phone: user.phone,
+            district: user.district,
+            type: user.type,
+            services: user.services,
+            address: user.address.toObject()
+          },
+          serviceRequests: serviceRequests.map(sr => ({
+            documentType: sr.documentType,
+            mobileNumber: sr.mobileNumber,
+            status: sr.status,
+            action: sr.action
+          
+          
+          }))
+        });
+      } catch (error) {
+        console.error("Error fetching user or data:", error);
+        res.status(500).send("Server error: " + error.message);
+      }
+    });
+        
     // Dashboard Route
     app.get('/dashboard', async (req, res) => {
       if (!req.session.user) return res.redirect('/');
