@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/js/dashboard.js"></script>
+  <script src="/js/doughnut.js"></script>
+  <script src="/js/line.js"></script>
   <script src="/js/tailwindConfig.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
   <link rel="stylesheet" href="/css/timeWeather.css">
@@ -99,7 +101,7 @@
         </div>
       </div>
     </div>
-  </nav>  
+  </nav>
   <!-- Main Content -->
   <div class="flex ml-56 pt-20 bg-bg-light min-h-screen">
     <div class="container mx-auto p-6">
@@ -150,12 +152,39 @@
         <div class="row-span-2 space-y-4" id="container-3">
           <div class="space-y-4">
             <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[180px]" id="card-3">Card 3</div>
-            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[220px]" id="card-4">Card 4</div>
+            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[200px]" id="card-4">
+              <!-- Doughnut Chart -->
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Service Types</h3>
+                <div class="flex space-x-2">
+                  <button class="btn btn-xs text-xs font-normal p-1 btn-primary" data-period="today">Today</button>
+                  <button class="btn btn-xs text-xs font-normal p-1 btn-secondary" data-period="week">Week</button>
+                  <button class="btn btn-xs text-xs font-normal p-1 btn-accent" data-period="month">Month</button>
+                  <button class="btn btn-xs text-xs font-normal p-1 btn-neutral" data-period="all">All</button>
+                </div>
+              </div>
+              <div class="relative h-full">
+                <canvas id="doughnutChart" class="h-full"></canvas>
+              </div>
+            </div>
           </div>
         </div>
         <!-- Container 4: Spanning Columns 2 and 3 -->
         <div class="col-span-2 space-y-4" id="container-4">
-          <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[250px]" id="card-5">Card 5</div>
+          <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[250px]" id="card-5">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold">Performance Overview</h3>
+              <div class="flex space-x-2">
+                <button class="btn btn-xs text-xs font-normal p-1 btn-primary" data-period="today">Today</button>
+                <button class="btn btn-xs text-xs font-normal p-1 btn-secondary" data-period="week">Week</button>
+                <button class="btn btn-xs text-xs font-normal p-1 btn-accent" data-period="month">Month</button>
+                <button class="btn btn-xs text-xs font-normal p-1 btn-neutral" data-period="all">All</button>
+              </div>
+            </div>
+            <div class="relative h-full">
+              <canvas id="lineChart" class="h-full"></canvas>
+            </div>
+          </div>
         </div>
       </div>
     </div>
