@@ -204,6 +204,7 @@ router.post('/api/login', async (req, res) => {
     
     // Set session data
     req.session.user = {
+        pName: user.personName,
         id: user._id,
         username: user.username,
         email:user.email,

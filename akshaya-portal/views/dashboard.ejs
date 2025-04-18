@@ -6,42 +6,13 @@
   <title>Service Saathi Dashboard</title>
   <!-- Tailwind + DaisyUI -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#6366F1',     // Indigo 500
-            secondary: '#3B82F6',   // Sky 500
-            accent: '#22D3EE',      // Cyan 400
-            'bg-light': '#F9FAFB',  // Light gray
-          }
-        }
-      },
-      daisyui: {
-        themes: [
-          {
-            calmblue: {
-              primary: '#6366F1',
-              secondary: '#3B82F6',
-              accent: '#22D3EE',
-              neutral: '#F9FAFB',
-              'base-100': '#FFFFFF',
-              'base-200': '#F3F4F6',
-              'base-300': '#E5E7EB',
-              info: '#3ABFF8',
-              success: '#36D399',
-              warning: '#FBBD23',
-              error: '#F87272',
-            },
-          },
-        ],
-      }
-    }
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/doughnut.js"></script>
+  <script src="/js/line.js"></script>
+  <script src="/js/tailwindConfig.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
   <link rel="stylesheet" href="/css/timeWeather.css">
-  <link rel="stylesheet" href="/css/userico.css">
 </head>
 <body class="bg-bg-light text-gray-800 transition-all duration-300">
   <!-- Sidebar -->
@@ -80,12 +51,11 @@
       </nav>
     </div>
   </aside>
-
   <!-- Top Navbar -->
   <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40">
     <div class="flex items-center space-x-4">
       <h2 class="text-xl font-semibold text-gray-700">
-        Welcome back, <span class="text-primary">User</span> 👋
+        Welcome back, <span class="text-primary"><%=user.pName%></span> 👋
       </h2>
     </div>
     <div class="flex items-center space-x-4">
@@ -97,34 +67,48 @@
         </label>
         <div tabindex="0" class="mt-3 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
           <!-- Custom Dropdown Card -->
-          <div class="ucard">
-            <ul class="ulist">
-              <li class="uelement">
-                <p class="ulabel">Rename</p>
+          <div>
+            <ul>
+              <li>               
+                <p class="hover:text-[#6161f9] active:bg-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                  User Profile
+                </p>
               </li>
-              <li class="uelement">
-                <p class="ulabel">Add Member</p>
+              <li>
+                <p class="hover:text-[#6161f9] active:bg-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+                  </svg>                  
+                  Change Password
+                </p>
               </li>
             </ul>
-            <div class="useparator"></div>
-            <ul class="ulist">
-              <li class="uelement delete">
-                <p class="ulabel">Delete</p>
+            <div class="border-t-[1.5px] border-[#dfdfe1]"></div>
+            <ul>
+              <li>
+                <p class="hover:text-[#f04545] active:bg-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+                  </svg>                  
+                  Logout
+                </p>
               </li>
             </ul>
           </div>
         </div>
       </div>
     </div>
-  </nav>  
-
+  </nav>
   <!-- Main Content -->
   <div class="flex ml-56 pt-20 bg-bg-light min-h-screen">
     <div class="container mx-auto p-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="space-y-4">
-          <!-- Weather Card -->
-          <div class="p-4 h-full flex flex-col">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+        <!-- Container 1: Weather Card -->
+        <div class="col-span-1 space-y-4">
+          <div class="h-full flex flex-col">
             <div class="space-y-4 flex-1 overflow-y-auto">
               <div class="card">
                 <section class="info-section">
@@ -145,10 +129,10 @@
                   </div>
                   <div class="right-side">
                     <div>
-                      <div class="hour" id="current-time">--:--</div>
-                      <div class="date" id="current-date">-- --</div>
+                      <div class="hour text-3xl" id="current-time">--:--</div>
+                      <div class="date text-xl" id="current-date">-- --</div>
                     </div>
-                    <div class="city" id="city-name">Loading...</div>
+                    <div class="city text-lg" id="city-name">Loading...</div>
                   </div>
                 </section>
                 <section class="days-section" id="forecast-section">
@@ -158,112 +142,52 @@
             </div>
           </div>
         </div>
-
-        <!-- Container 2 -->
-        <div class="space-y-4">
-          <h3 class="text-xl font-semibold text-gray-800">Container 2</h3>
+        <!-- Container 2: Cards Section -->
+        <div class="col-span-1 space-y-4">
           <div class="space-y-4">
-            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition">Card 1</div>
-            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition">Card 2</div>
-            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition">Card 3</div>
+            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[220px]">Card 1</div>
           </div>
         </div>
-
-        <!-- Container 3 -->
-        <div class="space-y-4">
-          <h3 class="text-xl font-semibold text-gray-800">Container 3</h3>
+        <!-- Container 3: Cards Section -->
+        <div class="row-span-2 space-y-4" id="container-3">
           <div class="space-y-4">
-            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition">Card 1</div>
-            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition">Card 2</div>
+            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[180px]" id="card-3">Card 3</div>
+            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[200px]" id="card-4">
+              <!-- Doughnut Chart -->
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Service Types</h3>
+                <div class="flex space-x-2">
+                  <button class="btn btn-xs text-xs font-normal p-1 btn-primary" data-period="today">Today</button>
+                  <button class="btn btn-xs text-xs font-normal p-1 btn-secondary" data-period="week">Week</button>
+                  <button class="btn btn-xs text-xs font-normal p-1 btn-accent" data-period="month">Month</button>
+                  <button class="btn btn-xs text-xs font-normal p-1 btn-neutral" data-period="all">All</button>
+                </div>
+              </div>
+              <div class="relative h-full">
+                <canvas id="doughnutChart" class="h-full"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Container 4: Spanning Columns 2 and 3 -->
+        <div class="col-span-2 space-y-4" id="container-4">
+          <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[250px]" id="card-5">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold">Performance Overview</h3>
+              <div class="flex space-x-2">
+                <button class="btn btn-xs text-xs font-normal p-1 btn-primary" data-period="today">Today</button>
+                <button class="btn btn-xs text-xs font-normal p-1 btn-secondary" data-period="week">Week</button>
+                <button class="btn btn-xs text-xs font-normal p-1 btn-accent" data-period="month">Month</button>
+                <button class="btn btn-xs text-xs font-normal p-1 btn-neutral" data-period="all">All</button>
+              </div>
+            </div>
+            <div class="relative h-full">
+              <canvas id="lineChart" class="h-full"></canvas>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Scripts -->
-  <script>
-    // Fetch weather data dynamically using WeatherAPI
-    async function fetchWeatherData(city = "Ernakulam") {
-      const apiKey = "92918a91522544dbbe3154544251404"; // Replace with your WeatherAPI key
-      const apiUrl = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=no`;
-      try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Failed to fetch weather data");
-        const data = await response.json();
-        // Update DOM with fetched data
-        document.getElementById("weather-condition").textContent = data.current.condition.text;
-        document.getElementById("current-temperature").textContent = `${Math.round(data.current.temp_c)}°`;
-        document.getElementById("temperature-range").textContent = `--°/--°`; // Range will be updated by forecast data
-        document.getElementById("city-name").textContent = data.location.name;
-        // Set weather icon dynamically
-        const iconUrl = data.current.condition.icon;
-        document.getElementById("weather-icon").innerHTML = `<img src="https:${iconUrl}" alt="Weather Icon" class="w-12 h-12">`;
-        // Fetch forecast data
-        fetchForecastData(city);
-      } catch (error) {
-        console.error("Error fetching weather data:", error);
-        document.getElementById("weather-condition").textContent = "Error";
-        document.getElementById("current-temperature").textContent = "--°";
-        document.getElementById("temperature-range").textContent = "--°/--°";
-        document.getElementById("city-name").textContent = "City Not Found";
-      }
-    }
-    // Fetch forecast data dynamically
-    async function fetchForecastData(city = "Ernakulam") {
-      const apiKey = "92918a91522544dbbe3154544251404"; // Replace with your WeatherAPI key
-      const apiUrl = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${city}&days=4&aqi=no`;
-      try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Failed to fetch forecast data");
-        const data = await response.json();
-        // Extract forecast for the next 4 days
-        const forecastSection = document.getElementById("forecast-section");
-        forecastSection.innerHTML = ""; // Clear previous forecast
-        data.forecast.forecastday.forEach((dayData) => {
-          const date = new Date(dayData.date);
-          const day = date.toLocaleDateString("en-US", { weekday: "short" });
-          const temp = Math.round(dayData.day.avgtemp_c);
-          const iconUrl = dayData.day.condition.icon;
-          const button = document.createElement("button");
-          button.innerHTML = `
-            <span class="day">${day}</span>
-            <span class="icon-weather-day">
-              <img src="https:${iconUrl}" alt="Weather Icon" class="w-6 h-6">
-            </span>
-            <span>${temp}°</span>
-          `;
-          forecastSection.appendChild(button);
-        });
-        // Update temperature range (min/max) for the first day
-        const firstDay = data.forecast.forecastday[0];
-        const maxTemp = Math.round(firstDay.day.maxtemp_c);
-        const minTemp = Math.round(firstDay.day.mintemp_c);
-        document.getElementById("temperature-range").textContent = `${maxTemp}°/${minTemp}°`;
-      } catch (error) {
-        console.error("Error fetching forecast data:", error);
-      }
-    }
-    // Update current time and date dynamically
-    function updateDateTime() {
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const day = now.toLocaleDateString("en-US", { weekday: "short" });
-      const month = now.toLocaleDateString("en-US", { month: "short" });
-      const date = now.getDate();
-      document.getElementById("current-time").textContent = `${hours}:${minutes}`;
-      document.getElementById("current-date").textContent = `${day} ${month} ${date}`;
-    }
-    // Initialize the app
-    function init() {
-      fetchWeatherData(); // Fetch weather data for a default city
-      updateDateTime(); // Update time and date
-      setInterval(updateDateTime, 1000); // Update time every second
-      setInterval(fetchWeatherData, 3600000); // Update Weather every hour
-    }
-    // Start the app
-    init();
-  </script>
 </body>
 </html>
