@@ -1,16 +1,8 @@
 // controllers/modules/applyModule.js
-
-const axios = require('axios');
+const axios       = require('axios');
 const CentreModel = require('../../models/Centre');
-const UserModel   = require('../../models/wha-user');
+const ServiceModel = require('../../models/Service');
 
-const DOCUMENT_TYPES = [
-  { key: 'income_certificate',     name: 'Income Certificate'    },
-  { key: 'voter_registration',     name: 'Voter Registration'    },
-  { key: 'passport_service',       name: 'Passport Service'      },
-  { key: 'utility_payments',       name: 'Utility Payments'      },
-  { key: 'possession_certificate', name: 'Possession Certificate'}
-];
 
 const DISTRICTS = [
   "Thiruvananthapuram","Kollam","Pathanamthitta","Alappuzha",
@@ -26,83 +18,123 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
       const lower = text.toLowerCase();
       const num   = parseInt(text, 10);
 
-      // ===========================================================================
-      // 1. Check for a full cancel command ("0")
-      //    This resets the application completely.
-      // ===========================================================================
+      // ──────────────────────────────────────────────────────────────────────────
+      // SECTION 1: CANCEL (0️⃣) → Reset everything, clear lastOption + applyState.
+      // ──────────────────────────────────────────────────────────────────────────
       if (lower === '0') {
-        user.applyState = null;
-        user.applyDataTemp = {};
+        user.applyState     = null;
+        user.applyDataTemp  = {};
+        user.lastOption     = null;         // clear mode so menu will be shown next
         await user.save();
         return sendMessage(From,
           "*❌ Application cancelled.*\n" +
-          "0️⃣ Cancel\n1️⃣ Chat\n2️⃣ Apply for Document"
+          "*Please choose:*\n1️⃣ Chat\n2️⃣ Apply for Document"
         );
       }
 
-      // ===========================================================================
-      // 2. Check for "back" command to go one step backward in the application.
-      // ===========================================================================
+      // ──────────────────────────────────────────────────────────────────────────
+      // SECTION 2: BACK → Step one level up, preserve lastOption = 'apply'
+      // ──────────────────────────────────────────────────────────────────────────
       if (lower === 'back') {
         switch (user.applyState) {
           case 'subdistrict':
-            // Go back to district selection.
-            user.applyState = 'district';
+            // back to district selection
+            user.applyState    = 'district';
+            delete user.applyDataTemp.subdistrict;
             await user.save();
             return sendMessage(From,
-              "*Select your district:* (0️⃣ Cancel)\n" +
-              DISTRICTS.map((d, i) => `${i+1}. ${d}`).join('\n')
+              `*Select your district:* (0️⃣ Cancel)\n` +
+              DISTRICTS.map((d,i) => `${i+1}. ${d}`).join('\n')
             );
           case 'document':
-            // Go back to subdistrict selection.
-            user.applyState = 'subdistrict';
+            // back to subdistrict selection
+            user.applyState    = 'subdistrict';
+            delete user.applyDataTemp.documentType;
+            delete user.applyDataTemp.documentName;
             await user.save();
             {
               const subs = await CentreModel.distinct(
-                'subdistrict',
+                'subdistrict', 
                 { district: user.applyDataTemp.district }
               );
               return sendMessage(From,
-                `*Select subdistrict in ${user.applyDataTemp.district}:* (Enter the number, 0️⃣ Cancel)\n` +
-                subs.map((s, i) => `${i+1}. ${s}`).join('\n')
+                `*Select subdistrict in ${user.applyDataTemp.district}:* (0️⃣ Cancel, type 'back' to district)\n` +
+                subs.map((s,i) => `${i+1}. ${s}`).join('\n')
               );
             }
           case 'centre':
-            // Go back to document selection.
-            user.applyState = 'document';
+            // back to document selection
+            user.applyState    = 'document';
+            delete user.applyDataTemp.centres;
             await user.save();
             return sendMessage(From,
-              "*Select document to apply:* (Enter the number, 0️⃣ Cancel or type 'back' to return to subdistrict)\n" +
-              DOCUMENT_TYPES.map((d, i) => `${i+1}. ${d.name}`).join('\n')
+              "*Select document to apply:* (0️⃣ Cancel, type 'back' to subdistrict)\n" +
+              DOCUMENT_TYPES.map((d,i) => `${i+1}. ${d.name}`).join('\n')
             );
           default:
-            // No state to go back from; treat as full cancel.
-            user.applyState = null;
-            user.applyDataTemp = {};
+            // nothing to go back to: treat as full cancel
+            user.applyState     = null;
+            user.applyDataTemp  = {};
+            user.lastOption     = null;
             await user.save();
             return sendMessage(From,
               "*❌ Application cancelled.*\n" +
-              "0️⃣ Cancel\n1️⃣ Chat\n2️⃣ Apply for Document"
+              "*Please choose:*\n1️⃣ Chat\n2️⃣ Apply for Document"
             );
         }
       }
 
-      // ===========================================================================
-      // 3. Proceed with the application process based on the current step.
-      // ===========================================================================
-
-      // Step 0: If no state is set yet, start with district selection.
-      if (!user.applyState) {
-        user.applyState = 'district';
-        user.applyDataTemp = {};
+      // ──────────────────────────────────────────────────────────────────────────
+      // SECTION 3: INITIAL PROMPT → Begin at district if no state set
+      // ──────────────────────────────────────────────────────────────────────────
+      if (user.applyState === 'document') {
+        const services = await ServiceModel.find().sort({ name: 1 }); // Optional sort by name
+        if (isNaN(num) || num < 1 || num > services.length) {
+          return sendMessage(From,
+            `Invalid choice. Enter 1–${services.length} or 0️⃣ to cancel.`
+          );
+        }
+        const selectedService = services[num - 1];
+        user.applyDataTemp.documentType = selectedService.key;
+        user.applyDataTemp.documentName = selectedService.name;
+        user.applyState = 'centre';
         await user.save();
+      
+        const centres = await CentreModel.find({
+          type: { $in: ['csc', 'akshaya'] },
+          district: user.applyDataTemp.district,
+          subdistrict: user.applyDataTemp.subdistrict,
+          [`services.${selectedService.key}`]: true
+        }).limit(5);
+      
+        if (!centres.length) {
+          user.applyState = 'document';
+          await user.save();
+          return sendMessage(From,
+            "❌ No centres offer that service here.\nChoose another document or 0️⃣ to cancel:\n" +
+            services.map((s, i) => `${i + 1}. ${s.name}`).join('\n')
+          );
+        }
+      
+        user.applyDataTemp.centres = centres.map(c => ({
+          centreId: c.centerId || "N/A",
+          centreName: c.centreName,
+          contact: c.contact,
+          address: `${c.district}, ${c.subdistrict}`
+        }));
+        await user.save();
+      
         return sendMessage(From,
-          "*Select your district:* (Enter the number, 0️⃣ Cancel)\n" +
-          DISTRICTS.map((d, i) => `${i+1}. ${d}`).join('\n')
+          "*Select centre:* (Enter number, 0️⃣ Cancel, 'back' to document)\n" +
+          user.applyDataTemp.centres.map((c, i) =>
+            `${i + 1}. *${c.centreName}*\n📍 ${c.address}\n📞 ${c.contact}\n🆔 ${c.centreId}`
+          ).join('\n\n')
         );
       }
-
-      // Step 1: District selection.
+   
+      // ──────────────────────────────────────────────────────────────────────────
+      // SECTION 4: DISTRICT SELECTED → Move to subdistrict
+      // ──────────────────────────────────────────────────────────────────────────
       if (user.applyState === 'district') {
         if (isNaN(num) || num < 1 || num > DISTRICTS.length) {
           return sendMessage(From,
@@ -110,31 +142,33 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
           );
         }
         user.applyDataTemp.district = DISTRICTS[num-1];
-        user.applyState = 'subdistrict';
+        user.applyState             = 'subdistrict';
         await user.save();
 
-        // Fetch available subdistricts.
         const subs = await CentreModel.distinct(
           'subdistrict',
           { district: user.applyDataTemp.district }
         );
         if (!subs.length) {
-          // If none found, revert to district selection.
+          // revert if none
           user.applyState = 'district';
           await user.save();
           return sendMessage(From,
-            `No subdistricts found for ${user.applyDataTemp.district}. Try another district:\n` +
-            DISTRICTS.map((d, i) => `${i+1}. ${d}`).join('\n') +
+            `No subdistricts in ${user.applyDataTemp.district}. Try again:\n` +
+            DISTRICTS.map((d,i) => `${i+1}. ${d}`).join('\n') +
             "\n0️⃣ Cancel"
           );
         }
         return sendMessage(From,
-          `*Select subdistrict in ${user.applyDataTemp.district}:* (Enter the number, 0️⃣ Cancel, 'back' to reselect district)\n` +
-          subs.map((s, i) => `${i+1}. ${s}`).join('\n')
+          `*Select subdistrict in ${user.applyDataTemp.district}:* (Enter number, 0️⃣ Cancel, 'back' to district)\n` +
+          subs.map((s,i) => `${i+1}. ${s}`).join('\n')
         );
       }
 
-      // Step 2: Subdistrict selection.
+      // ──────────────────────────────────────────────────────────────────────────
+      // SECTION 5: SUBDISTRICT SELECTED → Move to document list
+      // ──────────────────────────────────────────────────────────────────────────
+      const services = await ServiceModel.find().sort({ name: 1 });
       if (user.applyState === 'subdistrict') {
         const subs = await CentreModel.distinct(
           'subdistrict',
@@ -146,15 +180,17 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
           );
         }
         user.applyDataTemp.subdistrict = subs[num-1];
-        user.applyState = 'document';
+        user.applyState               = 'document';
         await user.save();
         return sendMessage(From,
-          "*Select document to apply:* (Enter the number, 0️⃣ Cancel, 'back' to reselect subdistrict)\n" +
-          DOCUMENT_TYPES.map((d, i) => `${i+1}. ${d.name}`).join('\n')
+          "*Select document to apply:* (Enter number, 0️⃣ Cancel, 'back' to subdistrict)\n" +
+          services.map((s, i) => `${i + 1}. ${s.name}`).join('\n')
         );
       }
 
-      // Step 3: Document selection.
+      // ──────────────────────────────────────────────────────────────────────────
+      // SECTION 6: DOCUMENT SELECTED → Find centres offering it
+      // ──────────────────────────────────────────────────────────────────────────
       if (user.applyState === 'document') {
         if (isNaN(num) || num < 1 || num > DOCUMENT_TYPES.length) {
           return sendMessage(From,
@@ -164,103 +200,104 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         const doc = DOCUMENT_TYPES[num-1];
         user.applyDataTemp.documentType = doc.key;
         user.applyDataTemp.documentName = doc.name;
-        user.applyState = 'centre';
+        user.applyState                 = 'centre';
         await user.save();
 
-        console.log("🔍 Searching centres:", {
-          district:    user.applyDataTemp.district,
-          subdistrict: user.applyDataTemp.subdistrict,
-          service:     doc.key
-        });
+        console.log("🔍 Searching centres:", user.applyDataTemp);
 
         const centres = await CentreModel.find({
-          type:        { $in: ['csc', 'akshaya'] },
+          type:        { $in: ['csc','akshaya'] },
           district:    user.applyDataTemp.district,
           subdistrict: user.applyDataTemp.subdistrict,
           [`services.${doc.key}`]: true
         }).limit(5);
 
         if (!centres.length) {
-          // If no centres found, allow the user to reselect document.
           user.applyState = 'document';
           await user.save();
           return sendMessage(From,
-            "❌ No centres offer that service in this area.\nChoose another document or 0️⃣ to cancel.\n" +
-            DOCUMENT_TYPES.map((d, i) => `${i+1}. ${d.name}`).join('\n')
+            "❌ No centres offer that service here.\nChoose another document or 0️⃣ to cancel:\n" +
+            DOCUMENT_TYPES.map((d,i) => `${i+1}. ${d.name}`).join('\n')
           );
         }
+
         user.applyDataTemp.centres = centres.map(c => ({
           centreId:   c.centerId || "N/A",
-          centreName: c.centreName || "Unnamed Centre",
-          contact:    c.contact || "No contact info",
-          address:    `${c.district || "Unknown District"}, ${c.subdistrict || "Unknown Subdistrict"}`
+          centreName: c.centreName,
+          contact:    c.contact,
+          address:    `${c.district}, ${c.subdistrict}`
         }));
         await user.save();
 
         return sendMessage(From,
-          "*Select centre:* (Enter the number, 0️⃣ Cancel, 'back' to reselect document)\n" +
-          user.applyDataTemp.centres.map((c, i) =>
+          "*Select centre:* (Enter number, 0️⃣ Cancel, 'back' to document)\n" +
+          user.applyDataTemp.centres.map((c,i) => 
             `${i+1}. *${c.centreName}*\n📍 ${c.address}\n📞 ${c.contact}\n🆔 ${c.centreId}`
           ).join('\n\n')
         );
       }
 
-      // Step 4: Centre selection and create request.
-if (user.applyState === 'centre') {
-  const list = user.applyDataTemp.centres || [];
-  if (isNaN(num) || num < 1 || num > list.length) {
-    return sendMessage(From,
-      `Invalid choice. Enter 1–${list.length} or 0️⃣ to cancel.`
-    );
-  }
-  const chosen = list[num-1];
-  try {
-    // Construct the URL using DOCUMENT_SERVICE_API_BASE
-    const apiUrl = `${DOCUMENT_SERVICE_API_BASE}/service-request`;
-    
-    // Make the API request with the expected payload.
-    const apiRes = await axios.post(apiUrl, {
-      "document-type": user.applyDataTemp.documentType,  // e.g., "Income Certificate"
-      "centre-id":     chosen.centreId                     // e.g., "689691"
-    });
-    const data = apiRes.data;  // The sample response is assumed to match the provided structure.
+      // ──────────────────────────────────────────────────────────────────────────
+      // SECTION 7: CENTRE SELECTED → Call the Document‑API & Persist result
+      // ──────────────────────────────────────────────────────────────────────────
+      if (user.applyState === 'centre') {
+        const list = user.applyDataTemp.centres || [];
+        if (isNaN(num) || num < 1 || num > list.length) {
+          return sendMessage(From,
+            `Invalid choice. Enter 1–${list.length} or 0️⃣ to cancel.`
+          );
+        }
+        const chosen = list[num-1];
 
-    // Save the application data to the user's record.
-    user.applications.push({
-      district:          user.applyDataTemp.district,
-      subdistrict:       user.applyDataTemp.subdistrict,
-      centreId:          chosen.centreId,
-      documentType:      user.applyDataTemp.documentType,
-      documentName:      user.applyDataTemp.documentName,
-      serviceRequestId:  data.serviceRequestId,
-      requiredDocuments: data.requiredDocuments.map(d => ({
-        name: d.name,
-        uploadedFile: d.uploadedFile || ""
-      })),
-      uploadLink:        data.uploadLink  // The full upload link from the response.
-    });
-    // Clear the temporary state upon successful creation.
-    user.applyState = null;
-    user.applyDataTemp = {};
-    await user.save();
+        try {
+          const apiRes = await axios.post(
+            `${DOCUMENT_SERVICE_API_BASE}/api/service-request`,
+            {
+              "document-type": user.applyDataTemp.documentName,
+              "centre-id":     chosen.centreId
+            }
+          );
+          const data = apiRes.data;
 
-    return sendMessage(From,
-      `*${data.message}*\n` +
-      `Request ID: ${data.serviceRequestId}\n` +
-      `Required Docs:\n` +
-      data.requiredDocuments.map(d => `• ${d.name}`).join('\n') +
-      `\nUpload Link: ${data.uploadLink}`  // Send the full link to the user.
-    );
-  } catch (err) {
-    console.error("❌ Service‑request API error:", err);
-    return sendMessage(From,
-      "Error creating request. Please try again later or 0️⃣ to cancel."
-    );
-  }
-}
+          // add to user.applications
+          user.applications.push({
+            district:         user.applyDataTemp.district,
+            subdistrict:      user.applyDataTemp.subdistrict,
+            centreId:         chosen.centreId,
+            documentType:     user.applyDataTemp.documentType,
+            documentName:     user.applyDataTemp.documentName,
+            serviceRequestId: data.serviceRequestId,
+            requiredDocuments:data.requiredDocuments.map(d=>({
+              name: d.name,
+              uploadedFile: d.uploadedFile||""
+            })),
+            uploadLink:       data.uploadLink
+          });
 
+          // reset state & lastOption so next input goes to menu
+          user.applyState    = null;
+          user.lastOption    = null;
+          user.applyDataTemp = {};
+          await user.save();
 
-      // Final fallback for any unexpected state.
+          return sendMessage(From,
+            `*${data.message}*\n` +
+            `Request ID: ${data.serviceRequestId}\n` +
+            `Required Docs:\n` +
+            data.requiredDocuments.map(d=>`• ${d.name}`).join('\n') +
+            `\nUpload Link: ${data.uploadLink}`
+          );
+        } catch (err) {
+          console.error("❌ Document API error:", err);
+          return sendMessage(From,
+            "Error creating request. Try again later or 0️⃣ to cancel."
+          );
+        }
+      }
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // SECTION 8: FINAL FALLBACK
+      // ──────────────────────────────────────────────────────────────────────────
       return sendMessage(From,
         "Unexpected state. Type 'hi' to restart or 0️⃣ to cancel."
       );
