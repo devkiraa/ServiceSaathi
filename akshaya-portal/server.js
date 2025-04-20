@@ -98,17 +98,17 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   });
       
   // Dashboard Route
-  app.get('/dashboard', async (req, res) => {
-    if (!req.session.user) return res.redirect('/');
-    if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
-    try {
-      const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-      const serviceRequests = await ServiceRequest.find({ centreId: req.session.user.centerId });
-      res.render('dashboard', { user: req.session.user, documents, serviceRequests });
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
+  // app.get('/dashboard', async (req, res) => {
+  //   if (!req.session.user) return res.redirect('/');
+  //   if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
+  //   try {
+  //     const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
+  //     const serviceRequests = await ServiceRequest.find({ centreId: req.session.user.centerId });
+  //     res.render('dashboard', { user: req.session.user, documents, serviceRequests });
+  //   } catch (error) {
+  //     res.status(500).send(error.message);
+  //   }
+  // });
 
   app.get('/dashboard', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
@@ -217,27 +217,6 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
     } catch (error) {
       console.error('Error:', error);
       return res.status(500).json({ message: 'Internal Server Error' });
-    }
-  });
-
-  app.get('/continue-application/:serviceRequestId', async (req, res) => {
-    try {
-      const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
-      if (!serviceRequest) {
-        return res.status(404).send("Service request not found.");
-      }
-      // Populate customer details from session if available
-      const customer = req.session.user || {};
-      res.render('continueApplication', {
-        customerName: customer.name || "",
-        mobile: customer.mobile || "",
-        email: customer.email || "",
-        address: customer.address || "",
-        dob: customer.dob || "",
-        serviceRequest: serviceRequest
-      });
-    } catch (error) {
-      res.status(500).send(error.message);
     }
   });
 }).catch(err => {
