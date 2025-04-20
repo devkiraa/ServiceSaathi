@@ -1,10 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Sample data for the line chart
     const chartData = {
-        today: {
-          labels: ['09:00', '12:00', '15:00', '18:00', '21:00'],
-          data: [10, 20, 15, 25, 30],
-        },
         week: {
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
           data: [5, 10, 15, 20, 25, 30, 35],
@@ -13,9 +9,13 @@ document.addEventListener("DOMContentLoaded", function () {
           labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
           data: [10, 20, 25, 30],
         },
-        all: {
+        year: {
           labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
           data: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60],
+        },
+        all: {
+          labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+          data: [5, 20, 25, 3, 40, 45, 5],
         },
       };
   
@@ -80,5 +80,5 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   
       // Render default chart (Today)
-      renderLineChart('today');
+      renderLineChart('week');
 });
