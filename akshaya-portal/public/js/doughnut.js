@@ -1,4 +1,5 @@
 // Initialize Chart.js
+document.addEventListener("DOMContentLoaded", function () {
 const doughnutChartCtx = document.getElementById('doughnutChart').getContext('2d');
 let doughnutChart;
 
@@ -79,3 +80,4 @@ document.querySelectorAll('.btn-xs').forEach(button => {
 
 // Initialize the chart with "All" data by default
 fetchServiceData('all');
+});
