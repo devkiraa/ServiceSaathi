@@ -2,6 +2,7 @@
 const axios        = require('axios');
 const CentreModel  = require('../../models/Centre');
 const ServiceModel = require('../../models/Service');
+const UserModel   = require('../../models/User');
 
 const DISTRICTS = [
   "Thiruvananthapuram","Kollam","Pathanamthitta","Alappuzha",
@@ -162,12 +163,13 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
           );
         }
 
-        user.applyDataTemp.centres = centres.map(c=>({
+        user.applyDataTemp.centres = centres.map(c => ({
           centreId:   c.centerId,
-          centreName: c.centreName,
-          contact:    c.contact,
-          address:    `${c.district}, ${c.subdistrict}`
+          centreName: c.shopName, // or `c.username` if that's more appropriate
+          contact:    c.phone,
+          address:    `${c.address?.locality || ''}, ${c.subdistrict}, ${c.district}`
         }));
+        
         await user.save();
 
         return sendMessage(From,
@@ -175,7 +177,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
           user.applyDataTemp.centres.map((c,i)=>
             `${i+1}. ${c.centreName}\n📍${c.address}\n📞${c.contact}\n🆔 ${c.centreId}`
           ).join('\n\n')
-        );
+        );        
       }
 
       // — SECTION 7: centre → call API and persist —
