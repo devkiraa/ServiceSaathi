@@ -125,20 +125,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' })
       }
     });
         
-    // Dashboard Route
 
-  /* app.get('/dashboard', async (req, res) => {
-      if (!req.session.user) return res.redirect('/');
-      if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
-      try {
-        const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-        const serviceRequests = await ServiceRequest.find({ centreId: req.session.user.centerId });
-
-        res.render('dashboard', { user: req.session.user, documents, serviceRequests });
-      } catch (error) {
-        res.status(500).send(error.message);
-      }
-    }); */
     
     app.get('/dashboard', async (req, res) => {
       if (!req.session.user) return res.redirect('/');
@@ -192,9 +179,9 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' })
           },
           serviceRequests: serviceRequests.map((sr) => ({
             documentType: sr.documentType,
-            mobileNumber: sr.mobileNumber,
             status: sr.status,
             action: sr.action,
+            createdAt:sr.createdAt
           })),
           servicePercentages, // Pass the calculated percentages
         });
