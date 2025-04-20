@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="/js/tailwindConfig.js"></script>
   <style>
     /* Center the main content */
     .flex.h-screen {
@@ -52,39 +53,6 @@
       }
     }
   </style>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#6366F1',     // Indigo 500
-            secondary: '#3B82F6',   // Sky 500
-            accent: '#22D3EE',      // Cyan 400
-            'bg-light': '#F9FAFB',  // Light gray
-          }
-        }
-      },
-      daisyui: {
-        themes: [
-          {
-            calmblue: {
-              primary: '#6366F1',
-              secondary: '#3B82F6',
-              accent: '#22D3EE',
-              neutral: '#F9FAFB',
-              'base-100': '#FFFFFF',
-              'base-200': '#F3F4F6',
-              'base-300': '#E5E7EB',
-              info: '#3ABFF8',
-              success: '#36D399',
-              warning: '#FBBD23',
-              error: '#F87272',
-            },
-          },
-        ],
-      }
-    }
-  </script>
 </head>
 <body class="bg-bg-light text-gray-800 transition-all duration-300">
   <!-- Sidebar -->
@@ -93,119 +61,139 @@
       <div class="p-6">
         <h1 class="text-2xl font-bold text-white">Service Saathi</h1>
       </div>
-  <nav class="flex-1 px-4 " >
-    <ul class="space-y-3">
-      <li>
-        <a href="/dashboard" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9m-3 7v-4H6v4" />
-          </svg>
-          <span>Home</span>
-        </a>
-      </li>
-      <li>
-        <a href="/services" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-          </svg>              
-          <span>Service</span>
-        </a>
-      </li>
-      <li>
-        <a href="/contact" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8V7a2 2 0 00-2-2H5a2 2 0 00-2 2v1m18 0v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8m18 0L12 13 3 8" />
-          </svg>
-          <span>Contact Us</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
-</div>
-</aside>
-<!-- Top Navbar -->
-<!-- Top Navbar -->
-<nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-1 px-6 flex justify-between items-center z-40">
-  <div class="flex items-center space-x-4">
-    <!-- Profile Icon Dropdown -->
-    <div id="dropdown" class="dropdown dropdown-end">
-      <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-        <div class="w-10 h-10 rounded-full flex items-center justify-center text-black">
-          <img src="/uploads/images/profile2.svg" id="profileimg"alt="User Avatar" class="w-full h-full object-cover" />
-        </div>
-      </label>
-      <ul tabindex="0" class="mt-3 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-        <li>
-          <span class="text-gray-800 px-4 font-medium"><%= user.centerId %></span>
-        </li>
-        <li>
-          <a href="/profile" class="block text-sm px-4 py-2 text-gray-700 hover:bg-gray-100">User Profile</a>
-        </li>
-        <li>
-          <a href="/change-password" class="block text-sm px-4 py-2 text-gray-700 hover:bg-gray-100">Change Password</a>
-        </li>
-        <li>
-          <a href="/logout" class="block text-sm px-4 py-2 text-red-500 hover:bg-gray-100">Logout</a>
-        </li>
-      </ul>
+      <nav class="flex-1 px-4 " >
+        <ul class="space-y-3">
+          <li>
+            <a href="/dashboard" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9m-3 7v-4H6v4" />
+              </svg>
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/services" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+              </svg>              
+              <span>Service</span>
+            </a>
+          </li>
+          <li>
+            <a href="/contact" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8V7a2 2 0 00-2-2H5a2 2 0 00-2 2v1m18 0v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8m18 0L12 13 3 8" />
+              </svg>
+              <span>Contact Us</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
-  </div>
-</nav>
-
- 
-
+  </aside>
+  <!-- Top Navbar -->
+  <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40">
+    <div class="flex items-center space-x-4">
+    </div>
+    <div class="flex items-center space-x-4">
+      <div class="dropdown dropdown-end">
+        <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center text-black">
+            <img src="/uploads/images/profile2.svg" alt="User Avatar" class="w-full h-full object-cover" />
+          </div>
+        </label>
+        <div tabindex="0" class="mt-3 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+          <!-- Custom Dropdown Card -->
+          <div>
+            <ul>
+              <li>               
+                <p class="hover:text-[#6161f9] active:bg-white" onclick="redirect('profile')">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                  User Profile
+                </p>
+              </li>
+              <li>
+                <p class="hover:text-[#6161f9] active:bg-white" onclick="redirect('change-pass')">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+                  </svg>                  
+                  Change Password
+                </p>
+              </li>
+            </ul>
+            <div class="border-t-[1.5px] border-[#dfdfe1]"></div>
+            <ul>
+              <li>
+                <p class="hover:text-[#f04545] active:bg-white" onclick="redirect('logout')">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+                  </svg>                  
+                  Logout
+                </p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
   <!-- Main Content -->
-  <main class="pt-8 px-8">
-    <!-- Service Requests Section -->
-    <div class="bg-gray-50 p-6 rounded-2xl border-2 border-blue-200 shadow-lg mb-6 card">
-      <h3 class="text-lg font-semibold mb-4 text-gray-800">My Service Requests</h3>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-600">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-            <tr>
-              <th class="px-6 py-3">Service Type</th>
-              <th class="px-6 py-3">Mobile Number</th>
-              <th class="px-6 py-3">Status</th>
-              <th class="px-6 py-3">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% if (serviceRequests.length === 0) { %>
+  <div class="flex ml-56 pt-20 bg-bg-light min-h-screen">
+    <div class="container mx-auto p-6">
+      <!-- Service Requests Section -->
+      <div class="bg-gray-50 p-6 rounded-2xl border-2 border-blue-200 shadow-lg mb-6 card">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">My Service Requests</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-600">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
-                <td colspan="4" class="px-6 py-4 text-center">No service requests found.</td>
+                <th class="px-6 py-3">Customer Name</th>
+                <th class="px-6 py-3">Mobile Number</th>
+                <th class="px-6 py-3">Service Type</th>
+                <th class="px-6 py-3">Application Date</th>
+                <th class="px-6 py-3">Status</th>
               </tr>
-            <% } else { %>
-              <% serviceRequests.forEach(function(sr) { %>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-6 py-4"><%= sr.documentType %></td>
-                  <td class="px-6 py-4"><%= user.username %></td>
-                  <td class="px-6 py-4 <%= 
-                    sr.status === 'received' ? 'text-blue-600' : 
-                    sr.status === 'started' ? 'text-yellow-500' : 
-                    sr.status === 'completed' ? 'text-green-600' : '' 
-                  %>">
-                    <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
-                  </td>
-                  <td class="px-6 py-4 space-x-2">                  
-                    <% if (sr.requiredDocuments && sr.requiredDocuments.length > 0 && sr.status === 'received') { %>
-                      <button class="text-blue-500 hover:text-blue-700" onclick="viewDocuments('<%= sr._id %>')">
-                        View Documents
-                      </button>
-                    <% } %>
-                    <% if (sr.status==='completed') { %>
-                      
-                      <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
-                    <% } else if(sr.status==='received') { %>
-                      <a href="/continue-application/<%= sr._id %>" class="text-green-500 hover:text-green-700">Continue Application</a>
-                    <% } else if(sr.status==='started') { %>
-                      <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
-                    <% } %>
-                  </td>
+            </thead>
+            <tbody>
+              <% if (serviceRequests.length === 0) { %>
+                <tr>
+                  <td colspan="4" class="px-6 py-4 text-center">No service requests found.</td>
                 </tr>
-              <% }); %>
-            <% } %>
-          </tbody>
-        </table>
+              <% } else { %>
+                <% serviceRequests.forEach(function(sr) { %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4"><%= sr.documentType %></td>
+                    <td class="px-6 py-4"><%= user.username %></td>
+                    <td class="px-6 py-4 <%= 
+                      sr.status === 'received' ? 'text-blue-600' : 
+                      sr.status === 'started' ? 'text-yellow-500' : 
+                      sr.status === 'completed' ? 'text-green-600' : '' 
+                    %>">
+                      <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
+                    </td>
+                    <td class="px-6 py-4 space-x-2">                  
+                      <% if (sr.requiredDocuments && sr.requiredDocuments.length > 0 && sr.status === 'received') { %>
+                        <button class="text-blue-500 hover:text-blue-700" onclick="viewDocuments('<%= sr._id %>')">
+                          View Documents
+                        </button>
+                      <% } %>
+                      <% if (sr.status==='completed') { %>
+
+                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
+                      <% } else if(sr.status==='received') { %>
+                        <a href="/continue-application/<%= sr._id %>" class="text-green-500 hover:text-green-700">Continue Application</a>
+                      <% } else if(sr.status==='started') { %>
+                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -223,18 +211,6 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
   <script>
-    document.getElementById('userDropdownBtn').addEventListener('click', function () {
-      document.getElementById('userDropdown').classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', function (event) {
-      const dropdown = document.getElementById('userDropdown');
-      const button = document.getElementById('userDropdownBtn');
-      if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-        dropdown.classList.add('hidden');
-      }
-    });
-
     // Function to fetch service request details and display in modal.
     async function viewDocuments(serviceRequestId) {
       try {
