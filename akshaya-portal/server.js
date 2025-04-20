@@ -8,21 +8,25 @@ const path = require('path');
 // const multer = require('multer'); // Removed
 dotenv.config();
 const app = express();
+
 // Middleware
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json()); // Built-in middleware for JSON request body parsing
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
 }));
+
 // Set view engine to EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/sendimage', express.static(path.join(__dirname, 'uploads/service-documents')));
+
 // Models
 const User = require('./models/User');
 const Document = require('./models/Document');
@@ -31,293 +35,215 @@ const ServiceRequest = require('./models/ServiceRequest');
 // let upload; // Removed
 
 // MongoDB Atlas Connection
-mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' })
-  .then(() => {
-    console.log("✅ MongoDB Atlas connected to CHATBOTDB");
-    console.log('\n=======================================');
-    console.log('\nLogs from Service Saathi WhatsApp Server');
+mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
+  console.log("✅ MongoDB Atlas connected to CHATBOTDB");
+  console.log('\n=======================================');
+  console.log('\nLogs from Service Saathi WhatsApp Server');
+  // --- Configure GridFS Storage AFTER successful database connection ---
+  // const storage = new GridFsStorage({ ... }); // Removed
+  // Initialize multer upload middleware after storage is configured
+  // upload = multer({ storage }); // Removed
+  // Export the upload middleware
+  // module.exports.upload = upload; // Removed
+  // Routes - Require routes AFTER database connection is established
 
-    // --- Configure GridFS Storage AFTER successful database connection ---
-    // const storage = new GridFsStorage({ ... }); // Removed
+  const authRoutes = require('./routes/auth');
+  const documentRoutes = require('./routes/documents');
+  const adminRoutes = require('./routes/admin');
+  const serviceRoutes = require('./routes/service');
+  const serviceAdminRoutes = require('./routes/serviceAdmin');
+  const weatherRoutes = require('./routes/weather');
 
-    // Initialize multer upload middleware after storage is configured
-    // upload = multer({ storage }); // Removed
+  app.use(authRoutes);
+  app.use(documentRoutes);
+  app.use(adminRoutes);
+  app.use('/', serviceRoutes); // Mount service routes at the root
+  app.use('/', serviceAdminRoutes); // Mount service admin routes at the root
+  app.use('/api', weatherRoutes);
 
-    // Export the upload middleware
-    // module.exports.upload = upload; // Removed
+  // Login Page
+  app.get('/', (req, res) => {
+    res.render('login');
+  });
 
-    // Routes - Require routes AFTER database connection is established
-    const authRoutes = require('./routes/auth');
-    const documentRoutes = require('./routes/documents');
-    const adminRoutes = require('./routes/admin');
-    const serviceRoutes = require('./routes/service');
-    const serviceAdminRoutes = require('./routes/serviceAdmin');
+  // Logout Page
+  app.get('/logout', (req, res) => {
+    res.render('logout');
+  });
 
-    app.use(authRoutes);
-    app.use(documentRoutes);
-    app.use(adminRoutes);
-    app.use('/', serviceRoutes); // Mount service routes at the root
-    app.use('/', serviceAdminRoutes); // Mount service admin routes at the root
-    // Login Page
-    app.get('/', (req, res) => {
-      res.render('login');
+  app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: "Logout failed" });
+      }
+      return res.redirect('/login');
+      // return res.json({ success: true, message: "Logged out successfully" });
     });
-    // Logout Page
-    app.get('/logout', (req, res) => {
-      res.render('logout');
-    });
-    app.post('/logout', (req, res) => {
-      req.session.destroy((err) => {
-        if (err) {
-          return res.status(500).json({ success: false, message: "Logout failed" });
+  });
+
+  // Admin: Add User Page
+  app.get('/add-user', (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+    res.render('addUser');
+  });
+
+  // Signup Page
+  app.get('/signup', (req, res) => {
+    res.render('signup');
+  });
+
+  // Signup Page
+  app.get('/change-password', (req, res) => {
+    res.render('changePassword');
+  });
+      
+  // Dashboard Route
+  app.get('/dashboard', async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
+    try {
+      const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
+      const serviceRequests = await ServiceRequest.find({ centreId: req.session.user.centerId });
+      res.render('dashboard', { user: req.session.user, documents, serviceRequests });
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.get('/dashboard', async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
+    try {
+      const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
+     
+      const user = await User.findOne({ _id: req.session.user.id });
+      if (!user) return res.status(404).send("User not found");
+  
+      // Fetch service requests for the user
+      const serviceRequests = await ServiceRequest.find({ userId: user._id });
+  
+      // Calculate service type distribution
+      const serviceTypes = {};
+      serviceRequests.forEach((sr) => {
+        const serviceType = sr.documentType;
+        if (serviceTypes[serviceType]) {
+          serviceTypes[serviceType]++;
+        } else {
+          serviceTypes[serviceType] = 1;
         }
-        return res.redirect('/login');
-        // return res.json({ success: true, message: "Logged out successfully" });
       });
-    });
-    // Admin: Add User Page
-    app.get('/add-user', (req, res) => {
-      if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
-      res.render('addUser');
-    });
-    // Signup Page
-    app.get('/signup', (req, res) => {
-      res.render('signup');
-    });
-    // Signup Page
-    app.get('/change-password', (req, res) => {
-      res.render('changePassword');
-    });
-    app.get('/services', async (req, res) => {
-      if (!req.session.user) return res.redirect('/');
-      try {
-        const user = await User.findOne({ _id: req.session.user.id });
-        if (!user) return res.status(404).send("User not found");
-    
-        // Fetch service requests for the user
-        const serviceRequests = await ServiceRequest.find({ userId: user._id });
-    
-        
-        res.render('services', {
-          user: {
-            email: user.email,
-            shopName: user.shopName,
-            personName: user.personName,
-            centerId: user.centerId,
-            phone: user.phone,
-            district: user.district,
-            type: user.type,
-            services: user.services,
-            address: user.address.toObject()
-          },
-          serviceRequests: serviceRequests.map(sr => ({
-            documentType: sr.documentType,
-            mobileNumber: sr.mobileNumber,
-            status: sr.status,
-            action: sr.action
-          
-          
-          }))
-        });
-      } catch (error) {
-        console.error("Error fetching user or data:", error);
-        res.status(500).send("Server error: " + error.message);
-      }
-    });
-        
+  
+      // Convert to array format for chart rendering
+      const serviceData = Object.entries(serviceTypes).map(([type, count]) => ({
+        label: type,
+        value: count,
+      }));
+  
+      // Calculate total services
+      const totalServices = serviceRequests.length;
+  
+      // Calculate percentages
+      const servicePercentages = serviceData.map(({ label, value }) => ({
+        label,
+        value: (value / totalServices) * 100, // Percentage
+      }));
+      // res.render('dashboard', { user: req.session.user, serviceRequests });
+      res.render('dashboard', {
+        user: req.session.user,
+        serviceRequests: serviceRequests.map((sr) => ({
+          documentType: sr.documentType,
+          mobileNumber: sr.mobileNumber,
+          status: sr.status,
+          action: sr.action,
+        })),
+        servicePercentages, // Pass the calculated percentages
+      });
+    } catch (error) {
+      console.error("Error fetching user or service requests:", error);
+      res.status(500).send("Server error: " + error.message);
+    }
+  });
 
-    
-    app.get('/dashboard', async (req, res) => {
-      if (!req.session.user) return res.redirect('/');
-      if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
-      try {
-        const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-       
-        const user = await User.findOne({ _id: req.session.user.id });
-        if (!user) return res.status(404).send("User not found");
-    
-        // Fetch service requests for the user
-        const serviceRequests = await ServiceRequest.find({ userId: user._id });
-    
-        // Calculate service type distribution
-        const serviceTypes = {};
-        serviceRequests.forEach((sr) => {
-          const serviceType = sr.documentType;
-          if (serviceTypes[serviceType]) {
-            serviceTypes[serviceType]++;
-          } else {
-            serviceTypes[serviceType] = 1;
-          }
-        });
-    
-        // Convert to array format for chart rendering
-        const serviceData = Object.entries(serviceTypes).map(([type, count]) => ({
-          label: type,
-          value: count,
-        }));
-    
-        // Calculate total services
-        const totalServices = serviceRequests.length;
-    
-        // Calculate percentages
-        const servicePercentages = serviceData.map(({ label, value }) => ({
-          label,
-          value: (value / totalServices) * 100, // Percentage
-        }));
-    
-        res.render('dashboard', {
-          user: {
-            email: user.email,
-            shopName: user.shopName,
-            personName: user.personName,
-            centerId: user.centerId,
-            phone: user.phone,
-            district: user.district,
-            type: user.type,
-            services: user.services,
-            address: user.address.toObject(),
-          },
-          serviceRequests: serviceRequests.map((sr) => ({
-            documentType: sr.documentType,
-            status: sr.status,
-            action: sr.action,
-            createdAt:sr.createdAt
-          })),
-          servicePercentages, // Pass the calculated percentages
-        });
-      } catch (error) {
-        console.error("Error fetching user or service requests:", error);
-        res.status(500).send("Server error: " + error.message);
-      }
-    });
-    app.get('/profile', async (req, res) => {
-      if (!req.session.user) return res.redirect('/');
-      try {
-        const user = await User.findOne({ _id: req.session.user.id });
-        if (!user) return res.status(404).send("User not found");
-
-        res.render('profile', {
-          user: {
-            email: user.email,
-            shopName: user.shopName,
-            personName: user.personName,
-            centerId: user.centerId,
-            phone: user.phone,
-            district: user.district,
-            type: user.type,
-            services: user.services,
-            address: user.address.toObject()
-          }
-        });
-      } catch (error) {
-        res.status(500).send("Server error: " + error.message);
-      }
-    });
-    app.use(express.json()); // Built-in middleware for JSON request body parsing
-    app.post('/profile', async (req, res) => {
-      try {
-        const { email, shopName, personName, phone, type, district, address, services } = req.body;
-        console.log("📌 Received Form Data:", req.body); // ✅ Log received data
-
-        if (!email || !shopName || !personName || !phone || !type || !district || !address || !services) {
-          return res.status(400).json({ message: 'All fields are required!' });
+  app.get('/profile', async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    try {
+      const user = await User.findOne({ _id: req.session.user.id });
+      if (!user) return res.status(404).send("User not found");
+      res.render('profile', {
+        user: {
+          email: user.email,
+          shopName: user.shopName,
+          personName: user.personName,
+          centerId: user.centerId,
+          phone: user.phone,
+          district: user.district,
+          type: user.type,
+          services: user.services,
+          address: user.address.toObject()
         }
+      });
+    } catch (error) {
+      res.status(500).send("Server error: " + error.message);
+    }
+  });
 
-        let user = await User.findOne({ email });
-
-        if (user) {
-          // Update existing profile
-          user.shopName = shopName;
-          user.personName = personName;
-          user.phone = phone;
-          user.type = type;
-          user.district = district;
-          user.address = { ...user.address, ...address }; // Merging old & new address
-          user.services = { ...user.services, ...services }; // Merging services
-
-          await user.save();
-          req.session.user = user; // Update session data
-          return res.status(200).json({ message: 'Profile updated successfully!', data: user });
-        } else {
-          // Create new profile
-          const newUser = new User({ email, shopName, personName, centerId, phone, type, district, address, services });
-          await newUser.save();
-          req.session.user = newUser; // Store in session
-          return res.status(201).json({ message: 'Profile created successfully!', data: newUser });
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({ message: 'Internal Server Error' });
+  app.post('/profile', async (req, res) => {
+    try {
+      const { email, shopName, personName, phone, type, district, address, services } = req.body;
+      console.log("📌 Received Form Data:", req.body); // ✅ Log received data
+      if (!email || !shopName || !personName || !phone || !type || !district || !address || !services) {
+        return res.status(400).json({ message: 'All fields are required!' });
       }
-    });
-    app.get('/api/service-data', async (req, res) => {
-      const { period } = req.query; // Extract the period from the query parameter
-      try {
-        let serviceData;
-    
-        // Fetch data based on the selected period
-        if (period === 'today') {
-          serviceData = await ServiceRequest.aggregate([
-            { $match: { createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } } },
-            { $group: { _id: '$documentType', count: { $sum: 1 } } },
-          ]);
-        } else if (period === 'week') {
-          serviceData = await ServiceRequest.aggregate([
-            { $match: { createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } } },
-            { $group: { _id: '$documentType', count: { $sum: 1 } } },
-          ]);
-        } else if (period === 'month') {
-          serviceData = await ServiceRequest.aggregate([
-            { $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } } },
-            { $group: { _id: '$documentType', count: { $sum: 1 } } },
-          ]);
-        } else {
-          // Default: All data
-          serviceData = await ServiceRequest.aggregate([
-            { $group: { _id: '$documentType', count: { $sum: 1 } } },
-          ]);
-        }
-    
-        // Calculate total services and percentages
-        const total = serviceData.reduce((sum, item) => sum + item.count, 0);
-        const formattedData = serviceData.map(item => ({
-          label: item._id,
-          value: ((item.count / total) * 100).toFixed(2), // Percentage with 2 decimal places
-        }));
-    
-        res.json(formattedData);
-      } catch (error) {
-        console.error("Error fetching service data:", error);
-        res.status(500).send("Server error");
+      let user = await User.findOne({ email });
+      if (user) {
+        // Update existing profile
+        user.shopName = shopName;
+        user.personName = personName;
+        user.phone = phone;
+        user.type = type;
+        user.district = district;
+        user.address = { ...user.address, ...address }; // Merging old & new address
+        user.services = { ...user.services, ...services }; // Merging services
+        await user.save();
+        req.session.user = user; // Update session data
+        return res.status(200).json({ message: 'Profile updated successfully!', data: user });
+      } else {
+        // Create new profile
+        const newUser = new User({ email, shopName, personName, centerId, phone, type, district, address, services });
+        await newUser.save();
+        req.session.user = newUser; // Store in session
+        return res.status(201).json({ message: 'Profile created successfully!', data: newUser });
       }
-    });
-    app.get('/continue-application/:serviceRequestId', async (req, res) => {
-      try {
-        const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
-        if (!serviceRequest) {
-          return res.status(404).send("Service request not found.");
-        }
+    } catch (error) {
+      console.error('Error:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
 
-        // Populate customer details from session if available
-        const customer = req.session.user || {};
-
-        res.render('continueApplication', {
-          customerName: customer.name || "",
-          mobile: customer.mobile || "",
-          email: customer.email || "",
-          address: customer.address || "",
-          dob: customer.dob || "",
-          serviceRequest: serviceRequest
-        });
-      } catch (error) {
-        res.status(500).send(error.message);
+  app.get('/continue-application/:serviceRequestId', async (req, res) => {
+    try {
+      const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
+      if (!serviceRequest) {
+        return res.status(404).send("Service request not found.");
       }
-    });
-  })
-  .catch(err => {
+      // Populate customer details from session if available
+      const customer = req.session.user || {};
+      res.render('continueApplication', {
+        customerName: customer.name || "",
+        mobile: customer.mobile || "",
+        email: customer.email || "",
+        address: customer.address || "",
+        dob: customer.dob || "",
+        serviceRequest: serviceRequest
+      });
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  });
+}).catch(err => {
     console.error('❌ MongoDB connection error:', err);
     process.exit(1); // Stop server if DB fails
-  });
+});
 
 // Start Server
 const PORT = process.env.PORT || 5601;
