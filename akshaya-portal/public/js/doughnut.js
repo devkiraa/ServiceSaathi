@@ -1,56 +1,83 @@
+// Initialize Chart.js
 document.addEventListener("DOMContentLoaded", function () {
-    // Initialize Chart.js Doughnut Chart
-    const ctx = document.getElementById('doughnutChart').getContext('2d');
-    let doughnutChart;
-  
-    const dataSets = {
-      today: [30, 20, 50],
-      week: [40, 30, 30],
-      month: [25, 25, 50],
-      all: [10, 40, 50],
-    };
-  
-    function createChart(data) {
-      if (doughnutChart) {
-        doughnutChart.destroy(); // Destroy the previous chart instance to prevent memory leaks
-      }
-      doughnutChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Task A', 'Task B', 'Task C'],
-          datasets: [{
-            data: data,
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-            hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
-          }]
+const doughnutChartCtx = document.getElementById('doughnutChart').getContext('2d');
+let doughnutChart;
+
+// Function to initialize or update the doughnut chart
+function updateDoughnutChart(data) {
+  const labels = data.map(item => item.label);
+  const values = data.map(item => item.value);
+
+  // Destroy existing chart instance if it exists
+  if (doughnutChart) {
+    doughnutChart.destroy();
+  }
+
+  // Create a new doughnut chart
+  doughnutChart = new Chart(doughnutChartCtx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: [
+          '#FF6384', // Red
+          '#36A2EB', // Blue
+          '#FFCE56', // Yellow
+          '#4BC0C0', // Teal
+          '#9966FF', // Purple
+          '#F7DC6F', // Light Yellow
+          '#B22222', // Firebrick
+          '#4682B4', // Steel Blue
+          '#FFD700', // Gold
+          '#8B4513', // Saddle Brown
+        ],
+        hoverOffset: 4,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'right',
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false, // Ensure the chart respects the container's dimensions
-        }
-      });
-    }
-  
-    // Add event listeners to buttons
-    document.querySelectorAll('#card-4 button').forEach(button => {
-      button.addEventListener('click', () => {
-        const period = button.getAttribute('data-period');
-        const newData = dataSets[period];
-        if (newData) {
-          createChart(newData); // Update the chart with new data
-        } else {
-          console.error(`Invalid period: ${period}`);
-        }
-      });
-    });
-  
-    // Initialize with "Today" data
-    createChart(dataSets.today);
-  
-    // Optional: Reinitialize the chart on window resize
-    window.addEventListener('resize', () => {
-      if (doughnutChart) {
-        doughnutChart.resize(); // Trigger Chart.js resize logic
-      }
-    });
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              return `${label}: ${value}%`;
+            },
+          },
+        },
+      },
+    },
   });
+}
+
+// Function to fetch service data based on the selected period
+async function fetchServiceData(period) {
+  try {
+    const response = await fetch(`/api/service-data?period=${period}`);
+    if (!response.ok) throw new Error("Failed to fetch service data");
+    const data = await response.json();
+
+    // Update the doughnut chart with the fetched data
+    updateDoughnutChart(data);
+  } catch (error) {
+    console.error("Error fetching service data:", error);
+    alert("An error occurred while fetching service data.");
+  }
+}
+
+// Add event listeners to the period buttons
+document.querySelectorAll('.btn-xs').forEach(button => {
+  button.addEventListener('click', () => {
+    const period = button.getAttribute('data-period'); // Get the period (today, week, month, all)
+    fetchServiceData(period); // Fetch data for the selected period
+  });
+});
+
+// Initialize the chart with "All" data by default
+fetchServiceData('all');
+});
