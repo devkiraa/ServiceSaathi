@@ -37,6 +37,7 @@ function updateDoughnutChart(data) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false, // Ensure the chart respects the container's dimensions
       plugins: {
         legend: {
           position: 'top',
