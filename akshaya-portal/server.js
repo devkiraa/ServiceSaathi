@@ -126,7 +126,8 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' })
     });
         
     // Dashboard Route
-    app.get('/dashboard', async (req, res) => {
+
+  /* app.get('/dashboard', async (req, res) => {
       if (!req.session.user) return res.redirect('/');
       if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
       try {
@@ -136,6 +137,70 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' })
         res.render('dashboard', { user: req.session.user, documents, serviceRequests });
       } catch (error) {
         res.status(500).send(error.message);
+      }
+    }); */
+    
+    app.get('/dashboard', async (req, res) => {
+      if (!req.session.user) return res.redirect('/');
+      if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
+      try {
+        const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
+       
+        const user = await User.findOne({ _id: req.session.user.id });
+        if (!user) return res.status(404).send("User not found");
+    
+        // Fetch service requests for the user
+        const serviceRequests = await ServiceRequest.find({ userId: user._id });
+    
+        // Calculate service type distribution
+        const serviceTypes = {};
+        serviceRequests.forEach((sr) => {
+          const serviceType = sr.documentType;
+          if (serviceTypes[serviceType]) {
+            serviceTypes[serviceType]++;
+          } else {
+            serviceTypes[serviceType] = 1;
+          }
+        });
+    
+        // Convert to array format for chart rendering
+        const serviceData = Object.entries(serviceTypes).map(([type, count]) => ({
+          label: type,
+          value: count,
+        }));
+    
+        // Calculate total services
+        const totalServices = serviceRequests.length;
+    
+        // Calculate percentages
+        const servicePercentages = serviceData.map(({ label, value }) => ({
+          label,
+          value: (value / totalServices) * 100, // Percentage
+        }));
+    
+        res.render('dashboard', {
+          user: {
+            email: user.email,
+            shopName: user.shopName,
+            personName: user.personName,
+            centerId: user.centerId,
+            phone: user.phone,
+            district: user.district,
+            type: user.type,
+            services: user.services,
+            address: user.address.toObject(),
+          },
+          serviceRequests: serviceRequests.map((sr) => ({
+            documentType: sr.documentType,
+            mobileNumber: sr.mobileNumber,
+            status: sr.status,
+            action: sr.action,
+          })),
+          servicePercentages, // Pass the calculated percentages
+        });
+      } catch (error) {
+        console.error("Error fetching user or service requests:", error);
+        res.status(500).send("Server error: " + error.message);
       }
     });
     app.get('/profile', async (req, res) => {
@@ -196,6 +261,47 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' })
       } catch (error) {
         console.error('Error:', error);
         return res.status(500).json({ message: 'Internal Server Error' });
+      }
+    });
+    app.get('/api/service-data', async (req, res) => {
+      const { period } = req.query; // Extract the period from the query parameter
+      try {
+        let serviceData;
+    
+        // Fetch data based on the selected period
+        if (period === 'today') {
+          serviceData = await ServiceRequest.aggregate([
+            { $match: { createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } } },
+            { $group: { _id: '$documentType', count: { $sum: 1 } } },
+          ]);
+        } else if (period === 'week') {
+          serviceData = await ServiceRequest.aggregate([
+            { $match: { createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } } },
+            { $group: { _id: '$documentType', count: { $sum: 1 } } },
+          ]);
+        } else if (period === 'month') {
+          serviceData = await ServiceRequest.aggregate([
+            { $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } } },
+            { $group: { _id: '$documentType', count: { $sum: 1 } } },
+          ]);
+        } else {
+          // Default: All data
+          serviceData = await ServiceRequest.aggregate([
+            { $group: { _id: '$documentType', count: { $sum: 1 } } },
+          ]);
+        }
+    
+        // Calculate total services and percentages
+        const total = serviceData.reduce((sum, item) => sum + item.count, 0);
+        const formattedData = serviceData.map(item => ({
+          label: item._id,
+          value: ((item.count / total) * 100).toFixed(2), // Percentage with 2 decimal places
+        }));
+    
+        res.json(formattedData);
+      } catch (error) {
+        console.error("Error fetching service data:", error);
+        res.status(500).send("Server error");
       }
     });
     app.get('/continue-application/:serviceRequestId', async (req, res) => {
