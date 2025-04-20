@@ -15,10 +15,7 @@
       justify-content: center; /* Center horizontally */
       align-items: center; /* Center vertically (optional) */
     }
-  #profileimg
-  {
-    left:110;
-  }
+
     /* Ensure the main content has a max-width and is centered */
     main {
       width: 100%;
@@ -51,6 +48,66 @@
       main {
         margin-left: 0; /* No offset on small screens */
       }
+    }
+
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* Alternate row colors */
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-buttons button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #6B7280;
+      font-size: 1.2rem;
+    }
+
+    .action-buttons button:hover {
+      color: #3B82F6; /* Edit icon hover color */
+    }
+
+    .action-buttons button.delete {
+      color: #EF4444; /* Delete icon color */
+      font-size: 1.2rem;
+    }
+
+    .action-buttons button.delete:hover {
+      color: #EF4444; /* Delete icon hover color */
+    }
+
+    /* Progress Bars */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #E5E7EB;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: #3B82F6; /* Progress bar fill color */
+      transition: width 0.3s ease;
     }
   </style>
 </head>
@@ -91,6 +148,7 @@
       </nav>
     </div>
   </aside>
+
   <!-- Top Navbar -->
   <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40">
     <div class="flex items-center space-x-4">
@@ -139,61 +197,111 @@
       </div>
     </div>
   </nav>
+
   <!-- Main Content -->
-  <div class="flex ml-56 pt-20 bg-bg-light min-h-screen">
+  <div class="flex ml-56 pt-16 bg-bg-light min-h-screen">
     <div class="container mx-auto p-6">
       <!-- Service Requests Section -->
-      <div class="bg-gray-50 p-6 rounded-2xl border-2 border-blue-200 shadow-lg mb-6 card">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">My Service Requests</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left text-gray-600">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Customer Name
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Mobile Number
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Service Type
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Application Date
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% if (serviceRequests.length === 0) { %>
               <tr>
-                <th class="px-6 py-3">Customer Name</th>
-                <th class="px-6 py-3">Mobile Number</th>
-                <th class="px-6 py-3">Service Type</th>
-                <th class="px-6 py-3">Application Date</th>
-                <th class="px-6 py-3">Status</th>
+                <td colspan="6" class="px-6 py-4 text-center">No service requests found.</td>
               </tr>
-            </thead>
-            <tbody>
-              <% if (serviceRequests.length === 0) { %>
+            <% } else { %>
+              <% serviceRequests.forEach(function(sr) { %>
                 <tr>
-                  <td colspan="4" class="px-6 py-4 text-center">No service requests found.</td>
-                </tr>
-              <% } else { %>
-                <% serviceRequests.forEach(function(sr) { %>
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4"><%= sr.documentType %></td>
-                    <td class="px-6 py-4"><%= user.username %></td>
-                    <td class="px-6 py-4 <%= 
-                      sr.status === 'received' ? 'text-blue-600' : 
-                      sr.status === 'started' ? 'text-yellow-500' : 
-                      sr.status === 'completed' ? 'text-green-600' : '' 
-                    %>">
-                      <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
-                    </td>
-                    <td class="px-6 py-4 space-x-2">                  
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <%= sr.documentType %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <%= user.username %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <%= sr.serviceType %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <%= sr.applicationDate %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="w-4 h-4 mr-2 bg-green-500 rounded-full"></div>
+                      <span class="<%= 
+                        sr.status === 'received' ? 'text-blue-600' : 
+                        sr.status === 'started' ? 'text-yellow-500' : 
+                        sr.status === 'completed' ? 'text-green-600' : '' 
+                      %>">
+                        <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div class="action-buttons">
                       <% if (sr.requiredDocuments && sr.requiredDocuments.length > 0 && sr.status === 'received') { %>
                         <button class="text-blue-500 hover:text-blue-700" onclick="viewDocuments('<%= sr._id %>')">
-                          View Documents
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                            <path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                          </svg>
                         </button>
                       <% } %>
                       <% if (sr.status==='completed') { %>
-
-                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
-                      <% } else if(sr.status==='received') { %>
-                        <a href="/continue-application/<%= sr._id %>" class="text-green-500 hover:text-green-700">Continue Application</a>
+                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd" d="M.458 10C3.732 5.932 7.461 2.978 11.528 1.324a8.96 8.96 0 016.744 6.744c-.983.983-2.34.983-3.324 0l-2-2a8.96 8.96 0 01-6.744-6.744A8.96 8.96 0 0110 10c-4.478 0-8.463 3.063-9.04 7.68a1 1 0 001.728 1.07l2.142 2.142A1 1 0 0010 17H5a1 1 0 000 2h3v1a1 1 0 102 0v-1H15a1 1 0 100-2h-3v-1a1 1 0 10-2 0v1H5a3 3 0 01-3-3V7a3 3 0 013-3h5.414l.905-1.81V5.5l-6-6-1.066 1.066z" clip-rule="evenodd" />
+                          </svg>
+                        </a>
+                      <% } else if(sr.status==='submitted') { %>
+                        <a href="/continue-application/<%= sr._id %>" class="text-green-500 hover:text-green-700">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd" d="M.458 10C3.732 5.932 7.461 2.978 11.528 1.324a8.96 8.96 0 016.744 6.744c-.983.983-2.34.983-3.324 0l-2-2a8.96 8.96 0 01-6.744-6.744A8.96 8.96 0 0110 10c-4.478 0-8.463 3.063-9.04 7.68a1 1 0 001.728 1.07l2.142 2.142A1 1 0 0010 17H5a1 1 0 000 2h3v1a1 1 0 102 0v-1H15a1 1 0 100-2h-3v-1a1 1 0 10-2 0v1H5a3 3 0 01-3-3V7a3 3 0 013-3h5.414l.905-1.81V5.5l-6-6-1.066 1.066z" clip-rule="evenodd" />
+                          </svg>
+                        </a>
                       <% } else if(sr.status==='started') { %>
-                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
+                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd" d="M.458 10C3.732 5.932 7.461 2.978 11.528 1.324a8.96 8.96 0 016.744 6.744c-.983.983-2.34.983-3.324 0l-2-2a8.96 8.96 0 01-6.744-6.744A8.96 8.96 0 0110 10c-4.478 0-8.463 3.063-9.04 7.68a1 1 0 001.728 1.07l2.142 2.142A1 1 0 0010 17H5a1 1 0 000 2h3v1a1 1 0 102 0v-1H15a1 1 0 100-2h-3v-1a1 1 0 10-2 0v1H5a3 3 0 01-3-3V7a3 3 0 013-3h5.414l.905-1.81V5.5l-6-6-1.066 1.066z" clip-rule="evenodd" />
+                          </svg>
+                        </a>
                       <% } %>
-                    </td>
-                  </tr>
-                <% }); %>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
+                      <button class="text-red-500 hover:text-red-700 delete">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 5H5v15a2 2 0 002 2h10a2 2 0 002-2V5H12.618l-1.314-4A1 1 0 009 2zm-1 4v10a1 1 0 002 0V6a1 1 0 00-2 0zm2 10a1 1 0 11-2 0 1 1 0 012 0zm7-11a1 1 0 10-2 0 1 1 0 002 0zm-2 12a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -241,7 +349,6 @@
         alert("An error occurred while fetching documents.");
       }
     }
- 
     function closeModal() {
       document.getElementById('docModal').classList.add('hidden');
     }
