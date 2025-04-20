@@ -163,7 +163,44 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
       res.status(500).send("Server error: " + error.message);
     }
   });
-
+  app.get('/api/service-data', async (req, res) => {
+    const { period } = req.query; // Extracts the 'period' query parameter
+    try {
+      let serviceData;
+  
+      if (period === 'today') {
+        serviceData = await ServiceRequest.aggregate([
+          { $match: { createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } } },
+          { $group: { _id: '$documentType', count: { $sum: 1 } } },
+        ]);
+      } else if (period === 'week') {
+        serviceData = await ServiceRequest.aggregate([
+          { $match: { createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } } },
+          { $group: { _id: '$documentType', count: { $sum: 1 } } },
+        ]);
+      } else if (period === 'month') {
+        serviceData = await ServiceRequest.aggregate([
+          { $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } } },
+          { $group: { _id: '$documentType', count: { $sum: 1 } } },
+        ]);
+      } else {
+        serviceData = await ServiceRequest.aggregate([
+          { $group: { _id: '$documentType', count: { $sum: 1 } } },
+        ]);
+      }
+  
+      const total = serviceData.reduce((sum, item) => sum + item.count, 0);
+      const formattedData = serviceData.map(item => ({
+        label: item._id,
+        value: ((item.count / total) * 100).toFixed(2),
+      }));
+  
+      res.json(formattedData);
+    } catch (error) {
+      console.error("Error fetching service data:", error);
+      res.status(500).send("Server error");
+    }
+  });
   app.get('/profile', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
     try {
