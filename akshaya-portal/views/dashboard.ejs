@@ -189,5 +189,13 @@
       </div>
     </div>
   </div>
+  <script>
+    const initialCity = "<%=user.district%>";
+    document.addEventListener("DOMContentLoaded", () => {
+      if (initialCity) {
+        fetchWeatherData(initialCity); // Call the function with the city
+      }
+    });
+  </script>
 </body>
 </html>
