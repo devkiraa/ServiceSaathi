@@ -4,6 +4,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const User = require('../models/User');
 const Service = require('../models/Service');
 const ServiceRequest = require('../models/ServiceRequest');
 const Centre = require('../models/Centre'); // To check centre details
@@ -13,6 +14,40 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 dotenv.config(); // Load environment variables if not already loaded
+
+router.get('/services', async (req, res) => {
+  if (!req.session.user) return res.redirect('/');
+  try {
+    const user = await User.findOne({ _id: req.session.user.id });
+    if (!user) return res.status(404).send("User not found");
+
+    // Fetch service requests for the user
+    const serviceRequests = await ServiceRequest.find({ centreId: user.centerId });
+    
+    res.render('services', {
+      user: {
+        email: user.email,
+        shopName: user.shopName,
+        personName: user.personName,
+        centerId: user.centerId,
+        phone: user.phone,
+        district: user.district,
+        type: user.type,
+        services: user.services,
+        address: user.address.toObject()
+      },
+      serviceRequests: serviceRequests.map(sr => ({
+        documentType: sr.documentType,
+        mobileNumber: sr.mobileNumber,
+        status: sr.status,
+        action: sr.action
+      }))
+    });
+  } catch (error) {
+    console.error("Error fetching user or data:", error);
+    res.status(500).send("Server error: " + error.message);
+  }
+});
 
 // --- Create a new service request ---
 router.post('/service-request', async (req, res) => {
@@ -108,13 +143,8 @@ router.get('/service-request/:id', async (req, res) => {
   }
 });
 
-
-// … other routes …
-
 // --- Upload Documents (Storing as Base64 from multipart/form-data) ---
-router.post(
-  '/upload-documents/:serviceRequestId',
-  upload.array('files', 10),          // <-- add multer middleware here
+router.post('/upload-documents/:serviceRequestId',upload.array('files', 10),          // <-- add multer middleware here
   async (req, res) => {
     try {
       const { serviceRequestId } = req.params;
