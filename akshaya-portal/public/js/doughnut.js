@@ -39,7 +39,7 @@ function updateDoughnutChart(data) {
       responsive: true,
       plugins: {
         legend: {
-          position: 'right',
+          position: 'top',
         },
         tooltip: {
           callbacks: {
