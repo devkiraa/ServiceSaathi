@@ -12,22 +12,27 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
-    #cameraPreview {
-      width: 100%;
-      max-height: 70vh; 
-      object-fit: cover;
-      background-color: #222;
-    }
-    #cropImageContainer {
-      max-height: 70vh;
-      overflow: hidden;
-    }
+    #cameraPreview { width: 100%; max-height: 70vh; object-fit: cover; background-color: #222; }
+    #cropImageContainer { max-height: 70vh; overflow: hidden; }
     #cropImage { display: block; max-width: 100%; }
     .hidden { display: none; }
   </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
-  
+  <!-- Loader Overlay -->
+  <div id="loaderOverlay" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+    <svg class="animate-spin h-12 w-12 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg>
+  </div>
+
+  <!-- Uploaded Documents Preview -->
+  <div id="uploadedDocsContainer" class="w-full max-w-md mx-auto mb-4 hidden">
+    <h2 class="text-lg font-semibold mb-2">Documents Already Uploaded</h2>
+    <div id="uploadedDocsList" class="grid grid-cols-1 gap-4"></div>
+  </div>
+
   <div id="cameraContainer" class="relative w-full max-w-md mx-auto">
     <video id="cameraPreview" autoplay playsinline class="w-full object-cover rounded"></video>
     <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
@@ -37,7 +42,7 @@
       Flash Off
     </button>
   </div>
-  
+
   <div id="cropContainer" class="w-full max-w-md mx-auto mt-4 hidden">
     <p class="text-center text-sm text-gray-300 mb-2">Adjust the selection to crop the document.</p>
     <div id="cropImageContainer" class="mb-2 bg-gray-900">
@@ -48,12 +53,12 @@
       <button id="confirmCropBtn" class="bg-blue-600 px-4 py-2 rounded">Confirm Crop</button>
     </div>
   </div>
-  
+
   <div id="instructionContainer" class="mt-4 text-center max-w-md mx-auto">
     <h2 id="docLabel" class="text-xl font-bold"></h2>
     <p id="docHint" class="text-sm text-gray-300"></p>
   </div>
-  
+
   <div id="controlContainer" class="flex justify-between w-full max-w-md mt-4 px-4">
     <button id="backBtn" class="bg-gray-600 px-4 py-2 rounded disabled:opacity-50" onclick="prevStep()" disabled>
       Back
@@ -62,24 +67,24 @@
       Capture
     </button>
   </div>
-  
+
   <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden"/>
-  
+
   <script id="requiredDocumentsData" type="application/json">
     <%- JSON.stringify(serviceRequest.requiredDocuments) %>
   </script>
-  
+
   <!-- Cropper.js JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  
+
   <script>
-    // Global Variables
     const serviceRequestId = "<%= serviceRequest._id %>";
     const requiredDocuments = JSON.parse(document.getElementById('requiredDocumentsData').textContent || '[]');
     let currentStep = 0;
     const totalSteps = requiredDocuments.length;
-  
-    // DOM Elements
+
+    const uploadedDocsContainer = document.getElementById('uploadedDocsContainer');
+    const uploadedDocsList = document.getElementById('uploadedDocsList');
     const cameraContainer = document.getElementById('cameraContainer');
     const cameraPreview   = document.getElementById('cameraPreview');
     const docLabel        = document.getElementById('docLabel');
@@ -89,34 +94,47 @@
     const flashBtn        = document.getElementById('flashBtn');
     const instructionContainer = document.getElementById('instructionContainer');
     const controlContainer = document.getElementById('controlContainer');
-    // Cropper elements
+    const loaderOverlay   = document.getElementById('loaderOverlay');
+
     const cropContainer   = document.getElementById('cropContainer');
     const cropImage       = document.getElementById('cropImage');
     const confirmCropBtn  = document.getElementById('confirmCropBtn');
     const cancelCropBtn   = document.getElementById('cancelCropBtn');
-  
-    // State Variables
+
     let videoStream = null;
     let videoTrack = null;
     let flashEnabled = false;
-    let imageBlob = null; // Final (cropped) image blob for current step
-    let originalBlobUrl = null; // URL of the initially captured (uncropped) image
+    let imageBlob = null;
+    let originalBlobUrl = null;
     let cropperInstance = null;
-  
-    // Initialize camera
+
+    function showUploadedDocs() {
+      uploadedDocsList.innerHTML = '';
+      requiredDocuments.forEach((doc, i) => {
+        if (doc.fileData) {
+          const div = document.createElement('div');
+          div.className = 'bg-gray-800 p-2 rounded';
+          const title = document.createElement('p');
+          title.className = 'font-medium';
+          title.textContent = doc.name;
+          const img = document.createElement('img');
+          img.className = 'mt-2 rounded w-full';
+          img.src = `/files/${serviceRequestId}/${i}`;
+          div.append(title, img);
+          uploadedDocsList.appendChild(div);
+        }
+      });
+      if (uploadedDocsList.childElementCount > 0) {
+        uploadedDocsContainer.classList.remove('hidden');
+      }
+    }
+
     async function initCamera() {
       try {
-        videoStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-          audio: false
-        });
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
         cameraPreview.srcObject = videoStream;
         await cameraPreview.play();
-        cameraPreview.onloadedmetadata = () => {
-          console.log(`Camera resolution: ${cameraPreview.videoWidth}x${cameraPreview.videoHeight}`);
-          videoTrack = videoStream.getVideoTracks()[0];
-          checkFlashSupport();
-        };
+        cameraPreview.onloadedmetadata = () => { videoTrack = videoStream.getVideoTracks()[0]; checkFlashSupport(); };
       } catch (err) {
         console.error("Camera error:", err);
         docLabel.textContent = "Camera Error";
@@ -126,292 +144,119 @@
         cameraContainer.classList.add('hidden');
       }
     }
-  
+
     function checkFlashSupport() {
       if (!videoTrack) return;
-      try {
-        const capabilities = videoTrack.getCapabilities();
-        flashBtn.hidden = !capabilities.torch;
-      } catch(err) {
-        console.error("Flash support check error:", err);
-        flashBtn.hidden = true;
-      }
+      try { flashBtn.hidden = !videoTrack.getCapabilities().torch; } catch { flashBtn.hidden = true; }
     }
-  
+
     async function toggleFlash() {
       if (!videoTrack || !videoTrack.getCapabilities().torch) return;
-      try {
-        flashEnabled = !flashEnabled;
-        await videoTrack.applyConstraints({ advanced: [{ torch: flashEnabled }] });
-        flashBtn.textContent = flashEnabled ? "Flash On" : "Flash Off";
-      } catch (err) {
-        console.error("Flash toggle failed:", err);
-      }
+      flashEnabled = !flashEnabled;
+      try { await videoTrack.applyConstraints({ advanced: [{ torch: flashEnabled }] }); flashBtn.textContent = flashEnabled ? "Flash On" : "Flash Off"; }
+      catch (err) { console.error("Flash toggle failed:", err); }
     }
     flashBtn.addEventListener("click", toggleFlash);
-  
-    // Render document step instructions
+
     function renderStep() {
-      if (totalSteps === 0) {
-        docLabel.textContent = "No documents required";
-        docHint.textContent = "";
-        controlContainer.style.display = 'none';
-        return;
-      }
+      if (totalSteps === 0) { docLabel.textContent = "No documents required"; docHint.textContent = ""; controlContainer.style.display = 'none'; return; }
       const doc = requiredDocuments[currentStep];
       docLabel.textContent = `Capture ${doc.name}`;
       docHint.textContent  = `Position the document, capture, then adjust the crop.`;
       backBtn.disabled = currentStep === 0;
       nextBtn.textContent = "Capture";
     }
-  
-    // Capture & crop flow
-    nextBtn.onclick = async function() {
-      nextBtn.disabled = true;
-      nextBtn.textContent = "Capturing...";
-      flashBtn.hidden = true;
-  
-      const capturedBlob = await capturePhoto();
-      if (capturedBlob) {
-        if (originalBlobUrl) URL.revokeObjectURL(originalBlobUrl);
-        originalBlobUrl = URL.createObjectURL(capturedBlob);
-        cropImage.src = originalBlobUrl;
-  
-        // Switch to crop UI
-        cameraContainer.classList.add("hidden");
-        controlContainer.classList.add("hidden");
-        instructionContainer.classList.add("hidden");
-        cropContainer.classList.remove("hidden");
-  
-        cropImage.onload = () => {
-          if (cropperInstance) {
-            cropperInstance.destroy();
-          }
-          cropperInstance = new Cropper(cropImage, {
-            aspectRatio: 0,
-            viewMode: 1,
-            background: false,
-            autoCropArea: 0.9,
-            zoomable: false,
-          });
-          nextBtn.disabled = false;
-          nextBtn.textContent = "Capture";
-          renderStep();
-        };
-        cropImage.onerror = () => {
-          console.error("Error loading image into cropper.");
-          // Instead of alert, update the instruction text
-          docHint.textContent = "Failed to load captured image. Please try again.";
-          resetToCamera();
-        };
-      } else {
-        docHint.textContent = "Failed to capture photo. Please try again.";
-        nextBtn.disabled = false;
-        renderStep();
-        flashBtn.hidden = !videoTrack?.getCapabilities().torch;
-      }
+
+    nextBtn.onclick = async () => {
+      nextBtn.disabled = true; nextBtn.textContent = "Capturing..."; flashBtn.hidden = true;
+      const blob = await capturePhoto();
+      if (!blob) { docHint.textContent = "Failed to capture photo. Please try again."; nextBtn.disabled = false; renderStep(); flashBtn.hidden = !videoTrack?.getCapabilities().torch; return; }
+
+      if (originalBlobUrl) URL.revokeObjectURL(originalBlobUrl);
+      originalBlobUrl = URL.createObjectURL(blob); cropImage.src = originalBlobUrl;
+      cameraContainer.classList.add("hidden"); controlContainer.classList.add("hidden"); instructionContainer.classList.add("hidden"); cropContainer.classList.remove("hidden");
+
+      cropImage.onload = () => {
+        if (cropperInstance) cropperInstance.destroy();
+        cropperInstance = new Cropper(cropImage, { aspectRatio: 0, viewMode: 1, background: false, autoCropArea: 0.9, zoomable: false });
+        nextBtn.disabled = false; nextBtn.textContent = "Capture"; renderStep();
+      };
+      cropImage.onerror = () => { docHint.textContent = "Failed to load image. Please try again."; resetToCamera(); };
     };
-  
+
     async function capturePhoto() {
-      if (!cameraPreview.srcObject || !cameraPreview.videoWidth) {
-        console.error("Video stream not ready.");
-        return null;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = cameraPreview.videoWidth;
-      canvas.height = cameraPreview.videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
-  
-      try {
-        const blob = await new Promise((resolve, reject) => {
-          canvas.toBlob(blob => {
-            if (blob) resolve(blob);
-            else reject(new Error("Canvas to Blob conversion failed"));
-          }, 'image/jpeg', 0.9);
-        });
-        console.log("Photo captured (uncropped), size:", (blob.size / 1024).toFixed(2), "KB");
-        return blob;
-      } catch (error) {
-        console.error("Error capturing photo:", error);
-        return null;
-      }
+      const video = cameraPreview;
+      if (!video.srcObject) return null;
+      const canvas = document.createElement('canvas'); canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d'); ctx.drawImage(video, 0, 0);
+      return new Promise((res, rej) => canvas.toBlob(b => b ? res(b) : rej(), 'image/jpeg', 0.9));
     }
-  
-    // Crop actions
-    confirmCropBtn.onclick = function() {
-      confirmCropBtn.disabled = true;
-      cancelCropBtn.disabled = true;
-      confirmCropBtn.textContent = 'Processing...';
-      if (!cropperInstance) return;
+
+    confirmCropBtn.onclick = () => {
+      confirmCropBtn.disabled = true; cancelCropBtn.disabled = true; confirmCropBtn.textContent = 'Processing...';
       cropperInstance.getCroppedCanvas().toBlob(async (blob) => {
-        if (blob) {
-          imageBlob = blob;
-          console.log("Cropped blob size:", (imageBlob.size / 1024).toFixed(2), "KB");
-          cleanupCropper();
-  
-          const doc = requiredDocuments[currentStep];
-          const filename = `${doc.name.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.jpg`;
-          const docFile = new File([imageBlob], filename, { type: 'image/jpeg' });
-          requiredDocuments[currentStep].file = docFile;
-          console.log(`Confirmed cropped file for ${doc.name}:`, docFile.name);
-          imageBlob = null;
-  
-          if (currentStep < totalSteps - 1) {
-            currentStep++;
-            resetToCamera();
-            renderStep();
-          } else {
-            await submitDocuments();
-          }
-        } else {
-          console.error("Cropped blob is null.");
-          docHint.textContent = "Image crop failed. Please try again.";
-          confirmCropBtn.disabled = false;
-          cancelCropBtn.disabled = false;
-          confirmCropBtn.textContent = 'Confirm Crop';
-        }
+        if (!blob) { docHint.textContent = "Image crop failed."; confirmCropBtn.disabled = false; cancelCropBtn.disabled = false; confirmCropBtn.textContent = 'Confirm Crop'; return; }
+        const doc = requiredDocuments[currentStep];
+        const filename = `${doc.name.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.jpg`;
+        requiredDocuments[currentStep].file = new File([blob], filename, { type: 'image/jpeg' });
+        cleanupCropper();
+        if (currentStep < totalSteps - 1) { currentStep++; resetToCamera(); renderStep(); }
+        else { await submitDocuments(); }
       }, 'image/jpeg', 0.9);
     };
-  
-    cancelCropBtn.onclick = function() {
-      console.log("Crop cancelled.");
-      cleanupCropper();
-      resetToCamera();
-    };
-  
-    function cleanupCropper() {
-      if (cropperInstance) {
-        cropperInstance.destroy();
-        cropperInstance = null;
-      }
-      if (originalBlobUrl) {
-        URL.revokeObjectURL(originalBlobUrl);
-        originalBlobUrl = null;
-        cropImage.src = '';
-      }
-      cropContainer.classList.add("hidden");
-      confirmCropBtn.disabled = false;
-      cancelCropBtn.disabled = false;
-      confirmCropBtn.textContent = 'Confirm Crop';
-    }
-  
-    function resetToCamera() {
-      cleanupCropper();
-      cropContainer.classList.add("hidden");
-      cameraContainer.classList.remove("hidden");
-      controlContainer.classList.remove("hidden");
-      instructionContainer.classList.remove("hidden");
-  
-      if (!videoStream) {
-        initCamera().then(() => {
-          flashBtn.hidden = !videoTrack?.getCapabilities().torch;
-        });
-      } else {
-        flashBtn.hidden = !videoTrack?.getCapabilities().torch;
-      }
-    }
-  
-    function stopVideoStream() {
-      if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        console.log("Video stream stopped.");
-      }
-      videoStream = null;
-      videoTrack = null;
-      if (cameraPreview) cameraPreview.srcObject = null;
-    }
-  
-    function prevStep() {
-      if (currentStep > 0) {
-        currentStep--;
-        if (requiredDocuments[currentStep]) {
-          requiredDocuments[currentStep].file = null;
-        }
-        resetToCamera();
-        renderStep();
-      }
-    }
-  
+    cancelCropBtn.onclick = () => { cleanupCropper(); resetToCamera(); };
+
+    function cleanupCropper() { if (cropperInstance) cropperInstance.destroy(); cropperInstance = null; if (originalBlobUrl) URL_revokeObjectURL(originalBlobUrl); cropContainer.classList.add("hidden"); confirmCropBtn.disabled = cancelCropBtn.disabled = false; confirmCropBtn.textContent = 'Confirm Crop'; }
+
+    function resetToCamera() { cleanupCropper(); cameraContainer.classList.remove("hidden"); controlContainer.classList.remove("hidden"); instructionContainer.classList.remove("hidden"); if (videoStream) checkFlashSupport(); else initCamera(); }
+
+    function stopVideoStream() { if (videoStream) videoStream.getTracks().forEach(t => t.stop()); videoStream = null; if (cameraPreview) cameraPreview.srcObject = null; }
+
+    function prevStep() { if (currentStep > 0) { currentStep--; requiredDocuments[currentStep].file = null; resetToCamera(); renderStep(); } }
+
     async function submitDocuments() {
-      console.log("Preparing to submit documents...");
-      const formData = new FormData();
-      let filesAttached = 0;
-  
-      requiredDocuments.forEach((doc) => {
-        if (doc.file instanceof File) {
-          formData.append(`files`, doc.file, doc.file.name);
-          filesAttached++;
-        } else {
-          console.warn(`No valid file captured for document: ${doc.name}`);
-        }
-      });
-  
-      if (filesAttached === 0 && totalSteps > 0) {
-        docHint.textContent = "No documents captured to submit.";
-        resetToCamera();
-        renderStep();
-        return;
-      }
-  
-      if (filesAttached < totalSteps) {
-        if (!confirm(`Only ${filesAttached} out of ${totalSteps} documents captured. Submit anyway?`)) {
-          resetToCamera();
-          renderStep();
-          return;
-        }
-      }
-  
+      loaderOverlay.classList.remove('hidden');
+      stopVideoStream();
       instructionContainer.classList.remove('hidden');
       docLabel.textContent = "Submitting...";
       docHint.textContent = "Please wait.";
-      controlContainer.classList.add('hidden');
-      cameraContainer.classList.add('hidden');
-      cropContainer.classList.add('hidden');
-      stopVideoStream();
-  
+      controlContainer.classList.add('hidden'); cameraContainer.classList.add('hidden'); cropContainer.classList.add('hidden'); flashBtn.hidden = true;
+
+      const formData = new FormData(); let attached = 0;
+      requiredDocuments.forEach(d => { if (d.file) { formData.append('files', d.file, d.file.name); attached++; } });
+      if (attached === 0) return;
+
       try {
-        const response = await fetch(`/upload-documents/${serviceRequestId}`, {
-          method: 'POST',
-          body: formData
-        });
-  
-        if (response.ok) {
-          const result = await response.json();
-          console.log("Upload successful:", result);
+        const res = await fetch(`/upload-documents/${serviceRequestId}`, { method: 'POST', body: formData });
+        loaderOverlay.classList.add('hidden');
+        if (res.ok) {
           docLabel.textContent = "Upload Complete";
           docHint.textContent = "Your documents have been submitted successfully.";
+          showUploadedDocs();
         } else {
-          let errorMsg = `Upload failed: ${response.status}`;
-          try {
-            const result = await response.json();
-            errorMsg += ` - ${result.error || result.message || JSON.stringify(result)}`;
-          } catch (e) {
-            errorMsg += ` - ${response.statusText}`;
-          }
-          console.error("Upload failed:", errorMsg);
-          alert(errorMsg);
-          currentStep = 0;
-          resetToCamera();
-          renderStep();
+          const err = await res.json().catch(() => ({}));
+          alert(`Upload failed: ${res.status} - ${err.error||err.message||res.statusText}`);
+          currentStep = 0; resetToCamera(); renderStep();
         }
-      } catch (error) {
-        console.error("Error during submission:", error);
-        alert("A network error occurred while uploading. Please try again.");
-        currentStep = 0;
-        resetToCamera();
-        renderStep();
+      } catch (e) {
+        loaderOverlay.classList.add('hidden');
+        alert("A network error occurred. Please try again.");
+        currentStep = 0; resetToCamera(); renderStep();
       }
     }
-  
+
     window.addEventListener('beforeunload', stopVideoStream);
     document.addEventListener('DOMContentLoaded', () => {
-      if (totalSteps === 0) {
-        renderStep();
-        stopVideoStream();
+      showUploadedDocs();
+      if (requiredDocuments.every(d => d.fileData)) {
+        // all already uploaded
+        cameraContainer.classList.add('hidden');
+        controlContainer.classList.add('hidden');
+        instructionContainer.classList.add('hidden');
+      } else if (totalSteps === 0) {
+        renderStep(); stopVideoStream();
       } else {
-        initCamera();
-        renderStep();
+        initCamera(); renderStep();
       }
     });
   </script>
