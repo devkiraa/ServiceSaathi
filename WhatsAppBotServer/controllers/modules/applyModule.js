@@ -24,7 +24,6 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         }
       } catch (err) {
         console.error('Error polling status:', err.response?.data || err.message);
-        // Optionally clearInterval(interval) on persistent errors
       }
     }, 10 * 1000);
   }
@@ -33,26 +32,6 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
     process: async (Body, user, From) => {
       const lower = Body.trim().toLowerCase();
       const num   = parseInt(Body, 10);
-
-      // Handle cancel command
-      if (lower === '/cancel') {
-        const lastApp = user.applications[user.applications.length - 1];
-        if (!lastApp) {
-          return sendMessage(From, 'You have no active service request to cancel.');
-        }
-        try {
-          const { data } = await axios.delete(
-            `${DOCUMENT_SERVICE_API_BASE}/service-request/${lastApp.serviceRequestId}/cancel`
-          );
-          // remove from user record
-          user.applications = user.applications.filter(app => app.serviceRequestId !== lastApp.serviceRequestId);
-          await user.save();
-          return sendMessage(From, data.message || 'Service request cancelled successfully.');
-        } catch (err) {
-          console.error('Error cancelling request:', err.response?.data || err.message);
-          return sendMessage(From, 'Failed to cancel request. Please try again later.');
-        }
-      }
 
       // Helper: resend main menu
       function sendMainMenu() {
@@ -70,7 +49,29 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         );
       }
 
-      // 0: cancel flow
+      // /cancel: cancel last service request
+      if (lower === '/cancel') {
+        const last = user.applications.slice(-1)[0];
+        if (!last) {
+          await sendMessage(From, "You have no active service requests to cancel.");
+          return sendMainMenu();
+        }
+        try {
+          await axios.post(
+            `${DOCUMENT_SERVICE_API_BASE}/service-request/${last.serviceRequestId}/cancel`
+          );
+          // remove from user record
+          user.applications = user.applications.filter(a => a.serviceRequestId !== last.serviceRequestId);
+          await user.save();
+          await sendMessage(From, '❌ Your service request has been cancelled.');
+        } catch (err) {
+          console.error('Error cancelling request:', err.response?.data || err.message);
+          await sendMessage(From, 'Failed to cancel. Please try again later.');
+        }
+        return sendMainMenu();
+      }
+
+      // 0: cancel all
       if (lower === '0') {
         delete user.applyState;
         user.applyDataTemp = {};
@@ -96,9 +97,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
             delete user.applyDataTemp.documentName;
             await user.save();
             {
-              const subs = await CentreModel.distinct(
-                'subdistrict', { district: user.applyDataTemp.district }
-              );
+              const subs = await CentreModel.distinct('subdistrict', { district: user.applyDataTemp.district });
               return sendMessage(From,
                 `*Select subdistrict:* (0️⃣ Cancel, back to district)\n` +
                 subs.map((s,i)=>`${i+1}. ${s}`).join('\n')
@@ -260,11 +259,11 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
           // send confirmation + link + cancel hint
           await sendMessage(From,
             `*${data.message}*\n` +
-            `Request ID: ${data.serviceRequestId} (keep this safe)\n` +
+            `Request ID: ${data.serviceRequestId}\n` +
             `Required Docs:\n${data.requiredDocuments.map(d => `• ${d.name}`).join('\n')}` +
             `\nUpload: ${data.uploadLink}` +
             `\n
-To cancel this request at any time, send /cancel.`
+To cancel this request at any time, reply with /cancel`
           );
 
           // start polling
@@ -285,3 +284,4 @@ To cancel this request at any time, send /cancel.`
     }
   };
 };
+  
