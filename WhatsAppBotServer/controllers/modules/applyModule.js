@@ -11,12 +11,30 @@ const DISTRICTS = [
 ];
 
 module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
+  // Helper: poll status endpoint every minute and notify on 'submitted'
+  async function pollStatus(requestId, to) {
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await axios.get(
+          `${DOCUMENT_SERVICE_API_BASE}/service-request/${requestId}/status`
+        );
+        if (data.status === 'submitted') {
+          await sendMessage(to, '✅ Your documents have been received successfully!');
+          clearInterval(interval);
+        }
+      } catch (err) {
+        console.error('Error polling status:', err.response?.data || err.message);
+        // Optionally clearInterval(interval) on persistent errors
+      }
+    }, 10 * 1000);
+  }
+
   return {
     process: async (Body, user, From) => {
       const lower = Body.trim().toLowerCase();
       const num   = parseInt(Body, 10);
 
-      // — HELPER: re‑send top‑level menu in the user’s language
+      // Helper: resend main menu
       function sendMainMenu() {
         if (user.language === 'malayalam') {
           return sendMessage(From,
@@ -32,7 +50,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         );
       }
 
-      // 0️⃣ Full cancel — tear down everything, then main menu
+      // 0: cancel all
       if (lower === '0') {
         delete user.applyState;
         user.applyDataTemp = {};
@@ -41,7 +59,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         return sendMainMenu();
       }
 
-      // 🔙 Back — step one level up
+      // back: step up
       if (lower === 'back') {
         switch (user.applyState) {
           case 'subdistrict':
@@ -59,8 +77,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
             await user.save();
             {
               const subs = await CentreModel.distinct(
-                'subdistrict',
-                { district: user.applyDataTemp.district }
+                'subdistrict', { district: user.applyDataTemp.district }
               );
               return sendMessage(From,
                 `*Select subdistrict:* (0️⃣ Cancel, back to district)\n` +
@@ -71,10 +88,9 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
             user.applyState = 'document';
             delete user.applyDataTemp.centres;
             await user.save();
-            // fall through to document prompt below
+            // fall through to document prompt
             break;
           default:
-            // nothing to go back to — cancel
             delete user.applyState;
             user.applyDataTemp = {};
             user.lastOption    = null;
@@ -83,7 +99,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         }
       }
 
-      // ▶️ STEP 1: start at district
+      // STEP 1: start at district
       if (!user.applyState) {
         user.applyState    = 'district';
         user.applyDataTemp = {};
@@ -94,7 +110,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         );
       }
 
-      // 🗺️ STEP 2: district → subdistrict
+      // STEP 2: district → subdistrict
       if (user.applyState === 'district') {
         if (isNaN(num) || num < 1 || num > DISTRICTS.length) {
           return sendMessage(From,
@@ -105,17 +121,13 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         user.applyState             = 'subdistrict';
         await user.save();
 
-        const subs = await CentreModel.distinct(
-          'subdistrict',
-          { district: user.applyDataTemp.district }
-        );
+        const subs = await CentreModel.distinct('subdistrict', { district: user.applyDataTemp.district });
         if (!subs.length) {
           user.applyState = 'district';
           await user.save();
           return sendMessage(From,
             `No subdistricts in ${user.applyDataTemp.district}. Try again:\n` +
-            DISTRICTS.map((d,i)=>`${i+1}. ${d}`).join('\n') +
-            `\n0️⃣ Cancel`
+            DISTRICTS.map((d,i)=>`${i+1}. ${d}`).join('\n') + `\n0️⃣ Cancel`
           );
         }
         return sendMessage(From,
@@ -124,12 +136,9 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         );
       }
 
-      // 📄 STEP 3: subdistrict → document list
+      // STEP 3: subdistrict → document
       if (user.applyState === 'subdistrict') {
-        const subs = await CentreModel.distinct(
-          'subdistrict',
-          { district: user.applyDataTemp.district }
-        );
+        const subs = await CentreModel.distinct('subdistrict', { district: user.applyDataTemp.district });
         if (isNaN(num) || num < 1 || num > subs.length) {
           return sendMessage(From,
             `Invalid. Enter 1–${subs.length} or 0️⃣ to cancel.`
@@ -146,7 +155,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         );
       }
 
-      // 🏥 STEP 4: document → centre list
+      // STEP 4: document → centre
       if (user.applyState === 'document') {
         const services = await ServiceModel.find().sort({ name: 1 });
         if (isNaN(num) || num < 1 || num > services.length) {
@@ -192,7 +201,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         );
       }
 
-      // 📝 STEP 5: centre → API → persist → teardown
+      // STEP 5: centre → create request → teardown
       if (user.applyState === 'centre') {
         const list = user.applyDataTemp.centres || [];
         if (isNaN(num) || num < 1 || num > list.length) {
@@ -202,15 +211,15 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         }
         const chosen = list[num-1];
         try {
-          // Include mobile-number in the service request payload
           const { data } = await axios.post(
             `${DOCUMENT_SERVICE_API_BASE}/service-request`,
             {
-              "document-type":   user.applyDataTemp.documentType,
-              "centre-id":       chosen.centreId,
-              "mobile-number":   user.phoneNumber
+              "document-type": user.applyDataTemp.documentType,
+              "centre-id":     chosen.centreId,
+              "mobile-number": user.phoneNumber
             }
           );
+
           // persist
           user.applications.push({
             district:         user.applyDataTemp.district,
@@ -219,33 +228,36 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
             documentType:     user.applyDataTemp.documentType,
             documentName:     user.applyDataTemp.documentName,
             serviceRequestId: data.serviceRequestId,
-            requiredDocuments: data.requiredDocuments.map(d=>({
-              name: d.name,
-              uploadedFile: d.uploadedFile || ""
-            })),
+            requiredDocuments: data.requiredDocuments.map(d => ({ name: d.name, uploadedFile: d.uploadedFile || "" })),
             uploadLink:       data.uploadLink
           });
+
           // teardown
           delete user.applyState;
           user.lastOption    = null;
           user.applyDataTemp = {};
           await user.save();
 
-          return sendMessage(From,
+          // send confirmation + link
+          await sendMessage(From,
             `*${data.message}*\n` +
             `Request ID: ${data.serviceRequestId}\n` +
-            `Required Docs:\n${data.requiredDocuments.map(d=>`• ${d.name}`).join('\n')}` +
+            `Required Docs:\n${data.requiredDocuments.map(d => `• ${d.name}`).join('\n')}` +
             `\nUpload: ${data.uploadLink}`
           );
+
+          // start polling
+          pollStatus(data.serviceRequestId, From);
         } catch (err) {
           console.error("❌ API error:", err.response?.data || err.message);
           return sendMessage(From,
             "Error creating request. Try again later or 0️⃣ to cancel."
           );
         }
+        return;
       }
 
-      // 🔚 Fallback
+      // Fallback
       return sendMessage(From,
         "Unexpected state. Type 'hi' to restart or 0️⃣ to cancel."
       );

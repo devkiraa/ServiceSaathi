@@ -3,10 +3,9 @@ const Chat   = require('../models/chat');
 const User   = require('../models/wha-user');
 const client = require('../config/twilio');
 
-module.exports = function({ CHAT_API_BASE,DOCUMENT_SERVICE_API_BASE }) {
-  //
+module.exports = function({ CHAT_API_BASE, DOCUMENT_SERVICE_API_BASE }) {
+  
   // ─── HELPERS ────────────────────────────────────────────────────────────────
-  //
   const storeChatMessage = async (userPhone, message, direction) => {
     try {
       await Chat.create({ userPhone, message, direction });
@@ -25,28 +24,25 @@ module.exports = function({ CHAT_API_BASE,DOCUMENT_SERVICE_API_BASE }) {
       });
       await storeChatMessage(to.replace("whatsapp:", ""), body, 'outbound');
     } catch (err) {
-      console.error(`Error sending message to ${to}:`, err); // <-- Improve error logging
+      console.error(`Error sending message to ${to}:`, err);
     }
   };
 
-  //
   // ─── LOAD MODULES ───────────────────────────────────────────────────────────
-  //
   const languageModule = require('./modules/languageModule')(sendMessage);
   const applyModule    = require('./modules/applyModule')(sendMessage, DOCUMENT_SERVICE_API_BASE);
   const optionModule   = require('./modules/optionModule')(sendMessage, applyModule);
   const chatModule     = require('./modules/chatModule')(sendMessage, CHAT_API_BASE);
+  const statusModule   = require('./modules/statusModule')(sendMessage, DOCUMENT_SERVICE_API_BASE);
 
-  //
   // ─── HANDLER: Inbound user messages ─────────────────────────────────────────
-  //
   const handleMessage = async (req, res) => {
     const Body      = (req.body.Body || "").trim();
     const From      = (req.body.From || "").trim();
     const userPhone = From.replace(/^whatsapp:/i, "");
 
     if (!Body || Body.toLowerCase() === "ok") {
-        return res.status(204).end();
+      return res.status(204).end();
     }
     await storeChatMessage(userPhone, Body, 'inbound');
 
@@ -59,12 +55,18 @@ module.exports = function({ CHAT_API_BASE,DOCUMENT_SERVICE_API_BASE }) {
 
     const lower = Body.toLowerCase();
 
-    // /LANG → reset
+    // /LANG → reset language
     if (lower === "/lang") {
       user.language   = null;
       user.lastOption = null;
       await user.save();
       await languageModule.prompt(From);
+      return res.sendStatus(200);
+    }
+
+    // /SERVICE → fetch all service requests
+    if (lower === "/service") {
+      await statusModule.checkAll(user, From);
       return res.sendStatus(200);
     }
 
@@ -115,9 +117,7 @@ module.exports = function({ CHAT_API_BASE,DOCUMENT_SERVICE_API_BASE }) {
     return res.sendStatus(200);
   };
 
-  //
   // ─── HANDLER: Delivery status callbacks ─────────────────────────────────────
-  //
   const handleStatusCallback = (req, res) => res.sendStatus(200);
 
   return { handleMessage, handleStatusCallback };
