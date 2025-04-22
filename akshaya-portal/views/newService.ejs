@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
   <script src="/js/tailwindConfig.js"></script>
-  <script src="/js/admindash.js"></script>
+  <script src="/js/newService.js"></script>
   <link rel="stylesheet" href="/css/admindash.css">
   <style>
     .error { color: red; margin-bottom: 1em; }
@@ -147,31 +147,11 @@
 
           <div class="flex justify-end space-x-4">
             <button type="submit" class="px-4 py-2 bg-primary text-white rounded hover:bg-secondary transition">Create Service</button>
-            <a href="/services" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</a>
+            <a href="/view-services" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</a>
           </div>
         </form>
       </section>
     </main>
   </div>
-
-  <script>
-    document.getElementById('add-btn').addEventListener('click', () => {
-      const container = document.getElementById('documents-container');
-      const div = document.createElement('div');
-      div.className = 'doc-row';
-      div.innerHTML = `
-        <input type="text" name="requiredDocuments" placeholder="Document Name" required class="block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-        <button type="button" class="remove-btn ml-2 text-red-500 hover:text-red-700">Remove</button>
-      `;
-      container.appendChild(div);
-    });
-
-    document.getElementById('documents-container').addEventListener('click', (e) => {
-      if (e.target.classList.contains('remove-btn')) {
-        const row = e.target.closest('.doc-row');
-        row.remove();
-      }
-    });
-  </script>
 </body>
 </html>
