@@ -236,20 +236,20 @@ router.get('/service-request/:id/status', async (req, res) => {
 });
 
 // Cancel a service request by ID
-router.delete('/service-request/:id/cancel', async (req, res) => {
+router.post('/service-request/:id/cancel', async (req, res) => {
   try {
     const { id } = req.params;
-
     const serviceRequest = await ServiceRequest.findById(id);
+
     if (!serviceRequest) {
       return res.status(404).json({ error: 'Service request not found' });
     }
 
-    await ServiceRequest.findByIdAndDelete(id);
+    await ServiceRequest.deleteOne({ _id: id });
 
-    res.status(200).json({ message: 'Service request cancelled and removed successfully' });
+    res.status(200).json({ message: 'Service request cancelled and deleted successfully' });
   } catch (error) {
-    console.error("Error cancelling service request:", error);
+    console.error('Error cancelling service request:', error);
     res.status(500).json({ error: error.message });
   }
 });

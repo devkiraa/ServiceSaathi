@@ -4,7 +4,6 @@ const User   = require('../models/wha-user');
 const client = require('../config/twilio');
 
 module.exports = function({ CHAT_API_BASE, DOCUMENT_SERVICE_API_BASE }) {
-  
   // ─── HELPERS ────────────────────────────────────────────────────────────────
   const storeChatMessage = async (userPhone, message, direction) => {
     try {
@@ -67,6 +66,12 @@ module.exports = function({ CHAT_API_BASE, DOCUMENT_SERVICE_API_BASE }) {
     // /SERVICE → fetch all service requests
     if (lower === "/service") {
       await statusModule.checkAll(user, From);
+      return res.sendStatus(200);
+    }
+
+    // /CANCEL → cancel the last service request
+    if (lower === "/cancel") {
+      await applyModule.process(Body, user, From);
       return res.sendStatus(200);
     }
 
