@@ -30,7 +30,7 @@ module.exports = function({ CHAT_API_BASE, DOCUMENT_SERVICE_API_BASE }) {
   // ─── LOAD MODULES ───────────────────────────────────────────────────────────
   const languageModule = require('./modules/languageModule')(sendMessage);
   const applyModule    = require('./modules/applyModule')(sendMessage, DOCUMENT_SERVICE_API_BASE);
-  const optionModule   = require('./modules/optionModule')(sendMessage, applyModule);
+  const optionModule   = require('./modules/optionModule')(sendMessage, applyModule, CHAT_API_BASE);
   const chatModule     = require('./modules/chatModule')(sendMessage, CHAT_API_BASE);
   const statusModule   = require('./modules/statusModule')(sendMessage, DOCUMENT_SERVICE_API_BASE);
 
