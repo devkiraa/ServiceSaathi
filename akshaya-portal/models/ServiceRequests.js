@@ -26,7 +26,8 @@ const serviceRequestSchema = new mongoose.Schema({
     },
     fileData: { // Stores the Base64 encoded file data
       type: String
-    }
+    },
+    
   }],
   uploadToken: {
     type: String
@@ -34,7 +35,10 @@ const serviceRequestSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  customerName:{
+    type:String
   }
 });
 
-module.exports = mongoose.model('ServiceRequest', serviceRequestSchema);
+module.exports = mongoose.model('ServiceRequests', serviceRequestSchema);

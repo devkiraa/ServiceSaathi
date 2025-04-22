@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const User = require('../models/User');
 const Service = require('../models/Service');
-const ServiceRequest = require('../models/ServiceRequest');
+const ServiceRequest = require('../models/ServiceRequests');
 const Centre = require('../models/Centre'); // To check centre details
 
 const multer = require('multer');

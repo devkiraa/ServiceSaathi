@@ -38,6 +38,8 @@
     main {
       margin-left: 260px; /* Slightly more than the sidebar width */
       padding: 20px;
+      
+    
     }
 
     /* Responsive Design */
@@ -49,12 +51,14 @@
         margin-left: 0; /* No offset on small screens */
       }
     }
-
+   
     /* Table Styling */
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      
     }
 
     th, td {
@@ -94,7 +98,133 @@
     .action-buttons button.delete:hover {
       color: #EF4444; /* Delete icon hover color */
     }
+    .group {
+      display: flex;
+      line-height: 28px;
+      align-items: center;
+      position: relative;
+      max-width:100%;
+    }
 
+    .input {
+      width: 1028px;
+      max-width:100%;
+      height: 40px;
+      line-height: 28px;
+      margin-top:20px;
+      padding: 0 1rem;
+      margin-left:80px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      outline: none;
+      background-color: #ffff;
+      color: #0d0c22;
+      transition: .2s ease;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .input::placeholder {
+      color: #9e9ea7;
+      padding-left:40px;
+    
+    }
+    
+
+   .input:focus, input:hover {
+      outline: none;
+      border-color:rgba(186, 180, 214, 0.4);
+      background-color: #fff;
+      box-shadow: 0 0 0 1px rgba(83, 49, 128, 0.1);
+    } 
+
+    .icon {
+      position: absolute;
+      left: 1rem;
+      fill: #9e9ea7;
+      width: 1.5rem;
+      height: 1.2rem;
+      margin-left:80px;
+      display: flex;
+       z-index: 1; 
+    }
+
+    /* Filter Button Styling */
+    .filterbtn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0 90px;
+    }
+
+    .filterbtn img {
+      width: 1.2em;
+      height: 1.2em;
+      color: #6b7280; /* Slightly muted gray */
+    }
+
+    .filterbtn:hover img {
+      filter: brightness(0.8); /* Darker effect on hover */
+    }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      overflow: hidden;
+      z-index: 10;
+      padding: 5px;
+    }
+
+    .dropdown-menu.active {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 0.25rem 1.5rem;
+      cursor: pointer;
+      color: #374151;
+      transition: background-color 0.2s ease;
+      font-size: medium;
+      display:100%;
+      
+    }
+    #dd1
+    {
+      
+      font-weight:500;
+      color:rgb(228, 17, 17);
+    }
+    #dd2
+    {
+      font-weight:500;
+      color:rgb(15, 102, 69);
+    }
+    #dd3
+    {
+      font-weight:500;
+      color:rgb(10, 10, 66);
+    }
+    .dropdown-item:hover {
+      background-color: #f3f4f6;
+    }
+    #container
+    {
+     margin-top:-80px;
+     }
+   
     /* Progress Bars */
     .progress-bar {
       width: 100%;
@@ -201,19 +331,40 @@
   <!-- Main Content -->
   <div class="flex ml-56 pt-16 bg-bg-light min-h-screen">
     <div class="container mx-auto p-6">
+      <!-- Search Bar -->
+      <div class="group mb-4">
+      <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+        <g>
+          <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
+        </g>
+      </svg>
+      <input placeholder="Search"  type="search" class="input">
+      <button class="filterbtn" id="dropdownButton">
+        <img src="../uploads/images/filter.svg" alt="" class="w-6 h-6 rounded-full">
+      </button>
+      
+      <div id="dropdownMenu" class="dropdown-menu">
+        <div class="dropdown-item" id="dd1" onclick="filterTable('pending')">Pending</div>
+        <div class="dropdown-item"id="dd2" onclick="filterTable('approved')">Approved</div>
+        <div class="dropdown-item" id="dd3" onclick="filterTable('rejected')">Rejected</div>
+      </button> 
+    </div>
+    </div>
+    
+    <div class="container mx-auto p-20 "id="container">
       <!-- Service Requests Section -->
       <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Service Type
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Customer Name
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Mobile Number
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Service Type
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Application Date
@@ -233,16 +384,17 @@
               </tr>
             <% } else { %>
               <% serviceRequests.forEach(function(sr) { %>
-                <tr>
+                <tr  class="serviceRow">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <%= sr.documentType %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <%= user.username %>
+                    <%= sr.customerName %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <%= sr.serviceType %>
+                    <%= sr.mobileNumber %>
                   </td>
+                
                   <td class="px-6 py-4 whitespace-nowrap">
                     <%= sr.applicationDate %>
                   </td>
@@ -349,6 +501,44 @@
         alert("An error occurred while fetching documents.");
       }
     }
+    function formatDate(createdAt) {
+  // Parse the createdAt string into a Date object
+  const date = new Date(createdAt);
+
+  // Extract day, month, and year
+  const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+  const year = date.getFullYear();
+  // Return the formatted date as "DD-MM-YYYY"
+  return `${day}-${month}-${year}`;
+  
+                 
+}
+
+      // Search functionality for Centre Name/Number
+const searchInput = document.querySelector('.input'); // Select the search input field
+const tableRows = document.querySelectorAll('.serviceRow'); // Select all rows in the table
+
+searchInput.addEventListener('input', () => {
+  const searchTerm = searchInput.value.toLowerCase().trim(); // Get the search term and normalize it
+  tableRows.forEach(row => {
+    const documentTypeCell = row.querySelector('td:first-child'); // First column contains Centre Name/Number
+    const customerNameCell = row.querySelector('td:nth-child(2)');
+    const applicationDate = row.querySelector('td:nth-child(4)');
+    const Cell = row.querySelector('td:first-child'); 
+    if (documentTypeCell|| customerNameCell) {
+      const documentType = documentTypeCell ? documentTypeCell.textContent.toLowerCase() : '';
+      const customerName = customerNameCell ? customerNameCell.textContent.toLowerCase() : '';
+      
+      if (documentType.includes(searchTerm) || customerName.includes(searchTerm) || applicationDate.includes(searchTerm) ) {
+        row.style.display = ''; // Show matching rows
+      } 
+      else{
+        row.style.display = 'none'; // Hide non-matching rows
+      }
+    }
+  });
+});
     function closeModal() {
       document.getElementById('docModal').classList.add('hidden');
     }

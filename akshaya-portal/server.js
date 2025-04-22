@@ -30,7 +30,7 @@ app.use('/sendimage', express.static(path.join(__dirname, 'uploads/service-docum
 // Models
 const User = require('./models/User');
 const Document = require('./models/Document');
-const ServiceRequest = require('./models/ServiceRequest');
+const ServiceRequest = require('./models/ServiceRequests');
 
 // let upload; // Removed
 
@@ -152,7 +152,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
         user: req.session.user,
         serviceRequests: serviceRequests.map((sr) => ({
           documentType: sr.documentType,
-          mobileNumber: sr.mobileNumber,
+          mobileNumber: sr.mobileNumber, 
           status: sr.status,
           action: sr.action,
         })),
@@ -163,6 +163,53 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
       res.status(500).send("Server error: " + error.message);
     }
   });
+  app.get('/services', async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    try {
+      const user = await User.findOne({ _id: req.session.user.id });
+      if (!user) return res.status(404).send("User not found");
+  
+      // Fetch service requests for the user
+      const serviceRequests = await ServiceRequest.find({ userId: user._id });
+      // Format the createdAt date for each service request
+      const formattedRequests = serviceRequests.map(sr => ({
+      documentType: sr.documentType,
+      mobileNumber: sr.mobileNumber,
+      status: sr.status,
+      action: sr.action,
+      createdAt:sr.createdAt,
+      applicationDate: formatDate(sr.createdAt) // Call the corrected formatDate function      
+      }));
+      res.render('services', {
+        user: {
+          email: user.email,
+          shopName: user.shopName,
+          personName: user.personName,
+          centerId: user.centerId,
+          phone: user.phone,
+          district: user.district,
+          type: user.type,
+          services: user.services,
+          address: user.address.toObject()
+        },
+        serviceRequests: formattedRequests // Pass the formatted requests to the template
+        });
+      }catch (error) {
+        console.error("Error fetching user or data:", error);
+        res.status(500).send("Server error: " + error.message);
+      }
+      
+        function formatDate(createdAt) {
+          const date = new Date(createdAt);
+          const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits
+          const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+          const year = date.getFullYear();
+          return
+           `${day}-${month}-${year}`;
+        
+        }
+  });
+      
   app.get('/api/service-data', async (req, res) => {
     const { period } = req.query; // Extracts the 'period' query parameter
     try {
