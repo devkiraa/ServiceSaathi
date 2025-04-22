@@ -34,6 +34,26 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
       const lower = Body.trim().toLowerCase();
       const num   = parseInt(Body, 10);
 
+      // Handle cancel command
+      if (lower === '/cancel') {
+        const lastApp = user.applications[user.applications.length - 1];
+        if (!lastApp) {
+          return sendMessage(From, 'You have no active service request to cancel.');
+        }
+        try {
+          const { data } = await axios.delete(
+            `${DOCUMENT_SERVICE_API_BASE}/service-request/${lastApp.serviceRequestId}/cancel`
+          );
+          // remove from user record
+          user.applications = user.applications.filter(app => app.serviceRequestId !== lastApp.serviceRequestId);
+          await user.save();
+          return sendMessage(From, data.message || 'Service request cancelled successfully.');
+        } catch (err) {
+          console.error('Error cancelling request:', err.response?.data || err.message);
+          return sendMessage(From, 'Failed to cancel request. Please try again later.');
+        }
+      }
+
       // Helper: resend main menu
       function sendMainMenu() {
         if (user.language === 'malayalam') {
@@ -50,7 +70,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         );
       }
 
-      // 0: cancel all
+      // 0: cancel flow
       if (lower === '0') {
         delete user.applyState;
         user.applyDataTemp = {};
@@ -88,7 +108,6 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
             user.applyState = 'document';
             delete user.applyDataTemp.centres;
             await user.save();
-            // fall through to document prompt
             break;
           default:
             delete user.applyState;
@@ -238,12 +257,14 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
           user.applyDataTemp = {};
           await user.save();
 
-          // send confirmation + link
+          // send confirmation + link + cancel hint
           await sendMessage(From,
             `*${data.message}*\n` +
-            `Request ID: ${data.serviceRequestId}\n` +
+            `Request ID: ${data.serviceRequestId} (keep this safe)\n` +
             `Required Docs:\n${data.requiredDocuments.map(d => `• ${d.name}`).join('\n')}` +
-            `\nUpload: ${data.uploadLink}`
+            `\nUpload: ${data.uploadLink}` +
+            `\n
+To cancel this request at any time, send /cancel.`
           );
 
           // start polling
