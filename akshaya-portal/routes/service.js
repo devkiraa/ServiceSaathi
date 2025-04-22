@@ -22,8 +22,16 @@ router.get('/services', async (req, res) => {
     if (!user) return res.status(404).send("User not found");
 
     // Fetch service requests for the user
-    const serviceRequests = await ServiceRequest.find({ centreId: user.centerId });
-    
+    const serviceRequests = await ServiceRequest.find({ userId: user._id });
+    // Format the createdAt date for each service request
+    const formattedRequests = serviceRequests.map(sr => ({
+    documentType: sr.documentType,
+    mobileNumber: sr.mobileNumber,
+    status: sr.status,
+    action: sr.action,
+    createdAt:sr.createdAt,
+    applicationDate: formatDate(sr.createdAt) // Call the corrected formatDate function      
+    }));
     res.render('services', {
       user: {
         email: user.email,
@@ -36,12 +44,22 @@ router.get('/services', async (req, res) => {
         services: user.services,
         address: user.address.toObject()
       },
-      serviceRequests
-    });
-  } catch (error) {
-    console.error("Error fetching user or data:", error);
-    res.status(500).send("Server error: " + error.message);
-  }
+      serviceRequests: formattedRequests // Pass the formatted requests to the template
+      });
+    }catch (error) {
+      console.error("Error fetching user or data:", error);
+      res.status(500).send("Server error: " + error.message);
+    }
+    
+      function formatDate(createdAt) {
+        const date = new Date(createdAt);
+        const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const year = date.getFullYear();
+        return
+         `${day}-${month}-${year}`;
+      
+      }
 });
 
 // --- Create a new service request ---
