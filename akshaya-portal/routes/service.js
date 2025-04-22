@@ -22,7 +22,7 @@ router.get('/services', async (req, res) => {
     if (!user) return res.status(404).send("User not found");
 
     // Fetch service requests for the user
-    const serviceRequests = await ServiceRequest.find({ userId: user._id });
+    const serviceRequests = await ServiceRequest.find({ centreId: user.centerId });
     // Format the createdAt date for each service request
     const formattedRequests = serviceRequests.map(sr => ({
     documentType: sr.documentType,
