@@ -5,7 +5,8 @@ const Service = require('../models/Service');
 
 // GET: Render "Add New Service" form
 router.get('/services/new', (req, res) => {
-  res.render('newService', { error: null, formData: {} });
+  if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+  res.render('newService', { error: null, formData: {}, user: req.session.user, });
 });
 
 // POST: Handle creation of a new service
