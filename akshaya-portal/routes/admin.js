@@ -19,6 +19,19 @@ router.get('/admin-dashboard', async (req, res) => {
       res.status(500).send(error.message);
     }
   });
+
+// Admin centers route – only accessible to admins
+router.get('/centers-list', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+  try {
+    // Fetch centres (all) and counts
+    const centres = await Centre.find(); 
+    res.render('centerList', { centres, user: req.session.user });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
 // Pending centres route
 router.get('/pending-centres/:id', async (req, res) => {
   try {
