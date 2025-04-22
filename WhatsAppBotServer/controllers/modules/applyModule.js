@@ -202,11 +202,13 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE) {
         }
         const chosen = list[num-1];
         try {
+          // Include mobile-number in the service request payload
           const { data } = await axios.post(
             `${DOCUMENT_SERVICE_API_BASE}/service-request`,
             {
-              "document-type": user.applyDataTemp.documentType,
-              "centre-id":     chosen.centreId
+              "document-type":   user.applyDataTemp.documentType,
+              "centre-id":       chosen.centreId,
+              "mobile-number":   user.phoneNumber
             }
           );
           // persist

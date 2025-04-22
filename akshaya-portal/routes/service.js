@@ -222,6 +222,19 @@ router.get('/service-request/phone/:mobileNumber', async (req, res) => {
   }
 });
 
+router.get('/service-request/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const serviceRequest = await ServiceRequest.findById(id, 'status');
+    if (!serviceRequest) return res.status(404).json({ error: 'Service request not found' });
+
+    res.json({ status: serviceRequest.status });
+  } catch (error) {
+    console.error("Error fetching service request status:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/ping', (req, res) => res.json({ ok: true }));
 
 module.exports = router;
