@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Centres List</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
   <script src="/js/tailwindConfig.js"></script>
@@ -108,35 +108,8 @@
   <!-- Main Content -->
   <div class="flex ml-56 pt-20 bg-gray-100 min-h-screen">
     <main class="flex-1 p-6">
-      <!-- Dashboard Overview Section -->
-      <section id="dashboard-section">
-        <!-- Header -->
-        <div class="flex justify-between items-center bg-gray-200 shadow p-4 rounded-md mb-6">
-          <h2 class="text-xl font-semibold">Dashboard Overview</h2>
-          <span class="text-gray-700 font-medium">Admin</span>
-        </div>
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div class="bg-white p-4 rounded shadow">
-            <p class="text-sm text-gray-500">Total Centres</p>
-            <p class="text-2xl font-bold text-gray-800"><%= counts.total %></p>
-          </div>
-          <div class="bg-white p-4 rounded shadow">
-            <p class="text-sm text-gray-500">Approved Centres</p>
-            <p class="text-2xl font-bold text-green-600"><%= counts.approved %></p>
-          </div>
-          <div class="bg-white p-4 rounded shadow">
-            <p class="text-sm text-gray-500">Pending Approval</p>
-            <p class="text-2xl font-bold text-yellow-600"><%= counts.pending %></p>
-          </div>
-          <div class="bg-white p-4 rounded shadow">
-            <p class="text-sm text-gray-500">Rejected Centres</p>
-            <p class="text-2xl font-bold text-red-600"><%= counts.rejected %></p>
-          </div>
-        </div>
-      </section>
       <!-- Centres List Section -->
-      <section id="centres-section" class="hidden">
+      <section id="centres-section">
         <!-- Search Bar and Filter Icon -->
         <div class="mb-6 flex items-center justify-between">
           <!-- Search Bar -->
