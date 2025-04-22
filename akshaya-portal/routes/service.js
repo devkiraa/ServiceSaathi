@@ -80,7 +80,7 @@ router.post('/service-request', async (req, res) => {
     await serviceRequest.save();
 
     const responseDocs = serviceRequest.requiredDocuments;
-    const uploadLink = `${req.protocol}://${req.get('host')}/sendimage/${uploadToken}`;
+    const uploadLink = `https://${req.get('host')}/sendimage/${uploadToken}`;
     res.status(201).json({
       message: 'Service request created successfully',
       serviceRequestId: serviceRequest._id,
