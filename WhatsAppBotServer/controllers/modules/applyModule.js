@@ -11,7 +11,7 @@ const DISTRICTS = [
   "Kannur", "Kasaragod"
 ];
 
-const POLLING_INTERVAL_MS = 30 * 1000; // Increased polling interval to 30 seconds
+const POLLING_INTERVAL_MS = 10 * 1000; // Increased polling interval to 10 seconds
 const MAX_POLLING_ATTEMPTS = 60; // Poll for a maximum of 30 minutes (60 attempts * 30 seconds)
 const TERMINAL_STATUSES = ['submitted', 'rejected', 'failed', 'cancelled']; // Statuses that stop polling
 
@@ -175,7 +175,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE, logger, AXIOS_
           case 'subdistrict':
             user.applyState = 'district';
             user.applyDataTemp = { ...user.applyDataTemp, subdistrict: undefined }; // Clear specific field
-            message = `*Select district:* (0️⃣ Cancel)\n` +
+            message = `*Select district:* (0️⃣ Cancel)\n\n` +
               DISTRICTS.map((d, i) => `${i + 1}. ${d}`).join('\n');
             break;
           case 'document':
@@ -187,7 +187,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE, logger, AXIOS_
                 message = `No subdistricts found for ${user.applyDataTemp.district}. Returning to district selection.\n*Select district:* (0️⃣ Cancel)\n` + DISTRICTS.map((d, i) => `${i + 1}. ${d}`).join('\n');
                 user.applyState = 'district';
              } else {
-                message = `*Select subdistrict:* (0️⃣ Cancel, back to district)\n` +
+                message = `*Select subdistrict:* (0️⃣ Cancel, back to district)\n\n` +
                 subs.map((s, i) => `${i + 1}. ${s}`).join('\n');
              }
             break;
@@ -291,7 +291,7 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE, logger, AXIOS_
              }
              const prompt = user.language === 'malayalam'
                ? `*അപേക്ഷിക്കാനുള്ള ഡോക്യുമെന്റ് തിരഞ്ഞെടുക്കുക:* (0️⃣ റദ്ദാക്കുക, സബ്ഡിസ്ട്രിക്റ്റിലേക്ക് മടങ്ങാൻ 'back')\n` + services.map((s, i) => `${i + 1}. ${s.name}`).join('\n')
-               : `*Select document to apply for:* (0️⃣ Cancel, 'back' to return to subdistrict selection)\n` + services.map((s, i) => `${i + 1}. ${s.name}`).join('\n');
+               : `*Select document to apply for:* (0️⃣ Cancel, 'back' to return to subdistrict selection)\n\n` + services.map((s, i) => `${i + 1}. ${s.name}`).join('\n');
              return sendMessage(From, prompt);
          } catch (dbError) {
              logger.error("DB Error fetching services:", dbError);
@@ -347,11 +347,11 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE, logger, AXIOS_
              const prompt = user.language === 'malayalam'
                  ? `*കേന്ദ്രം തിരഞ്ഞെടുക്കുക:* (0️⃣ റദ്ദാക്കുക, ഡോക്യുമെന്റിലേക്ക് മടങ്ങാൻ 'back')\n\n` +
                    user.applyDataTemp.centres.map((c, i) =>
-                       `${i + 1}. ${c.centreName}\n📍 ${c.address}\n📞 ${c.contact || '-'}\n🆔 ${c.centreId}`
+                       `${i + 1}. ${c.centreName}\n👤 ${c.ownerName}\n📞 ${c.contact || '-'}\n🆔 ${c.centreId}`
                    ).join('\n\n')
                  : `*Select service centre:* (0️⃣ Cancel, 'back' to return to document selection)\n\n` +
                    user.applyDataTemp.centres.map((c, i) =>
-                       `${i + 1}. ${c.centreName}\n📍 ${c.address}\n📞 ${c.contact || '-'}\n🆔 ${c.centreId}`
+                       `${i + 1}.  ${c.centreName}\n👤  ${c.ownerName}\n📞 ${c.contact || '-'}\n🆔 ${c.centreId}`
                    ).join('\n\n');
 
              return sendMessage(From, prompt);
@@ -427,9 +427,9 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE, logger, AXIOS_
                     `\nഅപ്‌ലോഡ് ലിങ്ക്: ${uploadLink}` +
                     `\n\nഈ അഭ്യർത്ഥന റദ്ദാക്കാൻ എപ്പോൾ വേണമെങ്കിലും /cancel എന്ന് മറുപടി നൽകുക.`
                   : `*${data.message || 'Request submitted successfully.'}*\n` +
-                    `Request ID: ${data.serviceRequestId}\n` +
+                    `\nRequest ID: ${data.serviceRequestId}\n` +
                     `Required Documents:\n${requiredDocs.map(d => `• ${d.name}`).join('\n')}` +
-                    `\nUpload Link: ${uploadLink}` +
+                    `\n\nUpload Link: ${uploadLink}` +
                     `\n\nTo cancel this request at any time, reply with /cancel`;
               await sendMessage(From, confirmationMsg);
 
