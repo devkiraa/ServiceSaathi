@@ -7,7 +7,7 @@ const serviceRequestSchema = new mongoose.Schema({
   mobileNumber:{ type: String, required: true },
   status: {
     type: String,
-    enum: ['pending','started','submitted','approved','rejected','completed','reupload_required'],
+    enum: ['documents-uploading','pending','started','submitted','approved','rejected','completed','reupload_required'],
     default: 'pending'
   },
   requiredDocuments: [{

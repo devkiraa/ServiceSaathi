@@ -75,7 +75,7 @@ router.post('/service-request', async (req, res) => {
       centreId,
       mobileNumber,
       requiredDocuments: initialDocs,
-      status: 'started',
+      status: 'documents-uploading',
       uploadToken
     });
     await serviceRequest.save();
@@ -162,7 +162,7 @@ router.post(
 router.post('/application-status/:serviceRequestId', async (req, res) => {
   try {
     const { status } = req.body;
-    if (!["completed","started"].includes(status)) {
+    if (!["completed","started","documents-uploading"].includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
     }
     const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);

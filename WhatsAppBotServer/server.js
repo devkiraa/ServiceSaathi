@@ -35,6 +35,6 @@ app.listen(PORT, () => {
   console.log('📅 Start time:', new Date().toLocaleString());
   console.log('🌐 Environment:', process.env.NODE_ENV || 'development');
   console.log('💬 Chat API Base:', CHAT_API_BASE);
-  console.log('📄 Document Service API Base:', DOCUMENT_SERVICE_API_BASE);
+  console.log('📄 Document Service Web:', DOCUMENT_SERVICE_API_BASE);
   console.log('===================================\n');
 });
