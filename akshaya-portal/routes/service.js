@@ -21,7 +21,7 @@ router.get('/services', async (req, res) => {
     const user = await User.findOne({ _id: req.session.user.id });
     if (!user) return res.status(404).send("User not found");
 
-    const serviceRequests = await ServiceRequest.find({ centreId: user.centerId });
+    const serviceRequests = await ServiceRequest.find({ centreId: user.centerId, status:["submitted", "started", "completed"] });
     res.render('services', {
       user: {
         email: user.email,
@@ -120,6 +120,7 @@ router.post('/service-request/:id/reupload', async (req, res) => {
 
 // Continue Application Route (Fixed)
 router.get('/continue-application/:serviceRequestId', async (req, res) => {
+  if (!req.session.user) return res.redirect('/');
   try {
     const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
     if (!serviceRequest) {

@@ -96,21 +96,61 @@
   <!-- Main Content -->
   <div class="flex ml-56 pt-16 bg-bg-light min-h-screen">
     <div class="container mx-auto p-6">
-      <!-- Search Bar -->
-      <div class="mb-6">
-       <form class="form">
-         <button>
-           <svg width="17" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="search">
-             <path d="M7.667 12.667A5.333 5.333 0 107.667 2a5.333 5.333 0 000 10.667zM14.334 14l-2.9-2.9" stroke="currentColor" stroke-width="1.333" stroke-linecap="round" stroke-linejoin="round"></path>
-           </svg>
-         </button>
-         <input class="input" placeholder="Search by mobile number or application date" required="" type="text" id="searchInput">
-         <button class="reset" type="reset">
-           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-           </svg>
-         </button>
-       </form>
+      <!-- Search Bar with Filter -->
+      <div class="mb-6 flex justify-between items-center">
+        <form class="form relative flex-grow">
+          <button>
+            <svg width="17" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="search">
+              <path d="M7.667 12.667A5.333 5.333 0 107.667 2a5.333 5.333 0 000 10.667zM14.334 14l-2.9-2.9" stroke="currentColor" stroke-width="1.333" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </button>
+          <input class="input w-full pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-500" placeholder="Search by mobile number or application date" required="" type="text" id="searchInput">
+          <button class="reset absolute right-2 top-1/2 transform -translate-y-1/2" type="reset">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </form>
+        <!-- Filter Dropdown -->
+        <div class="relative ml-4">
+          <button id="filterButton" class="flex items-center text-gray-500 hover:text-primary transition" onclick="toggleFilterMenu()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5" />
+            </svg>
+            <span id="selectedFilter">All</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 ml-1">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+          <div id="filterMenu" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden z-10">
+            <div class="py-1">
+              <button class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none" onclick="applyFilter('all')">
+                All
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 hidden" id="tick-all">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              </button>
+              <button class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none" onclick="applyFilter('submitted')">
+                Submitted
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 hidden" id="tick-submitted">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              </button>
+              <button class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none" onclick="applyFilter('started')">
+                Started
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 hidden" id="tick-started">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              </button>
+              <button class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none" onclick="applyFilter('completed')">
+                Completed
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 hidden" id="tick-completed">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- Service Requests Section -->
       <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -138,7 +178,7 @@
               </tr>
             <% } else { %>
               <% serviceRequests.forEach(function(sr) { %>
-                <tr class="service-request-row">
+                <tr class="service-request-row" data-status="<%= sr.status %>">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <a href="/continue-application/<%= sr._id %>" class="text-gray-500 hover:text-blue-500 mr-2"><%= sr.mobileNumber %></a>
                   </td>
@@ -203,7 +243,6 @@
         alert("An error occurred while fetching documents.");
       }
     }
-
     function closeModal() {
       document.getElementById('docModal').classList.add('hidden');
     }
@@ -212,11 +251,9 @@
     document.getElementById('searchInput').addEventListener('input', function () {
       const query = this.value.toLowerCase();
       const rows = document.querySelectorAll('#serviceRequestsTableBody tr');
-
       rows.forEach(row => {
         const mobileNumber = row.cells[0].textContent.toLowerCase();
         const applicationDate = row.cells[2].textContent.toLowerCase();
-
         if (mobileNumber.includes(query) || applicationDate.includes(query)) {
           row.style.display = '';
         } else {
@@ -232,6 +269,42 @@
       rows.forEach(row => {
         row.style.display = '';
       });
+    });
+
+    // Filter functionality
+    let currentFilter = 'all'; // Default filter
+    function toggleFilterMenu() {
+      const filterMenu = document.getElementById('filterMenu');
+      filterMenu.classList.toggle('hidden');
+    }
+
+    function applyFilter(filter) {
+      // Update UI
+      document.getElementById(`tick-${currentFilter}`).classList.add('hidden');
+      document.getElementById(`tick-${filter}`).classList.remove('hidden');
+      document.getElementById('selectedFilter').textContent = filter.charAt(0).toUpperCase() + filter.slice(1);
+
+      // Update filter state
+      currentFilter = filter;
+
+      // Apply filter to table rows
+      const rows = document.querySelectorAll('#serviceRequestsTableBody tr');
+      rows.forEach(row => {
+        const status = row.getAttribute('data-status');
+        if (filter === 'all' || status === filter) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // Close the filter menu
+      document.getElementById('filterMenu').classList.add('hidden');
+    }
+
+    // Initialize default filter
+    document.addEventListener('DOMContentLoaded', () => {
+      applyFilter('all'); // Set "All" as the default filter
     });
   </script>
 </body>
