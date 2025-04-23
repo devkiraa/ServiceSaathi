@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Function to initialize or update the line chart
  function updateLineChart(data) {
-    const labels= data.map(item => item.value); // Example labels
+    const labels= data.map(item => item.label); // Example labels
     const values = data.map(item => item.value); // Extract values from the fetched data
 
     // Destroy existing chart instance if it exists
@@ -24,8 +24,8 @@ document.addEventListener("DOMContentLoaded", function () {
           {
             label: 'Total No of Services',
             data: values,
-            borderColor: '#6366F1', // Indigo 500
-            backgroundColor: '#6366F1',
+            borderColor: '#ff6807', // Indigo 500
+            backgroundColor: '#ff6807',
             fill: true,
             tension: 0.1,
           },
@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
         responsive: true,
         maintainAspectRatio: false, // Ensure the chart respects the container's dimensions
         scales: {
+          
           y: {
             beginAtZero: true,
           },
