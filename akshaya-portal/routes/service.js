@@ -6,14 +6,14 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const User = require('../models/User');
 const Service = require('../models/Service');
-const ServiceRequest = require('../models/ServiceRequests');
-const Centre = require('../models/Centre'); // To check centre details
-
+const ServiceRequest = require('../models/ServiceRequest');
+const Centre = require('../models/Centre');
 const multer = require('multer');
+
+dotenv.config();
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
-dotenv.config(); // Load environment variables if not already loaded
 
 router.get('/services', async (req, res) => {
   if (!req.session.user) return res.redirect('/');
@@ -21,17 +21,7 @@ router.get('/services', async (req, res) => {
     const user = await User.findOne({ _id: req.session.user.id });
     if (!user) return res.status(404).send("User not found");
 
-    // Fetch service requests for the user
     const serviceRequests = await ServiceRequest.find({ centreId: user.centerId });
-    // Format the createdAt date for each service request
-    const formattedRequests = serviceRequests.map(sr => ({
-    documentType: sr.documentType,
-    mobileNumber: sr.mobileNumber,
-    status: sr.status,
-    action: sr.action,
-    createdAt:sr.createdAt,
-    applicationDate: formatDate(sr.createdAt) // Call the corrected formatDate function      
-    }));
     res.render('services', {
       user: {
         email: user.email,
@@ -44,92 +34,75 @@ router.get('/services', async (req, res) => {
         services: user.services,
         address: user.address.toObject()
       },
-      serviceRequests: formattedRequests // Pass the formatted requests to the template
-      });
-    }catch (error) {
-      console.error("Error fetching user or data:", error);
-      res.status(500).send("Server error: " + error.message);
-    }
-    
-      function formatDate(createdAt) {
-        const date = new Date(createdAt);
-        const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const year = date.getFullYear();
-        return
-         `${day}-${month}-${year}`;
-      
-      }
+      serviceRequests: serviceRequests.map(sr => ({
+        documentType: sr.documentType,
+        mobileNumber: sr.mobileNumber,
+        status: sr.status,
+        action: sr.action
+      }))
+    });
+  } catch (error) {
+    console.error("Error fetching user or data:", error);
+    res.status(500).send("Server error: " + error.message);
+  }
 });
 
-// --- Create a new service request ---
 router.post('/service-request', async (req, res) => {
   try {
-    const { 'document-type': documentType, 'centre-id': centreId } = req.body;
+    const {
+      'document-type': documentType,
+      'centre-id': centreId,
+      'mobile-number': mobileNumber
+    } = req.body;
 
-    // 1. Verify that the centre exists and is approved.
     const centre = await Centre.findOne({ centerId: centreId });
-    if (!centre) {
-      return res.status(400).json({ error: 'Centre not found' });
-    }
-    if (centre.status !== 'approved') {
-      return res.status(400).json({ error: 'Centre not approved' });
-    }
+    if (!centre) return res.status(400).json({ error: 'Centre not found' });
+    if (centre.status !== 'approved') return res.status(400).json({ error: 'Centre not approved' });
 
-    // 2. Fetch service definition from DB
     const service = await Service.findOne({ key: documentType });
-    if (!service) {
-      return res.status(400).json({ error: 'Invalid document type' });
-    }
+    if (!service) return res.status(400).json({ error: 'Invalid document type' });
 
-    // 3. Build the payload for insertion (no _id yet)
     const initialDocs = service.requiredDocuments.map(doc => ({
       name: doc.name,
       uploadedFile: "",
       fileData: ""
     }));
 
-    // 4. Generate upload token & save the ServiceRequest
     const uploadToken = crypto.randomBytes(16).toString('hex');
     const serviceRequest = new ServiceRequest({
       documentType,
       centreId,
+      mobileNumber,
       requiredDocuments: initialDocs,
       status: 'started',
       uploadToken
     });
     await serviceRequest.save();
 
-    // 5. Now serviceRequest.requiredDocuments has _id on each subdoc
     const responseDocs = serviceRequest.requiredDocuments;
-
-    // 6. Respond with those subdocs (with _id)
-    const uploadLink = `${req.protocol}://${req.get('host')}/sendimage/${uploadToken}`;
+    const uploadLink = `https://${req.get('host')}/sendimage/${uploadToken}`;
     res.status(201).json({
       message: 'Service request created successfully',
       serviceRequestId: serviceRequest._id,
-      requiredDocuments: responseDocs,   // ← contains the _id fields now
+      requiredDocuments: responseDocs,
       uploadLink
     });
-
   } catch (error) {
     console.error('Error creating service request:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// --- Request reupload for a specific document ---
 router.post('/service-request/:id/reupload', async (req, res) => {
   try {
     const { id } = req.params;
-    const { documentId } = req.body; // subdoc _id to reupload
+    const { documentId } = req.body;
     const serviceRequest = await ServiceRequest.findById(id);
     if (!serviceRequest) return res.status(404).json({ error: 'Service request not found' });
 
     const doc = serviceRequest.requiredDocuments.id(documentId);
     if (!doc) return res.status(404).json({ error: 'Document not found' });
 
-    // Mark for reupload and clear existing data
     doc.uploadedFile = "";
     doc.fileData = "";
     doc.needsReupload = true;
@@ -143,36 +116,30 @@ router.post('/service-request/:id/reupload', async (req, res) => {
   }
 });
 
-// --- Get service request details ---
 router.get('/service-request/:id', async (req, res) => {
   try {
     const serviceRequest = await ServiceRequest.findById(req.params.id);
-    if (!serviceRequest) {
-      return res.status(404).json({ error: "Service request not found" });
-    }
+    if (!serviceRequest) return res.status(404).json({ error: "Service request not found" });
     res.status(200).json(serviceRequest);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// --- Upload Documents (Storing as Base64 from multipart/form-data) ---
-router.post('/upload-documents/:serviceRequestId',upload.array('files', 10),          // <-- add multer middleware here
+router.post(
+  '/upload-documents/:serviceRequestId',
+  upload.array('files', 10),
   async (req, res) => {
     try {
       const { serviceRequestId } = req.params;
-      const files = req.files;        // multer populates this
-
+      const files = req.files;
       const serviceRequest = await ServiceRequest.findById(serviceRequestId);
-      if (!serviceRequest) {
-        return res.status(404).json({ error: "Service request not found" });
-      }
+      if (!serviceRequest) return res.status(404).json({ error: "Service request not found" });
 
       if (!files || files.length === 0) {
         return res.status(400).json({ error: "No files were uploaded." });
       }
 
-      // Loop through each uploaded file and store base64
       files.forEach((file, i) => {
         if (serviceRequest.requiredDocuments[i]) {
           const b64 = file.buffer.toString('base64');
@@ -184,7 +151,6 @@ router.post('/upload-documents/:serviceRequestId',upload.array('files', 10),    
       serviceRequest.status = "submitted";
       await serviceRequest.save();
       return res.json({ message: "Documents uploaded successfully", serviceRequest });
-
     } catch (err) {
       console.error("Upload error:", err);
       return res.status(500).json({ error: err.message });
@@ -192,17 +158,14 @@ router.post('/upload-documents/:serviceRequestId',upload.array('files', 10),    
   }
 );
 
-// --- Update Application Status ---
 router.post('/application-status/:serviceRequestId', async (req, res) => {
   try {
-    const { status } = req.body; // Expecting status: "completed" or "started"
-    if (!["completed", "started"].includes(status)) {
+    const { status } = req.body;
+    if (!["completed","started"].includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
     }
     const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
-    if (!serviceRequest) {
-      return res.status(404).json({ error: "Service request not found" });
-    }
+    if (!serviceRequest) return res.status(404).json({ error: "Service request not found" });
     serviceRequest.status = status;
     await serviceRequest.save();
     res.status(200).json({ message: "Application status updated successfully", serviceRequest });
@@ -211,22 +174,17 @@ router.post('/application-status/:serviceRequestId', async (req, res) => {
   }
 });
 
-// --- Serving Files (from Base64 data) ---
 router.get('/files/:serviceRequestId/:documentIndex', async (req, res) => {
   try {
     const { serviceRequestId, documentIndex } = req.params;
     const serviceRequest = await ServiceRequest.findById(serviceRequestId);
-
     if (!serviceRequest || !serviceRequest.requiredDocuments[documentIndex]) {
       return res.status(404).json({ error: 'File not found' });
     }
-
     const document = serviceRequest.requiredDocuments[documentIndex];
     if (!document.fileData) {
       return res.status(404).json({ error: 'File data not available' });
     }
-
-    // Determine content type based on filename
     let contentType = 'application/octet-stream';
     if (document.uploadedFile.endsWith('.pdf')) contentType = 'application/pdf';
     else if (document.uploadedFile.match(/\.(jpe?g)$/)) contentType = 'image/jpeg';
@@ -235,50 +193,67 @@ router.get('/files/:serviceRequestId/:documentIndex', async (req, res) => {
     const buffer = Buffer.from(document.fileData, 'base64');
     res.set('Content-Type', contentType);
     res.send(buffer);
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// --- Render applyService page using token ---
 router.get('/sendimage/:uploadToken', async (req, res) => {
   try {
     const { uploadToken } = req.params;
     const serviceRequest = await ServiceRequest.findOne({ uploadToken });
-    if (!serviceRequest) {
-      return res.status(404).send("Invalid upload token.");
-    }
+    if (!serviceRequest) return res.status(404).send("Invalid upload token.");
     const centre = await Centre.findOne({ centerId: serviceRequest.centreId });
-    if (!centre) {
-      return res.status(404).send("Associated centre not found.");
-    }
+    if (!centre) return res.status(404).send("Associated centre not found.");
     res.render('applyService', { serviceRequest });
   } catch (error) {
     res.status(500).send("Server error: " + error.message);
   }
 });
 
-router.get('/continue-application/:serviceRequestId', async (req, res) => {
+// GET by mobile number
+router.get('/service-request/phone/:mobileNumber', async (req, res) => {
   try {
-    const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
-    if (!serviceRequest) {
-      return res.status(404).send("Service request not found.");
-    }
-    // Populate customer details from session if available
-    const customer = req.session.user || {};
-    res.render('continueApplication', {
-      customerName: customer.name || "",
-      mobile: customer.mobile || "",
-      email: customer.email || "",
-      address: customer.address || "",
-      dob: customer.dob || "",
-      serviceRequest: serviceRequest
-    });
+    const { mobileNumber } = req.params;
+    const requests = await ServiceRequest.find({ mobileNumber });
+    res.status(200).json(requests);
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).json({ error: error.message });
   }
 });
+
+router.get('/service-request/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const serviceRequest = await ServiceRequest.findById(id, 'status');
+    if (!serviceRequest) return res.status(404).json({ error: 'Service request not found' });
+
+    res.json({ status: serviceRequest.status });
+  } catch (error) {
+    console.error("Error fetching service request status:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Cancel a service request by ID
+router.post('/service-request/:id/cancel', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const serviceRequest = await ServiceRequest.findById(id);
+
+    if (!serviceRequest) {
+      return res.status(404).json({ error: 'Service request not found' });
+    }
+
+    await ServiceRequest.deleteOne({ _id: id });
+
+    res.status(200).json({ message: 'Service request cancelled and deleted successfully' });
+  } catch (error) {
+    console.error('Error cancelling service request:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 router.get('/ping', (req, res) => res.json({ ok: true }));
 

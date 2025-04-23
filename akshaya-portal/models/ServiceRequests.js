@@ -2,43 +2,23 @@
 const mongoose = require('mongoose');
 
 const serviceRequestSchema = new mongoose.Schema({
-  documentType: {
-    type: String,
-    required: true
-  },
-  centreId: {
-    type: String,
-    required: true
-  },
+  documentType: { type: String, required: true },
+  centreId:    { type: String, required: true },
+  mobileNumber:{ type: String, required: true },
   status: {
     type: String,
-    enum: ['pending', 'started', 'submitted', 'approved', 'rejected', 'completed'],
+    enum: ['pending','started','submitted','approved','rejected','completed','reupload_required'],
     default: 'pending'
   },
   requiredDocuments: [{
-    name: {
-      type: String,
-      required: true
-    },
-    uploadedFile: { // Now stores the original filename
-      type: String,
-      default: ""
-    },
-    fileData: { // Stores the Base64 encoded file data
-      type: String
-    },
-    
+    name:         { type: String, required: true },
+    uploadedFile: { type: String, default: "" },
+    fileData:     { type: String, default: "" },
+    needsReupload:{ type: Boolean, default: false }
   }],
-  uploadToken: {
-    type: String
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  customerName:{
-    type:String
-  }
+  uploadToken: { type: String },
+  createdAt:   { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('ServiceRequests', serviceRequestSchema);
+module.exports = mongoose.models.ServiceRequest 
+  || mongoose.model('ServiceRequest', serviceRequestSchema);
