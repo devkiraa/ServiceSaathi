@@ -35,6 +35,7 @@ router.get('/services', async (req, res) => {
         address: user.address.toObject()
       },
       serviceRequests: serviceRequests.map(sr => ({
+        _id: sr._id,
         documentType: sr.documentType,
         mobileNumber: sr.mobileNumber,
         status: sr.status,
@@ -74,7 +75,7 @@ router.post('/service-request', async (req, res) => {
       centreId,
       mobileNumber,
       requiredDocuments: initialDocs,
-      status: 'started',
+      status: 'submitted',
       uploadToken
     });
     await serviceRequest.save();

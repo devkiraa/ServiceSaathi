@@ -38,8 +38,6 @@
     main {
       margin-left: 260px; /* Slightly more than the sidebar width */
       padding: 20px;
-      
-    
     }
 
     /* Responsive Design */
@@ -51,14 +49,12 @@
         margin-left: 0; /* No offset on small screens */
       }
     }
-   
+
     /* Table Styling */
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      
     }
 
     th, td {
@@ -98,133 +94,7 @@
     .action-buttons button.delete:hover {
       color: #EF4444; /* Delete icon hover color */
     }
-    .group {
-      display: flex;
-      line-height: 28px;
-      align-items: center;
-      position: relative;
-      max-width:100%;
-    }
 
-    .input {
-      width: 1028px;
-      max-width:100%;
-      height: 40px;
-      line-height: 28px;
-      margin-top:20px;
-      padding: 0 1rem;
-      margin-left:80px;
-      border: 2px solid transparent;
-      border-radius: 8px;
-      outline: none;
-      background-color: #ffff;
-      color: #0d0c22;
-      transition: .2s ease;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-    }
-
-    .input::placeholder {
-      color: #9e9ea7;
-      padding-left:40px;
-    
-    }
-    
-
-   .input:focus, input:hover {
-      outline: none;
-      border-color:rgba(186, 180, 214, 0.4);
-      background-color: #fff;
-      box-shadow: 0 0 0 1px rgba(83, 49, 128, 0.1);
-    } 
-
-    .icon {
-      position: absolute;
-      left: 1rem;
-      fill: #9e9ea7;
-      width: 1.5rem;
-      height: 1.2rem;
-      margin-left:80px;
-      display: flex;
-       z-index: 1; 
-    }
-
-    /* Filter Button Styling */
-    .filterbtn {
-      position: absolute;
-      top: 0;
-      right: 0;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 0 90px;
-    }
-
-    .filterbtn img {
-      width: 1.2em;
-      height: 1.2em;
-      color: #6b7280; /* Slightly muted gray */
-    }
-
-    .filterbtn:hover img {
-      filter: brightness(0.8); /* Darker effect on hover */
-    }
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background-color: white;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 5px;
-      overflow: hidden;
-      z-index: 10;
-      padding: 5px;
-    }
-
-    .dropdown-menu.active {
-      display: block;
-    }
-
-    .dropdown-item {
-      padding: 0.25rem 1.5rem;
-      cursor: pointer;
-      color: #374151;
-      transition: background-color 0.2s ease;
-      font-size: medium;
-      display:100%;
-      
-    }
-    #dd1
-    {
-      
-      font-weight:500;
-      color:rgb(228, 17, 17);
-    }
-    #dd2
-    {
-      font-weight:500;
-      color:rgb(15, 102, 69);
-    }
-    #dd3
-    {
-      font-weight:500;
-      color:rgb(10, 10, 66);
-    }
-    .dropdown-item:hover {
-      background-color: #f3f4f6;
-    }
-    #container
-    {
-     margin-top:-80px;
-     }
-   
     /* Progress Bars */
     .progress-bar {
       width: 100%;
@@ -252,9 +122,9 @@
         <ul class="space-y-3">
           <li>
             <a href="/dashboard" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9m-3 7v-4H6v4" />
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>              
               <span>Home</span>
             </a>
           </li>
@@ -262,16 +132,8 @@
             <a href="/services" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-              </svg>              
+              </svg>                            
               <span>Service</span>
-            </a>
-          </li>
-          <li>
-            <a href="/contact" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8V7a2 2 0 00-2-2H5a2 2 0 00-2 2v1m18 0v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8m18 0L12 13 3 8" />
-              </svg>
-              <span>Contact Us</span>
             </a>
           </li>
         </ul>
@@ -331,40 +193,16 @@
   <!-- Main Content -->
   <div class="flex ml-56 pt-16 bg-bg-light min-h-screen">
     <div class="container mx-auto p-6">
-      <!-- Search Bar -->
-      <div class="group mb-4">
-      <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-        <g>
-          <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
-        </g>
-      </svg>
-      <input placeholder="Search"  type="search" class="input">
-      <button class="filterbtn" id="dropdownButton">
-        <img src="../uploads/images/filter.svg" alt="" class="w-6 h-6 rounded-full">
-      </button>
-      
-      <div id="dropdownMenu" class="dropdown-menu">
-        <div class="dropdown-item" id="dd1" onclick="filterTable('pending')">Pending</div>
-        <div class="dropdown-item"id="dd2" onclick="filterTable('approved')">Approved</div>
-        <div class="dropdown-item" id="dd3" onclick="filterTable('rejected')">Rejected</div>
-      </button> 
-    </div>
-    </div>
-    
-    <div class="container mx-auto p-20 "id="container">
       <!-- Service Requests Section -->
       <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Service Type
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customer Name
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Mobile Number
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Service Type
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Application Date
@@ -372,88 +210,35 @@
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="bg-white divide-y divide-gray-200" id="serviceRequestsTableBody">
             <% if (serviceRequests.length === 0) { %>
               <tr>
                 <td colspan="6" class="px-6 py-4 text-center">No service requests found.</td>
               </tr>
             <% } else { %>
               <% serviceRequests.forEach(function(sr) { %>
-                <tr  class="serviceRow">
+                <tr class="service-request-row">
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <%= sr.documentType %>
+                    <a href="/view-documents/<%= sr._id %>" class="text-gray-500 hover:text-blue-500 mr-2"><%= sr.mobileNumber %></a>
                   </td>
+                  <td class="px-6 py-4 whitespace-nowrap"><%= sr.documentType %></td>
+                  <td class="px-6 py-4 whitespace-nowrap"><%= sr.applicationDate %></td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <%= sr.customerName %>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <%= sr.mobileNumber %>
-                  </td>
-                
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <%= sr.applicationDate %>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <div class="w-4 h-4 mr-2 bg-green-500 rounded-full"></div>
-                      <span class="<%= 
-                        sr.status === 'received' ? 'text-blue-600' : 
-                        sr.status === 'started' ? 'text-yellow-500' : 
-                        sr.status === 'completed' ? 'text-green-600' : '' 
-                      %>">
-                        <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
-                      </span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div class="action-buttons">
-                      <% if (sr.requiredDocuments && sr.requiredDocuments.length > 0 && sr.status === 'received') { %>
-                        <button class="text-blue-500 hover:text-blue-700" onclick="viewDocuments('<%= sr._id %>')">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                            <path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                          </svg>
-                        </button>
-                      <% } %>
-                      <% if (sr.status==='completed') { %>
-                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path fill-rule="evenodd" d="M.458 10C3.732 5.932 7.461 2.978 11.528 1.324a8.96 8.96 0 016.744 6.744c-.983.983-2.34.983-3.324 0l-2-2a8.96 8.96 0 01-6.744-6.744A8.96 8.96 0 0110 10c-4.478 0-8.463 3.063-9.04 7.68a1 1 0 001.728 1.07l2.142 2.142A1 1 0 0010 17H5a1 1 0 000 2h3v1a1 1 0 102 0v-1H15a1 1 0 100-2h-3v-1a1 1 0 10-2 0v1H5a3 3 0 01-3-3V7a3 3 0 013-3h5.414l.905-1.81V5.5l-6-6-1.066 1.066z" clip-rule="evenodd" />
-                          </svg>
-                        </a>
-                      <% } else if(sr.status==='submitted') { %>
-                        <a href="/continue-application/<%= sr._id %>" class="text-green-500 hover:text-green-700">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path fill-rule="evenodd" d="M.458 10C3.732 5.932 7.461 2.978 11.528 1.324a8.96 8.96 0 016.744 6.744c-.983.983-2.34.983-3.324 0l-2-2a8.96 8.96 0 01-6.744-6.744A8.96 8.96 0 0110 10c-4.478 0-8.463 3.063-9.04 7.68a1 1 0 001.728 1.07l2.142 2.142A1 1 0 0010 17H5a1 1 0 000 2h3v1a1 1 0 102 0v-1H15a1 1 0 100-2h-3v-1a1 1 0 10-2 0v1H5a3 3 0 01-3-3V7a3 3 0 013-3h5.414l.905-1.81V5.5l-6-6-1.066 1.066z" clip-rule="evenodd" />
-                          </svg>
-                        </a>
-                      <% } else if(sr.status==='started') { %>
-                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path fill-rule="evenodd" d="M.458 10C3.732 5.932 7.461 2.978 11.528 1.324a8.96 8.96 0 016.744 6.744c-.983.983-2.34.983-3.324 0l-2-2a8.96 8.96 0 01-6.744-6.744A8.96 8.96 0 0110 10c-4.478 0-8.463 3.063-9.04 7.68a1 1 0 001.728 1.07l2.142 2.142A1 1 0 0010 17H5a1 1 0 000 2h3v1a1 1 0 102 0v-1H15a1 1 0 100-2h-3v-1a1 1 0 10-2 0v1H5a3 3 0 01-3-3V7a3 3 0 013-3h5.414l.905-1.81V5.5l-6-6-1.066 1.066z" clip-rule="evenodd" />
-                          </svg>
-                        </a>
-                      <% } %>
-                      <button class="text-red-500 hover:text-red-700 delete">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 5H5v15a2 2 0 002 2h10a2 2 0 002-2V5H12.618l-1.314-4A1 1 0 009 2zm-1 4v10a1 1 0 002 0V6a1 1 0 00-2 0zm2 10a1 1 0 11-2 0 1 1 0 012 0zm7-11a1 1 0 10-2 0 1 1 0 002 0zm-2 12a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
+                    <span class="<%= 
+                      sr.status === 'submitted' ? 'bg-blue-200 text-blue-800' : 
+                      sr.status === 'started' ? 'bg-yellow-200 text-yellow-800' : 
+                      sr.status === 'completed' ? 'bg-green-200 text-green-800' : '' 
+                    %> rounded-full px-2 py-1 text-xs font-semibold">
+                      <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
+                    </span>
                   </td>
                 </tr>
               <% }); %>
             <% } %>
           </tbody>
-        </table>
+        </table>  
       </div>
     </div>
   </div>
@@ -501,44 +286,6 @@
         alert("An error occurred while fetching documents.");
       }
     }
-    function formatDate(createdAt) {
-  // Parse the createdAt string into a Date object
-  const date = new Date(createdAt);
-
-  // Extract day, month, and year
-  const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
-  const year = date.getFullYear();
-  // Return the formatted date as "DD-MM-YYYY"
-  return `${day}-${month}-${year}`;
-  
-                 
-}
-
-      // Search functionality for Centre Name/Number
-const searchInput = document.querySelector('.input'); // Select the search input field
-const tableRows = document.querySelectorAll('.serviceRow'); // Select all rows in the table
-
-searchInput.addEventListener('input', () => {
-  const searchTerm = searchInput.value.toLowerCase().trim(); // Get the search term and normalize it
-  tableRows.forEach(row => {
-    const documentTypeCell = row.querySelector('td:first-child'); // First column contains Centre Name/Number
-    const customerNameCell = row.querySelector('td:nth-child(2)');
-    const applicationDate = row.querySelector('td:nth-child(4)');
-    const Cell = row.querySelector('td:first-child'); 
-    if (documentTypeCell|| customerNameCell) {
-      const documentType = documentTypeCell ? documentTypeCell.textContent.toLowerCase() : '';
-      const customerName = customerNameCell ? customerNameCell.textContent.toLowerCase() : '';
-      
-      if (documentType.includes(searchTerm) || customerName.includes(searchTerm) || applicationDate.includes(searchTerm) ) {
-        row.style.display = ''; // Show matching rows
-      } 
-      else{
-        row.style.display = 'none'; // Hide non-matching rows
-      }
-    }
-  });
-});
     function closeModal() {
       document.getElementById('docModal').classList.add('hidden');
     }
