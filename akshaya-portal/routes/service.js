@@ -39,7 +39,8 @@ router.get('/services', async (req, res) => {
         documentType: sr.documentType,
         mobileNumber: sr.mobileNumber,
         status: sr.status,
-        action: sr.action
+        action: sr.action,
+        applicationDate: sr.createdAt
       }))
     });
   } catch (error) {
@@ -114,6 +115,30 @@ router.post('/service-request/:id/reupload', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Continue Application Route (Fixed)
+router.get('/continue-application/:serviceRequestId', async (req, res) => {
+  try {
+    const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
+    if (!serviceRequest) {
+      return res.status(404).send("Service request not found.");
+    }
+
+    // Populate customer details from session if available
+    const customer = req.session.user || {};
+
+    res.render('continueApplication', {
+      customerName: customer.name || "",
+      mobile: customer.mobile || "",
+      email: customer.email || "",
+      address: customer.address || "",
+      dob: customer.dob || "",
+      serviceRequest: serviceRequest
+    });
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 });
 
@@ -254,7 +279,6 @@ router.post('/service-request/:id/cancel', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 router.get('/ping', (req, res) => res.json({ ok: true }));
 
