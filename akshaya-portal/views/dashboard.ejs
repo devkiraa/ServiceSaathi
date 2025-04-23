@@ -136,28 +136,31 @@
         </div>
         <!-- Container 2: Cards Section -->
         <div class="col-span-1 space-y-4">
-          <div class="space-y-4">
-            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[220px]">Pending Services</div>
+          <div class="bg-white  rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[200px]">
+            <h3 class="text-lg flex justify-center items-center font-semibold mb-4">Pending Services</h3>
+            <p class="text-5xl font-bold flex justify-center items-center py-5 animate-pulse text-red-500"><%= pendingServices %></p>
           </div>
-        </div>
+          </div>
         <!-- Container 3: Cards Section -->
         <div class="row-span-2 space-y-4" id="container-3">
-          <div class="space-y-4">
-            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[180px]" id="card-3">Completed Services</div>
-            <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[200px]" id="card-4">
-              <!-- Doughnut Chart -->
-              <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Service Types</h3>
-                <div class="flex space-x-2">
-                  <button class="btn btn-xs text-xs font-normal p-1 btn-primary" data-period="today">Today</button>
-                  <button class="btn btn-xs text-xs font-normal p-1 btn-secondary" data-period="week">Week</button>
-                  <button class="btn btn-xs text-xs font-normal p-1 btn-accent" data-period="month">Month</button>
-                  <button class="btn btn-xs text-xs font-normal p-1 btn-neutral" data-period="all">All</button>
-                </div>
+         <!-- Completed Services Card -->
+        <div class="bg-white  rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[200px]">
+          <h3 class="text-lg flex justify-center items-center font-semibold mb-4">Completed Services</h3>
+          <p class="text-5xl font-bold flex justify-center items-center py-5 animate-pulse  text-green-500"><%= completedServices %></p>
+        </div>
+          <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-xl transition min-h-[200px]" id="card-4">
+            <!-- Doughnut Chart -->
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold">Service Types</h3>
+              <div class="flex space-x-2">
+                <button class="btn btn-xs text-xs font-normal p-1 btn-primary" data-period="today">Today</button>
+                <button class="btn btn-xs text-xs font-normal p-1 btn-secondary" data-period="week">Week</button>
+                <button class="btn btn-xs text-xs font-normal p-1 btn-accent" data-period="month">Month</button>
+                <button class="btn btn-xs text-xs font-normal p-1 btn-neutral" data-period="all">All</button>
               </div>
-              <div class="relative h-full">
-                <canvas id="doughnutChart" class="h-full"></canvas>
-              </div>
+            </div>
+            <div class="relative h-full">
+              <canvas id="doughnutChart" class="h-full"></canvas>
             </div>
           </div>
         </div>

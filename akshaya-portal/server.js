@@ -114,13 +114,28 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
     if (!req.session.user) return res.redirect('/');
     if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
     try {
+      // Fetch recent documents
       const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-     
+      console.log("Fetched Documents:", documents); // Debugging log
+  
+      // Fetch user details
       const user = await User.findOne({ _id: req.session.user.id });
       if (!user) return res.status(404).send("User not found");
   
-      // Fetch service requests for the user
-      const serviceRequests = await ServiceRequest.find({ userId: user._id });
+      // Fetch service requests for the user's center
+      const serviceRequests = await ServiceRequest.find({ centreId: user.centerId });
+  
+      // Calculate total pending services
+      const pendingServices = await ServiceRequest.countDocuments({
+        centreId: user.centerId, // Use user.centerId instead of serviceRequests.centerId
+       status: { $in: ['started', 'submitted'] },
+      });
+  
+      // Calculate total completed services
+      const completedServices = await ServiceRequest.countDocuments({
+        centreId: user.centerId, // Use user.centerId instead of serviceRequests.centerId
+        status: 'completed',
+      });
   
       // Calculate service type distribution
       const serviceTypes = {};
@@ -147,16 +162,21 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
         label,
         value: (value / totalServices) * 100, // Percentage
       }));
-      // res.render('dashboard', { user: req.session.user, serviceRequests });
+  
+      // Render the dashboard with the calculated data
       res.render('dashboard', {
         user: req.session.user,
+        documents, // Pass fetched documents
         serviceRequests: serviceRequests.map((sr) => ({
           documentType: sr.documentType,
-          mobileNumber: sr.mobileNumber, 
+          mobileNumber: sr.mobileNumber,
           status: sr.status,
           action: sr.action,
         })),
+        pendingServices, // Total pending services
+        completedServices, // Total completed services
         servicePercentages, // Pass the calculated percentages
+        totalServices, // Total services
       });
     } catch (error) {
       console.error("Error fetching user or service requests:", error);
@@ -164,24 +184,32 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
     }
   });
       
-  app.get('/api/service-data', async (req, res) => {
+ app.get('/api/service-data', async (req, res) => {
     const { period } = req.query; // Extracts the 'period' query parameter
+    const user = req.session.user; // Get the logged-in user from the session
+
+  if (!user || !user.centerId) {
+    return res.status(400).send("User or centerId not found in session");
+  }
     try {
       let serviceData;
   
       if (period === 'today') {
         serviceData = await ServiceRequest.aggregate([
-          { $match: { createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } } },
+          { $match: { createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } ,
+          centreId: user.centerId } },
           { $group: { _id: '$documentType', count: { $sum: 1 } } },
         ]);
       } else if (period === 'week') {
         serviceData = await ServiceRequest.aggregate([
-          { $match: { createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } } },
+          { $match: { createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } ,
+          centreId: user.centerId } },
           { $group: { _id: '$documentType', count: { $sum: 1 } } },
         ]);
       } else if (period === 'month') {
         serviceData = await ServiceRequest.aggregate([
-          { $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } } },
+          { $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) },
+          centreId: user.centerId  } },
           { $group: { _id: '$documentType', count: { $sum: 1 } } },
         ]);
       } else {
@@ -222,6 +250,123 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
       });
     } catch (error) {
       res.status(500).send("Server error: " + error.message);
+    }
+  }); 
+  app.get('/api/line-data', async (req, res) => {
+    const { period } = req.query; // Extract the 'period' query parameter
+    const user = req.session.user; // Get the logged-in user from the session
+
+  if (!user || !user.centerId) {
+    return res.status(400).send("User or centerId not found in session");
+  }
+    try {
+      let lineChartData;
+  
+      if (period === 'week') {
+        // Line chart data for the last week (daily aggregation)
+        lineChartData = await ServiceRequest.aggregate([
+          { 
+            $match: { createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } ,
+            centreId: user.centerId},
+            
+          },
+          { 
+            $group: { 
+              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }, }, 
+              count: { $sum: 1 } 
+            } 
+          },
+          { 
+            $sort: { _id: 1 } 
+          },
+        ]);
+      } else if (period === 'month') {
+        // Line chart data for the current month (weekly aggregation)
+        lineChartData = await ServiceRequest.aggregate([
+          { 
+            $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } ,
+            centreId: user.centerId },
+           
+          },
+          { 
+            $group: { 
+              _id: { $week: '$createdAt' }, 
+              count: { $sum: 1 } 
+            } 
+          },
+          { 
+            $sort: { _id: 1 } 
+          },
+        ]);
+      } else if (period === 'year') {
+        // Line chart data for the last year (monthly aggregation)
+        lineChartData = await ServiceRequest.aggregate([
+          {
+          $match: {
+            
+             createdAt: { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 1)) } ,
+            centreId: user.centerId, // Filter by the logged-in user's centerId
+          }
+        },
+          { 
+            $group: { 
+              _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, 
+              count: { $sum: 1 } 
+            }
+          },
+          { 
+            $sort: { _id: 1 } 
+          },
+        ]);
+        }
+
+       else if(period ==='all'){// Default: All data
+        lineChartData = await ServiceRequest.aggregate([
+          { 
+            $match: {
+              createdAt: { $gte: new Date(0) }, // Matches all dates (from the epoch time)
+              centreId: user.centerId, // Filter by the logged-in user's centerId
+            }
+          },
+          {
+            $group: { 
+              _id: { $year: '$createdAt' }, 
+              count: { $sum: 1 } ,
+      
+            } 
+          
+          },
+          { 
+            $sort: { _id: 1 } 
+          },
+        ]);
+      }
+  
+      // Handle empty data gracefully
+      if (lineChartData.length === 0) {
+        return res.json({
+          lineChart: [],
+          totalServices: 0,
+          pendingServices: 0,
+          completedServices: 0,
+        });
+      }
+  // Calculate total services
+
+
+  // Format the data
+  const formattedData = lineChartData.map(item => ({
+    label: item._id, // Time period (e.g., date, week, month, year)
+    value: item.count, // Total number of services for this period
+  }));
+
+  // Send Response
+  res.json(formattedData);
+  
+      
+    } catch (error) {
+      console.error("Error fetching service data:", error);
+      res.status(500).send("Server error");
     }
   });
 
