@@ -290,7 +290,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
           },
           { 
             $group: { 
-              _id: { $week: '$createdAt' }, 
+              _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, 
               count: { $sum: 1 } 
             } 
           },
@@ -310,7 +310,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
         },
           { 
             $group: { 
-              _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, 
+              _id: { $dateToString: { format: '%Y', date: '$createdAt' } }, 
               count: { $sum: 1 } 
             }
           },
@@ -330,12 +330,13 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
           },
           {
             $group: { 
-              _id: { $year: '$createdAt' }, 
-              count: { $sum: 1 } ,
+              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }},
+              count: { $sum: 1 } 
       
             } 
           
           },
+      
           { 
             $sort: { _id: 1 } 
           },
