@@ -319,12 +319,11 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE, logger, AXIOS_
 
          try {
              const centres = await CentreModel.find({
-                 type: { $in: ['csc', 'akshaya'] }, // Ensure correct type matching
-                 district: user.applyDataTemp.district,
-                 subdistrict: user.applyDataTemp.subdistrict,
-                 [`services.${svc.key}`]: true // Check if service key exists and is true
-             }).limit(5); // Limit results for WhatsApp message length
-
+              type: { $in: ['csc', 'akshaya'] },
+              district: user.applyDataTemp.district,
+              subdistrict: user.applyDataTemp.subdistrict,
+              [`services.${svc.key}`]: true
+          }).limit(5); // Limit results for WhatsApp message length
              if (!centres.length) {
                  user.applyState = 'document'; // Revert state
                  await user.save();
@@ -343,15 +342,14 @@ module.exports = function(sendMessage, DOCUMENT_SERVICE_API_BASE, logger, AXIOS_
                  address: `${c.addressLine1 || ''} ${c.subdistrict || ''}, ${c.district || ''}`.trim() || 'N/A'
              }));
              await user.save();
-
              const prompt = user.language === 'malayalam'
                  ? `*കേന്ദ്രം തിരഞ്ഞെടുക്കുക:* (0️⃣ റദ്ദാക്കുക, ഡോക്യുമെന്റിലേക്ക് മടങ്ങാൻ 'back')\n\n` +
-                   user.applyDataTemp.centres.map((c, i) =>
-                       `${i + 1}. ${c.centreName}\n👤 ${c.ownerName}\n📞 ${c.contact || '-'}\n🆔 ${c.centreId}`
+                  centres.map((c, i) =>
+                       `${i + 1}. ${c.centreName}\n👤 ${c.ownerName}\n📞 ${c.contact || '-'}\n🆔 ${c.centerId}`
                    ).join('\n\n')
                  : `*Select service centre:* (0️⃣ Cancel, 'back' to return to document selection)\n\n` +
-                   user.applyDataTemp.centres.map((c, i) =>
-                       `${i + 1}.  ${c.centreName}\n👤  ${c.ownerName}\n📞 ${c.contact || '-'}\n🆔 ${c.centreId}`
+                  centres.map((c, i) =>
+                       `${i + 1}.  ${c.centreName}\n👤  ${c.ownerName}\n📞 ${c.contact || '-'}\n🆔 ${c.centerId}`
                    ).join('\n\n');
 
              return sendMessage(From, prompt);
