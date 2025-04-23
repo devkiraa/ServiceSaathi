@@ -152,7 +152,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
         user: req.session.user,
         serviceRequests: serviceRequests.map((sr) => ({
           documentType: sr.documentType,
-          mobileNumber: sr.mobileNumber,
+          mobileNumber: sr.mobileNumber, 
           status: sr.status,
           action: sr.action,
         })),
@@ -163,6 +163,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
       res.status(500).send("Server error: " + error.message);
     }
   });
+      
   app.get('/api/service-data', async (req, res) => {
     const { period } = req.query; // Extracts the 'period' query parameter
     try {
