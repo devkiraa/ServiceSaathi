@@ -30,7 +30,7 @@ app.use('/sendimage', express.static(path.join(__dirname, 'uploads/service-docum
 // Models
 const User = require('./models/User');
 const Document = require('./models/Document');
-const ServiceRequest = require('./models/ServiceRequests');
+const ServiceRequest = require('./models/ServiceRequest');
 
 // let upload; // Removed
 
