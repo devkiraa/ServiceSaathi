@@ -15,10 +15,7 @@
       justify-content: center; /* Center horizontally */
       align-items: center; /* Center vertically (optional) */
     }
-  #profileimg
-  {
-    left:110;
-  }
+
     /* Ensure the main content has a max-width and is centered */
     main {
       width: 100%;
@@ -52,6 +49,66 @@
         margin-left: 0; /* No offset on small screens */
       }
     }
+
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* Alternate row colors */
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-buttons button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #6B7280;
+      font-size: 1.2rem;
+    }
+
+    .action-buttons button:hover {
+      color: #3B82F6; /* Edit icon hover color */
+    }
+
+    .action-buttons button.delete {
+      color: #EF4444; /* Delete icon color */
+      font-size: 1.2rem;
+    }
+
+    .action-buttons button.delete:hover {
+      color: #EF4444; /* Delete icon hover color */
+    }
+
+    /* Progress Bars */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #E5E7EB;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: #3B82F6; /* Progress bar fill color */
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body class="bg-bg-light text-gray-800 transition-all duration-300">
@@ -65,9 +122,9 @@
         <ul class="space-y-3">
           <li>
             <a href="/dashboard" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9m-3 7v-4H6v4" />
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>              
               <span>Home</span>
             </a>
           </li>
@@ -75,22 +132,15 @@
             <a href="/services" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-              </svg>              
+              </svg>                            
               <span>Service</span>
-            </a>
-          </li>
-          <li>
-            <a href="/contact" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8V7a2 2 0 00-2-2H5a2 2 0 00-2 2v1m18 0v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8m18 0L12 13 3 8" />
-              </svg>
-              <span>Contact Us</span>
             </a>
           </li>
         </ul>
       </nav>
     </div>
   </aside>
+
   <!-- Top Navbar -->
   <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40">
     <div class="flex items-center space-x-4">
@@ -139,61 +189,56 @@
       </div>
     </div>
   </nav>
+
   <!-- Main Content -->
-  <div class="flex ml-56 pt-20 bg-bg-light min-h-screen">
+  <div class="flex ml-56 pt-16 bg-bg-light min-h-screen">
     <div class="container mx-auto p-6">
       <!-- Service Requests Section -->
-      <div class="bg-gray-50 p-6 rounded-2xl border-2 border-blue-200 shadow-lg mb-6 card">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">My Service Requests</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left text-gray-600">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Mobile Number
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Service Type
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Application Date
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200" id="serviceRequestsTableBody">
+            <% if (serviceRequests.length === 0) { %>
               <tr>
-                <th class="px-6 py-3">Customer Name</th>
-                <th class="px-6 py-3">Mobile Number</th>
-                <th class="px-6 py-3">Service Type</th>
-                <th class="px-6 py-3">Application Date</th>
-                <th class="px-6 py-3">Status</th>
+                <td colspan="6" class="px-6 py-4 text-center">No service requests found.</td>
               </tr>
-            </thead>
-            <tbody>
-              <% if (serviceRequests.length === 0) { %>
-                <tr>
-                  <td colspan="4" class="px-6 py-4 text-center">No service requests found.</td>
-                </tr>
-              <% } else { %>
-                <% serviceRequests.forEach(function(sr) { %>
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4"><%= sr.documentType %></td>
-                    <td class="px-6 py-4"><%= user.username %></td>
-                    <td class="px-6 py-4 <%= 
-                      sr.status === 'received' ? 'text-blue-600' : 
-                      sr.status === 'started' ? 'text-yellow-500' : 
-                      sr.status === 'completed' ? 'text-green-600' : '' 
-                    %>">
+            <% } else { %>
+              <% serviceRequests.forEach(function(sr) { %>
+                <tr class="service-request-row">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <a href="/view-documents/<%= sr._id %>" class="text-gray-500 hover:text-blue-500 mr-2"><%= sr.mobileNumber %></a>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap"><%= sr.documentType %></td>
+                  <td class="px-6 py-4 whitespace-nowrap"><%= sr.applicationDate %></td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="<%= 
+                      sr.status === 'submitted' ? 'bg-blue-200 text-blue-800' : 
+                      sr.status === 'started' ? 'bg-yellow-200 text-yellow-800' : 
+                      sr.status === 'completed' ? 'bg-green-200 text-green-800' : '' 
+                    %> rounded-full px-2 py-1 text-xs font-semibold">
                       <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
-                    </td>
-                    <td class="px-6 py-4 space-x-2">                  
-                      <% if (sr.requiredDocuments && sr.requiredDocuments.length > 0 && sr.status === 'received') { %>
-                        <button class="text-blue-500 hover:text-blue-700" onclick="viewDocuments('<%= sr._id %>')">
-                          View Documents
-                        </button>
-                      <% } %>
-                      <% if (sr.status==='completed') { %>
-
-                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
-                      <% } else if(sr.status==='received') { %>
-                        <a href="/continue-application/<%= sr._id %>" class="text-green-500 hover:text-green-700">Continue Application</a>
-                      <% } else if(sr.status==='started') { %>
-                        <a href="/continue-application/<%= sr._id %>" class="text-yellow-500 hover:text-yellow-700">View</a>
-                      <% } %>
-                    </td>
-                  </tr>
-                <% }); %>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
+                    </span>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>  
       </div>
     </div>
   </div>
@@ -241,7 +286,6 @@
         alert("An error occurred while fetching documents.");
       }
     }
- 
     function closeModal() {
       document.getElementById('docModal').classList.add('hidden');
     }

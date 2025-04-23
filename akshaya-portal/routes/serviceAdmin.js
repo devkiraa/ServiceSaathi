@@ -5,7 +5,15 @@ const Service = require('../models/Service');
 
 // GET: Render "Add New Service" form
 router.get('/services/new', (req, res) => {
-  res.render('newService', { error: null, formData: {} });
+  if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+  res.render('newService', { error: null, formData: {}, user: req.session.user, });
+});
+
+// GET: Render "Add New Service" form
+router.get('/view-services', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+  const services = await Service.find({ });
+  res.render('allServices', { error: null, user: req.session.user, services });
 });
 
 // POST: Handle creation of a new service
