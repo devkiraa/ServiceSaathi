@@ -37,11 +37,9 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById('searchInput').addEventListener('input', function () {
     const query = this.value.toLowerCase();
     const rows = document.querySelectorAll('#serviceRequestsTableBody tr');
-  
     rows.forEach(row => {
       const mobileNumber = row.cells[0].textContent.toLowerCase();
       const applicationDate = row.cells[2].textContent.toLowerCase();
-    
       if (mobileNumber.includes(query) || applicationDate.includes(query)) {
         row.style.display = '';
       } else {
@@ -58,4 +56,37 @@ document.addEventListener("DOMContentLoaded", function () {
       row.style.display = '';
     });
   });
+  applyFilter('all'); // Set "All" as the default filter
 });
+
+
+// Filter functionality
+let currentFilter = 'all'; // Default filter
+function toggleFilterMenu() {
+  const filterMenu = document.getElementById('filterMenu');
+  filterMenu.classList.toggle('hidden');
+}
+
+function applyFilter(filter) {
+  // Update UI
+  document.getElementById(`tick-${currentFilter}`).classList.add('hidden');
+  document.getElementById(`tick-${filter}`).classList.remove('hidden');
+  document.getElementById('selectedFilter').textContent = filter.charAt(0).toUpperCase() + filter.slice(1);
+
+  // Update filter state
+  currentFilter = filter;
+
+  // Apply filter to table rows
+  const rows = document.querySelectorAll('#serviceRequestsTableBody tr');
+  rows.forEach(row => {
+    const status = row.getAttribute('data-status');
+    if (filter === 'all' || status === filter) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+
+  // Close the filter menu
+  document.getElementById('filterMenu').classList.add('hidden');
+}
