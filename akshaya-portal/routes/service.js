@@ -75,7 +75,7 @@ router.post('/service-request', async (req, res) => {
       centreId,
       mobileNumber,
       requiredDocuments: initialDocs,
-      status: 'submitted',
+      status: 'started',
       uploadToken
     });
     await serviceRequest.save();
