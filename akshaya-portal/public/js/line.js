@@ -1,84 +1,88 @@
+
+
+// Initialize Chart.js for the line chart
 document.addEventListener("DOMContentLoaded", function () {
-    // Sample data for the line chart
-    const chartData = {
-        week: {
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          data: [5, 10, 15, 20, 25, 30, 35],
+  const lineChartCtx = document.getElementById('lineChart').getContext('2d');
+  let lineChart;
+
+  // Function to initialize or update the line chart
+ function updateLineChart(data) {
+    const labels= data.map(item => item.value); // Example labels
+    const values = data.map(item => item.value); // Extract values from the fetched data
+
+    // Destroy existing chart instance if it exists
+    if (lineChart) {
+      lineChart.destroy();
+    }
+
+    // Create a new line chart
+    lineChart = new Chart(lineChartCtx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Total No of Services',
+            data: values,
+            borderColor: '#6366F1', // Indigo 500
+            backgroundColor: '#6366F1',
+            fill: true,
+            tension: 0.1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false, // Ensure the chart respects the container's dimensions
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
         },
-        month: {
-          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-          data: [10, 20, 25, 30],
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const label = context.dataset.label || '';
+                const value = context.raw || 0;
+                return `${label}: ${value}`;
+              },
+            },
+          },
         },
-        year: {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-          data: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60],
-        },
-        all: {
-          labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
-          data: [5, 20, 25, 3, 40, 45, 5],
-        },
-      };
-  
-      // Initialize Chart.js
-      const ctx = document.getElementById('lineChart').getContext('2d');
-      let lineChart;
-  
-      function renderLineChart(period) {
-        const data = chartData[period];
-        if (lineChart) {
-          lineChart.destroy(); // Destroy existing chart instance
-        }
+      },
+    });
+  }
+
+
+// Function to fetch service data based on the selected period
+async function fetchServiceData(period) {
+  try {
+    const response = await fetch(`/api/line-data?period=${period}`);
+    if (!response.ok) throw new Error("Failed to fetch line data");
+    const data = await response.json();
+
+    // Update the line chart with the fetched data
+    updateLineChart(data);
     
-        lineChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: data.labels,
-            datasets: [
-              {
-                label: 'Performance',
-                data: data.data,
-                borderColor: '#6161f9',
-                backgroundColor: 'rgba(97, 97, 249, 0.2)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true,
-                position: 'top',
-              },
-            },
-            scales: {
-              x: {
-                grid: {
-                  display: false,
-                },
-              },
-              y: {
-                beginAtZero: true,
-                grid: {
-                  color: '#e5e7eb',
-                },
-              },
-            },
-          },
-        });
-      }
-  
-      // Event listeners for buttons
-      document.querySelectorAll('#card-5 button').forEach((button) => {
-        button.addEventListener('click', () => {
-          const period = button.getAttribute('data-period');
-          renderLineChart(period);
-        });
-      });
-  
-      // Render default chart (Today)
-      renderLineChart('week');
+    // Display Total Services
+    /* document.getElementById('total-services').textContent = data.totalServices; */ 
+  } catch (error) {
+    console.error("Error fetching line data:", error);
+    alert("An error occurred while fetching line data.");
+  }
+}
+// Add event listeners to the period buttons
+document.querySelectorAll('.btn-xs').forEach(button => {
+  button.addEventListener('click', () => {
+    const period = button.getAttribute('data-period'); // Get the period (today, week, month, all)
+    fetchServiceData(period); // Fetch data for the selected period
+  });
+ 
+});
+ // Initialize the chart with "All" data by default
+ fetchServiceData('all');
 });
