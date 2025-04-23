@@ -25,45 +25,4 @@ document.addEventListener("DOMContentLoaded", function () {
       row.style.display = '';
     });
   });
-  applyFilter(currentFilter);
 });
-
-// Functionality for Filter Menu
-let currentFilter = 'all'; // Default filter
-
-function toggleFilterMenu() {
-  const menu = document.getElementById('filterMenu');
-  menu.classList.toggle('hidden');
-}
-
-function applyFilter(filter) {
-  // Remove tick marks from all options
-  ['all', 'pending', 'approved', 'rejected'].forEach(status => {
-    document.getElementById(`tick-${status}`).classList.add('hidden');
-  });
-
-  // Add tick mark to the selected option
-  document.getElementById(`tick-${filter}`).classList.remove('hidden');
-
-  // Update the button text
-  document.getElementById('filterButton').querySelector('span').textContent = filter.charAt(0).toUpperCase() + filter.slice(1);
-
-  // Close the filter menu
-  document.getElementById('filterMenu').classList.add('hidden');
-
-  // Apply filter to table rows
-  currentFilter = filter;
-  filterCentres();
-}
-
-function filterCentres() {
-  const rows = document.querySelectorAll('.centre-row');
-  rows.forEach(row => {
-    const status = row.getAttribute('data-status');
-    if (currentFilter === 'all' || status === currentFilter) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
-}
