@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const session = require('express-session');
 const path = require('path');
+const moment = require('moment');
 // const GridFsStorage = require('multer-gridfs-storage'); // Removed
 // const multer = require('multer'); // Removed
 dotenv.config();
@@ -60,6 +61,15 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   app.use('/', serviceRoutes); // Mount service routes at the root
   app.use('/', serviceAdminRoutes); // Mount service admin routes at the root
   app.use('/api', weatherRoutes);
+
+  // Helper function to format date
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A'; // Handle missing or invalid dates
+    return moment(dateString).format('hh:mm A DD/MM/YYYY');
+  }
+  
+  // Make formatDate available to all EJS templates
+  app.locals.formatDate = formatDate;
 
   // Login Page
   app.get('/', (req, res) => {
