@@ -126,7 +126,6 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
     try {
       // Fetch recent documents
       const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-      console.log("Fetched Documents:", documents); // Debugging log
   
       // Fetch user details
       const user = await User.findOne({ _id: req.session.user.id });
