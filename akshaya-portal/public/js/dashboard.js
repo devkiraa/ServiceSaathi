@@ -146,18 +146,6 @@ function adjustLineHeights() {
   }
 }
 
-async function redirect(direction) {
-  if(direction === 'logout'){
-    window.location.href = '/logout';
-  } else if (direction === 'profile'){
-    window.location.href = '/profile';
-  } else if (direction === 'change-pass'){
-    window.location.href = '/change-password';
-  } else {
-    console.error("Invalid Redirection!");
-  }
-}
-
 // Initialize the app
 function init() {
   // fetchWeatherData(); // Fetch weather data for a default city
