@@ -5,8 +5,7 @@ const dotenv = require('dotenv');
 const session = require('express-session');
 const path = require('path');
 const moment = require('moment');
-// const GridFsStorage = require('multer-gridfs-storage'); // Removed
-// const multer = require('multer'); // Removed
+
 dotenv.config();
 const app = express();
 
@@ -40,13 +39,6 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   console.log("✅ MongoDB Atlas connected to CHATBOTDB");
   console.log('\n=======================================');
   console.log('\nLogs from Service Saathi WhatsApp Server');
-  // --- Configure GridFS Storage AFTER successful database connection ---
-  // const storage = new GridFsStorage({ ... }); // Removed
-  // Initialize multer upload middleware after storage is configured
-  // upload = multer({ storage }); // Removed
-  // Export the upload middleware
-  // module.exports.upload = upload; // Removed
-  // Routes - Require routes AFTER database connection is established
 
   const authRoutes = require('./routes/auth');
   const documentRoutes = require('./routes/documents');
@@ -110,19 +102,6 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   app.get('/change-password', (req, res) => {
     res.render('changePassword');
   });
-      
-  // Dashboard Route
-  // app.get('/dashboard', async (req, res) => {
-  //   if (!req.session.user) return res.redirect('/');
-  //   if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
-  //   try {
-  //     const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-  //     const serviceRequests = await ServiceRequest.find({ centreId: req.session.user.centerId });
-  //     res.render('dashboard', { user: req.session.user, documents, serviceRequests });
-  //   } catch (error) {
-  //     res.status(500).send(error.message);
-  //   }
-  // });
 
   app.get('/dashboard', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
