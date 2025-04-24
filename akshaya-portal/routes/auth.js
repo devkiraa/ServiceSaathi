@@ -221,33 +221,6 @@ router.post('/api/login', async (req, res) => {
   }
 });
 
-
-// Handle service update
-/*router.post("/update-services", async (req, res) => {
-  try {
-      const { services } = req.body;
-
-      // Convert checkbox data to boolean values
-      const updatedServices = {};
-      for (let key in services) {
-          updatedServices[key] = services[key] === "true";
-      }
-
-      // Update the user document
-      await User.updateOne(
-          { username: "" }, // Example user
-          { $set: { services: updatedServices } }
-      );
-
-      res.redirect("/profile");
-  }
-   catch (error) {
-      console.error(error);
-      res.status(500).send("Error updating services");
-  }
-}); */
-
-
 router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -256,7 +229,6 @@ router.post("/logout", (req, res) => {
     return res.json({ success: true, message: "Logged out successfully" });
   });
 });
-
 
 // Change Password Route
 router.post('/api/change-password', async (req, res) => {
@@ -278,9 +250,7 @@ router.post('/api/change-password', async (req, res) => {
       return res.status(400).json({ error: "Current password is incorrect" });
     }
 
-    // Hash new password and save
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
+    user.password = newPassword;
     await user.save();
 
     res.json({ success: true, message: "Password changed successfully!" });
