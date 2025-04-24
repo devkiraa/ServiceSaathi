@@ -5,8 +5,7 @@ const dotenv = require('dotenv');
 const session = require('express-session');
 const path = require('path');
 const moment = require('moment');
-// const GridFsStorage = require('multer-gridfs-storage'); // Removed
-// const multer = require('multer'); // Removed
+
 dotenv.config();
 const app = express();
 
@@ -40,13 +39,6 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   console.log("✅ MongoDB Atlas connected to CHATBOTDB");
   console.log('\n=======================================');
   console.log('\nLogs from Service Saathi WhatsApp Server');
-  // --- Configure GridFS Storage AFTER successful database connection ---
-  // const storage = new GridFsStorage({ ... }); // Removed
-  // Initialize multer upload middleware after storage is configured
-  // upload = multer({ storage }); // Removed
-  // Export the upload middleware
-  // module.exports.upload = upload; // Removed
-  // Routes - Require routes AFTER database connection is established
 
   const authRoutes = require('./routes/auth');
   const documentRoutes = require('./routes/documents');
@@ -54,6 +46,8 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   const serviceRoutes = require('./routes/service');
   const serviceAdminRoutes = require('./routes/serviceAdmin');
   const weatherRoutes = require('./routes/weather');
+  const dashboardRoutes = require('./routes/dashboard');
+  const userRoutes = require('./routes/user');
 
   app.use(authRoutes);
   app.use(documentRoutes);
@@ -61,6 +55,8 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   app.use('/', serviceRoutes); // Mount service routes at the root
   app.use('/', serviceAdminRoutes); // Mount service admin routes at the root
   app.use('/api', weatherRoutes);
+  app.use('/api', dashboardRoutes);
+  app.use('/api', userRoutes);
 
   // Helper function to format date
   function formatDate(dateString) {
@@ -106,19 +102,6 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   app.get('/change-password', (req, res) => {
     res.render('changePassword');
   });
-      
-  // Dashboard Route
-  // app.get('/dashboard', async (req, res) => {
-  //   if (!req.session.user) return res.redirect('/');
-  //   if (req.session.user.role === 'admin') return res.redirect('/admin-dashboard');
-  //   try {
-  //     const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-  //     const serviceRequests = await ServiceRequest.find({ centreId: req.session.user.centerId });
-  //     res.render('dashboard', { user: req.session.user, documents, serviceRequests });
-  //   } catch (error) {
-  //     res.status(500).send(error.message);
-  //   }
-  // });
 
   app.get('/dashboard', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
@@ -190,226 +173,6 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
     } catch (error) {
       console.error("Error fetching user or service requests:", error);
       res.status(500).send("Server error: " + error.message);
-    }
-  });
-      
- app.get('/api/service-data', async (req, res) => {
-    const { period } = req.query; // Extracts the 'period' query parameter
-    const user = req.session.user; // Get the logged-in user from the session
-
-  if (!user || !user.centerId) {
-    return res.status(400).send("User or centerId not found in session");
-  }
-    try {
-      let serviceData;
-  
-      if (period === 'today') {
-        serviceData = await ServiceRequest.aggregate([
-          { $match: { createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } ,
-          centreId: user.centerId } },
-          { $group: { _id: '$documentType', count: { $sum: 1 } } },
-        ]);
-      } else if (period === 'week') {
-        serviceData = await ServiceRequest.aggregate([
-          { $match: { createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } ,
-          centreId: user.centerId } },
-          { $group: { _id: '$documentType', count: { $sum: 1 } } },
-        ]);
-      } else if (period === 'month') {
-        serviceData = await ServiceRequest.aggregate([
-          { $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) },
-          centreId: user.centerId  } },
-          { $group: { _id: '$documentType', count: { $sum: 1 } } },
-        ]);
-      } else {
-        serviceData = await ServiceRequest.aggregate([
-          { $group: { _id: '$documentType', count: { $sum: 1 } } },
-        ]);
-      }
-  
-      const total = serviceData.reduce((sum, item) => sum + item.count, 0);
-      const formattedData = serviceData.map(item => ({
-        label: item._id,
-        value: ((item.count / total) * 100).toFixed(2),
-      }));
-  
-      res.json(formattedData);
-    } catch (error) {
-      console.error("Error fetching service data:", error);
-      res.status(500).send("Server error");
-    }
-  });
-  app.get('/profile', async (req, res) => {
-    if (!req.session.user) return res.redirect('/');
-    try {
-      const user = await User.findOne({ _id: req.session.user.id });
-      if (!user) return res.status(404).send("User not found");
-      res.render('profile', {
-        user: {
-          email: user.email,
-          shopName: user.shopName,
-          personName: user.personName,
-          centerId: user.centerId,
-          phone: user.phone,
-          district: user.district,
-          type: user.type,
-          services: user.services,
-          address: user.address.toObject()
-        }
-      });
-    } catch (error) {
-      res.status(500).send("Server error: " + error.message);
-    }
-  }); 
-  app.get('/api/line-data', async (req, res) => {
-    const { period } = req.query; // Extract the 'period' query parameter
-    const user = req.session.user; // Get the logged-in user from the session
-
-  if (!user || !user.centerId) {
-    return res.status(400).send("User or centerId not found in session");
-  }
-    try {
-      let lineChartData;
-  
-      if (period === 'week') {
-        // Line chart data for the last week (daily aggregation)
-        lineChartData = await ServiceRequest.aggregate([
-          { 
-            $match: { createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } ,
-            centreId: user.centerId},
-            
-          },
-          { 
-            $group: { 
-              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }, }, 
-              count: { $sum: 1 } 
-            } 
-          },
-          { 
-            $sort: { _id: 1 } 
-          },
-        ]);
-      } else if (period === 'month') {
-        // Line chart data for the current month (weekly aggregation)
-        lineChartData = await ServiceRequest.aggregate([
-          { 
-            $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } ,
-            centreId: user.centerId },
-           
-          },
-          { 
-            $group: { 
-              _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, 
-              count: { $sum: 1 } 
-            } 
-          },
-          { 
-            $sort: { _id: 1 } 
-          },
-        ]);
-      } else if (period === 'year') {
-        // Line chart data for the last year (monthly aggregation)
-        lineChartData = await ServiceRequest.aggregate([
-          {
-          $match: {
-            
-             createdAt: { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 1)) } ,
-            centreId: user.centerId, // Filter by the logged-in user's centerId
-          }
-        },
-          { 
-            $group: { 
-              _id: { $dateToString: { format: '%Y', date: '$createdAt' } }, 
-              count: { $sum: 1 } 
-            }
-          },
-          { 
-            $sort: { _id: 1 } 
-          },
-        ]);
-        }
-
-       else if(period ==='all'){// Default: All data
-        lineChartData = await ServiceRequest.aggregate([
-          { 
-            $match: {
-              createdAt: { $gte: new Date(0) }, // Matches all dates (from the epoch time)
-              centreId: user.centerId, // Filter by the logged-in user's centerId
-            }
-          },
-          {
-            $group: { 
-              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }},
-              count: { $sum: 1 } 
-      
-            } 
-          
-          },
-      
-          { 
-            $sort: { _id: 1 } 
-          },
-        ]);
-      }
-  
-      // Handle empty data gracefully
-      if (lineChartData.length === 0) {
-        return res.json({
-          lineChart: [],
-          totalServices: 0,
-          pendingServices: 0,
-          completedServices: 0,
-        });
-      }
-  // Calculate total services
-
-
-  // Format the data
-  const formattedData = lineChartData.map(item => ({
-    label: item._id, // Time period (e.g., date, week, month, year)
-    value: item.count, // Total number of services for this period
-  }));
-
-  // Send Response
-  res.json(formattedData);
-  
-      
-    } catch (error) {
-      console.error("Error fetching service data:", error);
-      res.status(500).send("Server error");
-    }
-  });
-
-  app.post('/profile', async (req, res) => {
-    try {
-      const { email, shopName, personName, phone, type, district, address, services } = req.body;
-      console.log("📌 Received Form Data:", req.body); // ✅ Log received data
-      if (!email || !shopName || !personName || !phone || !type || !district || !address || !services) {
-        return res.status(400).json({ message: 'All fields are required!' });
-      }
-      let user = await User.findOne({ email });
-      if (user) {
-        // Update existing profile
-        user.shopName = shopName;
-        user.personName = personName;
-        user.phone = phone;
-        user.type = type;
-        user.district = district;
-        user.address = { ...user.address, ...address }; // Merging old & new address
-        user.services = { ...user.services, ...services }; // Merging services
-        await user.save();
-        req.session.user = user; // Update session data
-        return res.status(200).json({ message: 'Profile updated successfully!', data: user });
-      } else {
-        // Create new profile
-        const newUser = new User({ email, shopName, personName, centerId, phone, type, district, address, services });
-        await newUser.save();
-        req.session.user = newUser; // Store in session
-        return res.status(201).json({ message: 'Profile created successfully!', data: newUser });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      return res.status(500).json({ message: 'Internal Server Error' });
     }
   });
 }).catch(err => {
