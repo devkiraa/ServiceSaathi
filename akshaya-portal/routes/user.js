@@ -9,6 +9,7 @@ router.get('/profile', async (req, res) => {
     if (!user) return res.status(404).send("User not found");
     res.render('profile', {
       user: {
+        _id: user._id,
         email: user.email,
         shopName: user.shopName,
         personName: user.personName,

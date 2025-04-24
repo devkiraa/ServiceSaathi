@@ -56,7 +56,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   app.use('/', serviceAdminRoutes); // Mount service admin routes at the root
   app.use('/api', weatherRoutes);
   app.use('/api', dashboardRoutes);
-  app.use('/api', userRoutes);
+  app.use('/', userRoutes);
 
   // Helper function to format date
   function formatDate(dateString) {
