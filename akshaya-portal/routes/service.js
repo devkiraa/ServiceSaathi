@@ -17,11 +17,22 @@ const upload = multer({ storage });
 
 router.get('/services', async (req, res) => {
   if (!req.session.user) return res.redirect('/');
+  // helper to turn "income_certificate" → "Income Certificate"
+  const formatDocType = dt =>
+    dt
+      .split('_')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+
   try {
     const user = await User.findOne({ _id: req.session.user.id });
     if (!user) return res.status(404).send("User not found");
 
-    const serviceRequests = await ServiceRequest.find({ centreId: user.centerId, status:["submitted", "started", "completed"] });
+    const serviceRequests = await ServiceRequest.find({
+      centreId: user.centerId,
+      status: ["submitted", "started", "completed"]
+    });
+
     res.render('services', {
       user: {
         email: user.email,
@@ -36,7 +47,10 @@ router.get('/services', async (req, res) => {
       },
       serviceRequests: serviceRequests.map(sr => ({
         _id: sr._id,
-        documentType: sr.documentType,
+        // raw value kept in case you need it:
+        rawDocumentType: sr.documentType,
+        // human-readable, Title Case version:
+        documentType: formatDocType(sr.documentType),
         mobileNumber: sr.mobileNumber,
         status: sr.status,
         action: sr.action,
@@ -48,6 +62,7 @@ router.get('/services', async (req, res) => {
     res.status(500).send("Server error: " + error.message);
   }
 });
+
 
 router.post('/service-request', async (req, res) => {
   try {
