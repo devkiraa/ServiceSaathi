@@ -5,6 +5,7 @@ const serviceRequestSchema = new mongoose.Schema({
   documentType: { type: String, required: true },
   centreId:    { type: String, required: true },
   mobileNumber:{ type: String, required: true },
+  extractionDone: { type: Boolean, default: false },
   status: {
     type: String,
     enum: ['documents-uploading','pending','started','submitted','approved','rejected','completed','reupload_required'],

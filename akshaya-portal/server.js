@@ -50,7 +50,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   const userRoutes = require('./routes/user');
 
   app.use(authRoutes);
-  app.use(documentRoutes);
+  app.use('/',documentRoutes);
   app.use(adminRoutes);
   app.use('/', serviceRoutes); // Mount service routes at the root
   app.use('/', serviceAdminRoutes); // Mount service admin routes at the root
