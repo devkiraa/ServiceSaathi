@@ -1,4 +1,3 @@
-// routes/serviceAdmin.js
 const express = require('express');
 const router = express.Router();
 const Service = require('../models/Service');
@@ -6,13 +5,13 @@ const Service = require('../models/Service');
 // GET: Render "Add New Service" form
 router.get('/services/new', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
-  res.render('newService', { error: null, formData: {}, user: req.session.user, });
+  res.render('newService', { error: null, formData: {}, user: req.session.user });
 });
 
-// GET: Render "Add New Service" form
+// GET: Render "View Services" page
 router.get('/view-services', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
-  const services = await Service.find({ });
+  const services = await Service.find({});
   res.render('allServices', { error: null, user: req.session.user, services });
 });
 
@@ -30,24 +29,23 @@ router.get('/edit-service/:id', async (req, res) => {
 
     // Handle case where the service is not found
     if (!service) {
-      return res.status(404).render('error', { 
-        error: 'Service not found', 
-        user: req.session.user 
+      return res.status(404).render('error', {
+        error: 'Service not found',
+        user: req.session.user,
       });
     }
 
     // Render the "Edit Service" page with the service data
-    res.render('editService', { 
-      error: null, 
-      user: req.session.user, 
-      service 
+    res.render('editService', {
+      error: null,
+      user: req.session.user,
+      service,
     });
-      
   } catch (err) {
     console.error(err);
-    res.status(500).render('error', { 
-      error: 'An unexpected error occurred', 
-      user: req.session.user 
+    res.status(500).render('error', {
+      error: 'An unexpected error occurred',
+      user: req.session.user,
     });
   }
 });
@@ -55,6 +53,7 @@ router.get('/edit-service/:id', async (req, res) => {
 // POST: Handle creation of a new service
 router.post('/services', async (req, res) => {
   const { key, name, requiredDocuments } = req.body;
+
   // Normalize requiredDocuments to an array
   const docsArray = Array.isArray(requiredDocuments)
     ? requiredDocuments
@@ -70,7 +69,7 @@ router.post('/services', async (req, res) => {
     const service = new Service({
       key: key.trim().toLowerCase(),
       name: name.trim(),
-      requiredDocuments: requiredDocs
+      requiredDocuments: requiredDocs,
     });
     await service.save();
     // Redirect to a listing page or show success message
@@ -78,10 +77,9 @@ router.post('/services', async (req, res) => {
   } catch (err) {
     console.error('Error creating service:', err);
     // Re-render form with error and previous input
-    res.render('services/new', { error: err.message, formData: req.body });
+    res.render('newService', { error: err.message, formData: req.body });
   }
 });
-
 
 // POST: Handle updating an existing service
 router.post('/edit-service/:id', async (req, res) => {
@@ -118,6 +116,25 @@ router.post('/edit-service/:id', async (req, res) => {
     res.status(200).json({ message: 'Service updated successfully' });
   } catch (err) {
     console.error('Error updating service:', err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// DELETE: Handle deletion of a service
+router.delete('/delete-service/:id', async (req, res) => {
+  try {
+    // Find and delete the service by ID
+    const result = await Service.findByIdAndDelete(req.params.id);
+
+    // Handle case where the service is not found
+    if (!result) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    // Respond with success
+    res.status(200).json({ message: 'Service deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting service:', err);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
