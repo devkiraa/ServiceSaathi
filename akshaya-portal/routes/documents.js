@@ -1,130 +1,151 @@
 const express        = require('express');
-const path           = require('path');
-// const Document    = require('../models/Document'); // Document model likely not needed here anymore
+const path           = require('path'); // Needed for extension handling
 const ServiceRequest = require('../models/ServiceRequest');
 const router         = express.Router();
+const sharp          = require('sharp'); // Require sharp
+const moment         = require('moment'); // For server-side timestamp fallback
 
-// Render Continue Application - MODIFIED
+// Render Continue Application route (remains the same as previous version)
 router.get('/continue-application/:serviceRequestId', async (req, res) => {
-  // REMOVED: Session check depends on your auth strategy, keep if necessary
-  // if (!req.session.user) return res.redirect('/');
-
   try {
     const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
-    if (!serviceRequest) {
-        return res.status(404).send('Service request not found.');
-    }
+    if (!serviceRequest) return res.status(404).send('Service request not found.');
 
-    // Directly map the data from the subdocuments
-    const processedDocuments = serviceRequest.requiredDocuments.map(doc => {
-      // This assumes 'extractedFields' might exist on the subdocument,
-      // even if not explicitly in the schema provided earlier.
-      // It gracefully handles cases where it's missing.
-      return {
-        _id:            doc._id,          // Subdocument ID
-        name:           doc.name,         // Name from subdocument
-        base64Data:     doc.fileData || null, // Base64 data from subdocument
-        extractedFields: doc.extractedFields || {} // Extracted fields from subdoc (handles absence)
-      };
-    });
+    const processedDocuments = serviceRequest.requiredDocuments.map(doc => ({
+        _id:            doc._id,
+        name:           doc.name,
+        base64Data:     doc.fileData || null, // Pass raw base64 needed for client-side size calc
+        extractedFields: doc.extractedFields || {}
+    }));
 
-    // MODIFIED: Removed customer details from session
     res.render('continueApplication', {
       serviceRequest: {
         _id:               serviceRequest._id,
         status:            serviceRequest.status,
-        // --- MODIFICATION START ---
-        // Format documentType directly here: snake_case to Title Case
         documentType:      serviceRequest.documentType
-                            ? serviceRequest.documentType.split('_') // Split by underscore
-                                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize first letter, lowercase rest
-                                .join(' ') // Join with space
-                            : "Service Request Details", // Fallback if documentType is missing
-        // --- MODIFICATION END ---
+                            ? serviceRequest.documentType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+                            : "Service Request Details",
         requiredDocuments: processedDocuments,
       }
     });
-
-  } catch (err) {
-    console.error('Error in /continue-application:', err);
-    res.status(500).send('Something went wrong.');
-  }
+  } catch (err) { console.error(err); res.status(500).send('Error loading application.'); }
 });
 
-// Download base64 file - UNCHANGED (already correct based on previous fix)
-router.get('/download/:serviceRequestId/:docSubId', async (req, res) => {
+
+// --- NEW Route for Convertible Download ---
+router.get('/download-convert/:serviceRequestId/:docSubId', async (req, res) => {
   try {
-    const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
+    const { serviceRequestId, docSubId } = req.params;
+    const requestedFormat = req.query.format?.toLowerCase(); // e.g., 'jpg', 'png'
+    const requestedFilename = req.query.filename; // Filename from user input (without extension)
+
+    // Basic validation
+    if (!['jpg', 'png'].includes(requestedFormat)) { // Only support JPG/PNG for now
+      return res.status(400).send('Unsupported format requested. Only JPG and PNG are currently supported.');
+    }
+
+    const serviceRequest = await ServiceRequest.findById(serviceRequestId);
     if (!serviceRequest) {
       return res.status(404).send('Service request not found.');
     }
-    const doc = serviceRequest.requiredDocuments.id(req.params.docSubId);
+
+    const doc = serviceRequest.requiredDocuments.id(docSubId);
     if (!doc || !doc.fileData) {
-      return res.status(404).send('Document not found or has no data.');
+      return res.status(404).send('Document data not found.');
     }
 
-    // Remove data URI prefix if present before decoding
+    // Decode Base64 (handle potential data URI)
     const base64Data = doc.fileData.startsWith('data:')
         ? doc.fileData.substring(doc.fileData.indexOf(',') + 1)
         : doc.fileData;
 
-    const buffer = Buffer.from(base64Data, 'base64');
+    const originalBuffer = Buffer.from(base64Data, 'base64');
 
-    // Basic MIME type detection (remains the same)
-    let contentType = 'application/octet-stream'; let extension = 'bin';
-    // Refined checks based on potential data URI prefix OR raw base64 start
-    const fileDataStart = doc.fileData.substring(0, 30); // Check start of string
-    if (fileDataStart.includes('image/jpeg') || fileDataStart.startsWith('/9j/')) {
-        contentType = 'image/jpeg'; extension = 'jpg';
-    } else if (fileDataStart.includes('image/png') || fileDataStart.startsWith('iVBOR')) {
-        contentType = 'image/png'; extension = 'png';
-    } else if (fileDataStart.includes('application/pdf')) {
-        contentType = 'application/pdf'; extension = 'pdf';
-    } // Add more checks if needed
+    let outputBuffer;
+    let outputContentType;
+    const targetExtension = requestedFormat === 'jpg' ? 'jpg' : 'png'; // Determine target extension
 
-    const safeName = doc.name ? doc.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_') : 'document';
-    const filename = `${safeName}.${extension}`;
+    // --- Conversion Logic ---
+    try {
+        const image = sharp(originalBuffer);
+        // Check if input is potentially PDF - sharp might throw error
+        const metadata = await image.metadata().catch(() => null); // Suppress error if not image
+        if (!metadata || metadata.format === 'pdf') {
+             // If original is PDF, conversion to image is not supported here
+             if (requestedFormat === 'pdf') { // Allow PDF -> PDF download (no conversion needed)
+                 outputBuffer = originalBuffer;
+                 outputContentType = 'application/pdf';
+                 // targetExtension = 'pdf'; // If PDF output is enabled
+             } else {
+                 return res.status(400).send('Conversion from PDF to image is not supported.');
+             }
+        } else {
+            // Perform image conversion
+            if (requestedFormat === 'jpg') {
+                outputBuffer = await image.jpeg().toBuffer();
+                outputContentType = 'image/jpeg';
+            } else { // png
+                outputBuffer = await image.png().toBuffer();
+                outputContentType = 'image/png';
+            }
+        }
+    } catch (conversionError) {
+      console.error('Sharp conversion error:', conversionError);
+      // Attempt to serve original if conversion fails? Or just error out.
+      // Let's error out clearly for now.
+      return res.status(500).send(`Failed to convert document. Original format might be unsupported. Error: ${conversionError.message}`);
+    }
+    // --- End Conversion Logic ---
 
-    res.set('Content-Type', contentType);
-    res.set('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(buffer);
+
+    // --- Filename Generation ---
+    let finalFilename;
+    if (requestedFilename) {
+      // Sanitize and add the correct target extension
+      const baseName = requestedFilename.replace(/[^a-zA-Z0-9_\-\.]/g, '_').replace(/\.[^/.]+$/, ""); // Remove existing ext
+      finalFilename = `${baseName}.${targetExtension}`;
+    } else {
+      // Default filename if not provided by user
+      const safeName = doc.name ? doc.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_').replace(/\.[^/.]+$/, "") : 'document';
+      const timestamp = moment().format('YYYYMMDD_HHmmss');
+      finalFilename = `${safeName}_${timestamp}.${targetExtension}`;
+    }
+    // --- End Filename Generation ---
+
+    // Set headers and send response
+    res.set('Content-Type', outputContentType);
+    res.set('Content-Disposition', `attachment; filename="${finalFilename}"`);
+    res.send(outputBuffer);
 
   } catch (err) {
-    console.error('Error downloading document:', err);
-    res.status(500).send('Server error during download');
+    console.error('Error during convertible download:', err);
+    res.status(500).send('Server error during download process.');
   }
 });
 
 
-// Update overall request status - UNCHANGED
+// --- REMOVE or COMMENT OUT the old direct download route ---
+/*
+router.get('/download/:serviceRequestId/:docSubId', async (req, res) => {
+  // ... (old direct download logic) ...
+});
+*/
+
+// Update overall request status (remains the same)
 router.post('/update-request-status/:serviceRequestId', async (req, res) => {
-  try {
-    const { status } = req.body;
-    // Add validation if status is part of the enum
-    const validStatuses = ServiceRequest.schema.path('status').enumValues;
-    if (!validStatuses.includes(status)) {
-        return res.status(400).json({ message: 'Invalid status value provided.' });
+    // ... (previous status update logic) ...
+     try {
+        const { status } = req.body;
+        const validStatuses = ServiceRequest.schema.path('status').enumValues;
+        if (!validStatuses.includes(status)) return res.status(400).json({ message: 'Invalid status value.' });
+        const updatedRequest = await ServiceRequest.findByIdAndUpdate(req.params.serviceRequestId, { status }, { new: true, runValidators: true });
+        if (!updatedRequest) return res.status(404).json({ message: 'Not found.' });
+        res.json({ message: 'Status updated successfully' });
+    } catch (err) {
+        console.error(err);
+        if (err.name === 'ValidationError') return res.status(400).json({ message: `Validation failed: ${err.message}` });
+        res.status(500).json({ message: 'Failed to update status' });
     }
-
-    const updatedRequest = await ServiceRequest.findByIdAndUpdate(
-        req.params.serviceRequestId,
-        { status },
-        { new: true, runValidators: true } // Ensure validators run
-    );
-
-    if (!updatedRequest) {
-        return res.status(404).json({ message: 'Service request not found.' });
-    }
-
-    res.json({ message: 'Request status updated successfully' });
-  } catch (err) {
-    console.error('Error updating request status:', err);
-    // Check for validation errors
-    if (err.name === 'ValidationError') {
-        return res.status(400).json({ message: `Validation failed: ${err.message}` });
-    }
-    res.status(500).json({ message: 'Failed to update request status' });
-  }
 });
 
 module.exports = router;

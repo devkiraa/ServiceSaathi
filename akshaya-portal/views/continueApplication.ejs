@@ -1,213 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <%# Use documentType in the title if available %>
-  <title><%= serviceRequest ? serviceRequest.documentType : "Document" %> Details - Service Saathi</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-  <script src="/js/tailwindConfig.js"></script> <%# Assuming this configures Tailwind/DaisyUI themes %>
-  <script src="/js/profileIcon.js"></script> <%# Assuming this handles profile icon logic %>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-  <style>
-    /* Style for copy icon (can be removed if not used elsewhere) */
-    .copy-icon::before {
-      content: '📄'; /* Basic emoji representation */
-      cursor: pointer; display: inline-block; margin-left: 5px;
-    }
-    .copy-icon:hover::before { opacity: 0.7; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><%= serviceRequest ? serviceRequest.documentType : "Document" %> Details - Service Saathi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="/js/tailwindConfig.js"></script>
+    <script src="/js/profileIcon.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <style>
+        /* Basic Modal Styling */
+        .modal-backdrop { background-color: rgba(0,0,0,0.5); }
+        /* Ensure modal content is above backdrop */
+        #downloadModalContent { z-index: 110; }
+        /* Add other styles as needed */
+    </style>
 </head>
 <body class="bg-bg-light text-gray-800 transition-all duration-300">
 
-  <aside class="fixed top-0 left-0 h-screen w-56 bg-gradient-to-b from-primary to-secondary shadow-md z-50">
-    <div class="flex flex-col justify-between h-full">
-      <div class="p-6">
-        <h1 class="text-2xl font-bold text-white">Service Saathi</h1>
-      </div>
-      <nav class="flex-1 px-4">
-        <ul class="space-y-3">
-          <li><a href="/" class="block text-white hover:bg-white hover:text-primary rounded px-3 py-2">Home</a></li>
-          <li><a href="/services" class="block text-white hover:bg-white hover:text-primary rounded px-3 py-2">Services</a></li>
-          </ul>
-      </nav>
-      </div>
-  </aside>
-
-  <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40 h-16">
-    <%# MODIFIED: Display documentType instead of "Customer Details" %>
-    <h2 class="text-xl font-semibold text-gray-700 truncate pr-4">Document applying for
-      <%= serviceRequest ? serviceRequest.documentType : "Service Request Details"  %>
-    </h2>
-    <div class="flex items-center space-x-4">
-      <div id="profile-icon-container">
-         <span class="text-gray-600">Loading Profile...</span>
-      </div>
-    </div>
-  </nav>
-
-  <div class="flex ml-56 pt-16 bg-bg-light min-h-screen"> <%# Adjusted pt to match navbar height %>
-    <div class="container mx-auto p-6">
-      <div class="max-w-5xl mx-auto bg-white shadow-md rounded-md p-6">
-
-        <%# REMOVED: Customer Details Section (h2 for name and the gray box) %>
-
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Uploaded Documents & Extracted Data</h2>
-        <div class="overflow-x-auto">
-          <table class="w-full border-collapse border border-gray-300 mb-6 text-sm">
-            <thead>
-              <tr class="bg-gray-100">
-                <th class="border border-gray-300 p-2 text-center">Document Name</th>
-                <th class="border border-gray-300 p-2 text-center">Extracted Data</th>
-                <th class="border border-gray-300 p-2 text-center">View</th>
-                <th class="border border-gray-300 p-2 text-center">Download</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if (!serviceRequest || !serviceRequest.requiredDocuments || serviceRequest.requiredDocuments.length === 0) { %>
-                <tr><td colspan="4" class="text-center p-4 text-gray-500">No documents uploaded yet.</td></tr>
-              <% } else { %>
-                <% serviceRequest.requiredDocuments.forEach(function(doc) { %>
-                  <tr class="hover:bg-gray-50 align-top">
-                    <td class="border p-2 text-center font-medium"><%= doc.name %></td>
-                    <td class="border p-2 text-left">
-                      <%# Display extractedFields if available %>
-                      <% if (doc.extractedFields && typeof doc.extractedFields === 'object' && Object.keys(doc.extractedFields).length > 0) { %>
-                        <ul class="list-disc pl-5 space-y-1">
-                          <% for (const [label, value] of Object.entries(doc.extractedFields)) { %>
-                            <li><strong class="font-semibold"><%= label %>:</strong> <%= value %></li>
-                          <% } %>
-                        </ul>
-                      <% } else { %>
-                        <span class="text-gray-400 italic">Pending extraction</span>
-                      <% } %>
-                    </td>
-                    <td class="border p-2 text-center align-middle">
-                      <%# Display image preview %>
-                      <% if (doc.base64Data) { %>
-                        <img
-                          src="data:image/jpeg;base64,<%= doc.base64Data %>" <%# Assuming JPEG %>
-                          alt="Preview of <%= doc.name %>"
-                          class="h-20 md:h-24 mx-auto rounded-md shadow hover:scale-105 transition-transform duration-200 cursor-pointer object-contain"
-                          onclick="openImageModal('data:image/jpeg;base64,<%= doc.base64Data %>')"
-                        />
-                      <% } else { %>
-                        <span class="text-gray-400">No Preview</span>
-                      <% } %>
-                    </td>
-                    <td class="border p-2 text-center align-middle">
-                      <%# Display download link %>
-                      <% if (doc.base64Data) { %>
-                        <a
-                          href="/download/<%= serviceRequest._id %>/<%= doc._id %>"
-                          class="inline-block bg-primary text-white px-3 py-1 rounded hover:bg-secondary transition-colors duration-200 text-xs md:text-sm"
-                          title="Download <%= doc.name %>"
-                        >Download</a>
-                      <% } else { %>
-                        <span class="text-gray-400">–</span>
-                      <% } %>
-                    </td>
-                  </tr>
-                <% }); %>
-              <% } %>
-            </tbody>
-          </table>
+    <aside class="fixed top-0 left-0 h-screen w-56 bg-gradient-to-b from-primary to-secondary shadow-md z-50">
+        <div class="flex flex-col justify-between h-full">
+          <div class="p-6"> <h1 class="text-2xl font-bold text-white">Service Saathi</h1> </div>
+          <nav class="flex-1 px-4"> <ul class="space-y-3">
+              <li><a href="/" class="block text-white hover:bg-white hover:text-primary rounded px-3 py-2">Home</a></li>
+              <li><a href="/services" class="block text-white hover:bg-white hover:text-primary rounded px-3 py-2">Services</a></li>
+          </ul> </nav>
         </div>
+    </aside>
 
-        <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-end items-center gap-3">
-          <label for="overall-status" class="mr-2 font-semibold text-gray-700">Overall Request Status:</label>
-          <select id="overall-status" class="border rounded p-2 bg-white shadow-sm focus:ring-primary focus:border-primary">
-             <% const currentStatus = serviceRequest ? serviceRequest.status : 'Pending'; %>
-             <option value="Pending"    <%= currentStatus === 'Pending'    ? 'selected' : '' %>>Pending</option>
-             <option value="Processing" <%= currentStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
-             <option value="Completed"  <%= currentStatus === 'Completed'  ? 'selected' : '' %>>Completed</option>
-             <option value="Approved"   <%= currentStatus === 'Approved'   ? 'selected' : '' %>>Approved</option>
-             <option value="Rejected"   <%= currentStatus === 'Rejected'   ? 'selected' : '' %>>Rejected</option>
-             <option value="Reupload Required"   <%= currentStatus === 'reupload_required'   ? 'selected' : '' %>>Reupload Required</option>
-             <%# Add other valid statuses from your enum if necessary %>
-           </select>
-           <button
-             onclick="updateRequestStatus('<%= serviceRequest ? serviceRequest._id : '' %>')"
-             class="ml-3 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors duration-200 shadow"
-             <%= !serviceRequest ? 'disabled' : '' %>
-           >Save Status</button>
+    <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40 h-16">
+        <h2 class="text-xl font-semibold text-gray-700 truncate pr-4">Document applying for
+            <%= serviceRequest ? serviceRequest.documentType : "Service Request Details" %>
+        </h2>
+        <div class="flex items-center space-x-4">
+            <div id="profile-icon-container"> <span class="text-gray-600">Loading Profile...</span> </div>
         </div>
+    </nav>
 
-      </div></div> </div> <div id="imageModal" class="fixed inset-0 hidden bg-black bg-opacity-75 justify-center items-center z-[100] p-4" onclick="closeImageModal()">
-    <div class="relative max-w-full max-h-full" onclick="event.stopPropagation()">
-       <button onclick="closeImageModal()" class="absolute -top-8 right-0 text-white text-3xl font-bold hover:text-gray-300" title="Close Image">&times;</button>
-       <img id="modalImage" class="block max-h-[90vh] max-w-[90vw] rounded-md shadow-lg object-contain"/>
+    <div class="flex ml-56 pt-16 bg-bg-light min-h-screen">
+        <div class="container mx-auto p-6">
+            <div class="max-w-5xl mx-auto bg-white shadow-md rounded-md p-6">
+
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Uploaded Documents & Extracted Data</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300 mb-6 text-sm">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2 text-center">Document Name</th>
+                                <th class="border border-gray-300 p-2 text-center">Extracted Data</th>
+                                <th class="border border-gray-300 p-2 text-center">View</th>
+                                <th class="border border-gray-300 p-2 text-center">Download</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (!serviceRequest || !serviceRequest.requiredDocuments || serviceRequest.requiredDocuments.length === 0) { %>
+                                <tr><td colspan="4" class="text-center p-4 text-gray-500">No documents uploaded yet.</td></tr>
+                            <% } else { %>
+                                <% serviceRequest.requiredDocuments.forEach(function(doc) { %>
+                                    <tr class="hover:bg-gray-50 align-top">
+                                        <td class="border p-2 text-center font-medium"><%= doc.name %></td>
+                                        <td class="border p-2 text-left">
+                                            <%# Extracted data display (remains the same) %>
+                                            <% if (doc.extractedFields && typeof doc.extractedFields === 'object' && Object.keys(doc.extractedFields).length > 0) { %>
+                                                <ul class="list-disc pl-5 space-y-1">
+                                                <% for (const [label, value] of Object.entries(doc.extractedFields)) { %>
+                                                    <li><strong class="font-semibold"><%= label %>:</strong> <%= value %></li>
+                                                <% } %>
+                                                </ul>
+                                            <% } else { %> <span class="text-gray-400 italic">Pending extraction</span> <% } %>
+                                        </td>
+                                        <td class="border p-2 text-center align-middle">
+                                            <%# Image preview (remains the same) %>
+                                            <% if (doc.base64Data) { %>
+                                                <img src="data:image/jpeg;base64,<%= doc.base64Data %>" alt="Preview of <%= doc.name %>" class="h-20 md:h-24 mx-auto rounded-md shadow hover:scale-105 transition-transform duration-200 cursor-pointer object-contain" onclick="openImageModal('data:image/jpeg;base64,<%= doc.base64Data %>')"/>
+                                            <% } else { %> <span class="text-gray-400">No Preview</span> <% } %>
+                                        </td>
+                                        <td class="border p-2 text-center align-middle">
+                                            <%# --- MODIFIED Download Button --- %>
+                                            <% if (doc.base64Data) { %>
+                                                <button
+                                                    type="button"
+                                                    onclick="openDownloadModal('<%= serviceRequest._id %>', '<%= doc._id %>', '<%= doc.name %>', `<%- doc.base64Data %>`)" <%# Pass base64 data carefully %>
+                                                    class="inline-block bg-primary text-white px-3 py-1 rounded hover:bg-secondary transition-colors duration-200 text-xs md:text-sm"
+                                                    title="Download Options for <%= doc.name %>"
+                                                >Download</button>
+                                            <% } else { %> <span class="text-gray-400">–</span> <% } %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-end items-center gap-3">
+                    <label for="overall-status" class="mr-2 font-semibold text-gray-700">Overall Request Status:</label>
+                    <select id="overall-status" class="border rounded p-2 bg-white shadow-sm focus:ring-primary focus:border-primary">
+                        <% const currentStatus = serviceRequest ? serviceRequest.status : 'Pending'; %>
+                        <option value="Pending"    <%= currentStatus === 'Pending'    ? 'selected' : '' %>>Pending</option>
+                        <option value="Processing" <%= currentStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
+                        <option value="Completed"  <%= currentStatus === 'Completed'  ? 'selected' : '' %>>Completed</option>
+                        <option value="Approved"   <%= currentStatus === 'Approved'   ? 'selected' : '' %>>Approved</option>
+                        <option value="Rejected"   <%= currentStatus === 'Rejected'   ? 'selected' : '' %>>Rejected</option>
+                        <option value="Reupload Required"   <%= currentStatus === 'reupload_required'   ? 'selected' : '' %>>Reupload Required</option>
+                    </select>
+                    <button onclick="updateRequestStatus('<%= serviceRequest ? serviceRequest._id : '' %>')" class="ml-3 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors duration-200 shadow" <%= !serviceRequest ? 'disabled' : '' %>>Save Status</button>
+                </div>
+
+            </div></div> </div> <div id="imageModal" class="fixed inset-0 hidden bg-black bg-opacity-75 justify-center items-center z-[100] p-4" onclick="closeImageModal()">
+        <div class="relative max-w-full max-h-full" onclick="event.stopPropagation()">
+            <button onclick="closeImageModal()" class="absolute -top-8 right-0 text-white text-3xl font-bold hover:text-gray-300" title="Close Image">&times;</button>
+            <img id="modalImage" class="block max-h-[90vh] max-w-[90vw] rounded-md shadow-lg object-contain"/>
+        </div>
     </div>
-  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
-  <script>
-    // === Modal Functions ===
-    const imageModal = document.getElementById('imageModal');
-    const modalImage = document.getElementById('modalImage');
-    function openImageModal(src) { /* ... (same as before) ... */
-       if (modalImage && imageModal) {
-         modalImage.src = src;
-         imageModal.classList.remove('hidden');
-         imageModal.classList.add('flex');
-       }
-    }
-    function closeImageModal() { /* ... (same as before) ... */
-       if (imageModal) {
-         imageModal.classList.add('hidden');
-         imageModal.classList.remove('flex');
-         modalImage.src = '';
-       }
-    }
-    document.addEventListener('keydown', (event) => { /* ... (same as before) ... */
-        if (event.key === 'Escape' && !imageModal.classList.contains('hidden')) {
-            closeImageModal();
+    <div id="downloadModal" class="fixed inset-0 hidden items-center justify-center z-[105]">
+        <div class="modal-backdrop fixed inset-0" onclick="closeDownloadModal()"></div>
+        <div id="downloadModalContent" class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 relative">
+            <h3 class="text-lg font-semibold mb-4">Download Options</h3>
+
+            <div class="mb-4">
+                <label for="downloadFilename" class="block text-sm font-medium text-gray-700 mb-1">Filename:</label>
+                <input type="text" id="downloadFilename" name="downloadFilename" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary">
+            </div>
+
+            <div class="mb-4">
+                 <p class="text-sm text-gray-600">Original Size: <span id="originalFileSize">Calculating...</span></p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Download Format:</label>
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center">
+                        <input type="radio" name="downloadFormat" value="jpg" class="form-radio h-4 w-4 text-primary focus:ring-primary" checked>
+                        <span class="ml-2 text-sm">JPG</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="downloadFormat" value="png" class="form-radio h-4 w-4 text-primary focus:ring-primary">
+                        <span class="ml-2 text-sm">PNG</span>
+                    </label>
+                    <label class="flex items-center opacity-50 cursor-not-allowed" title="PDF conversion from images coming soon"> <%# Disable PDF for now %>
+                        <input type="radio" name="downloadFormat" value="pdf" class="form-radio h-4 w-4 text-primary focus:ring-primary" disabled>
+                        <span class="ml-2 text-sm">PDF</span>
+                    </label>
+                </div>
+                 <p class="text-xs text-gray-500 mt-2">Note: Conversion depends on the original file type. PDF output may not preserve original layout perfectly. PDF input cannot be converted to images.</p>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDownloadModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">Cancel</button>
+                <button type="button" id="confirmDownloadBtn" onclick="confirmDownload()" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary text-sm">Confirm & Download</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+    <script>
+        // === Image Modal Functions (remain the same) ===
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        function openImageModal(src) { if (modalImage && imageModal) { modalImage.src = src; imageModal.classList.remove('hidden'); imageModal.classList.add('flex'); } }
+        function closeImageModal() { if (imageModal) { imageModal.classList.add('hidden'); imageModal.classList.remove('flex'); modalImage.src = ''; } }
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !imageModal.classList.contains('hidden')) { closeImageModal(); } });
+
+        // === Download Modal Functions ===
+        const downloadModal = document.getElementById('downloadModal');
+        const downloadFilenameInput = document.getElementById('downloadFilename');
+        const originalFileSizeSpan = document.getElementById('originalFileSize');
+        const confirmDownloadBtn = document.getElementById('confirmDownloadBtn');
+
+        function calculateSizeAndFormat(base64String) {
+            // Basic Base64 size estimation
+            if (!base64String) return 'N/A';
+            // Remove data URI prefix if present for accurate calculation
+            const C = base64String.startsWith('data:') ? base64String.substring(base64String.indexOf(',') + 1) : base64String;
+            const L = C.length;
+            const bytes = L * 0.75 - (C.endsWith('==') ? 2 : (C.endsWith('=') ? 1 : 0));
+
+            if (bytes < 1024) return `${bytes} Bytes`;
+            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+            return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
         }
-    });
 
-    // === Copy to Clipboard Function === (Can be kept or removed if not used elsewhere)
-    function copyToClipboard(text) { /* ... (same as before) ... */
-      if (navigator.clipboard && text) {
-        navigator.clipboard.writeText(text).then(() => {
-          alert("Copied: " + text);
-        }).catch(err => {
-          console.error('Failed to copy text: ', err);
-          alert("Failed to copy text.");
-        });
-      } else {
-          alert("Clipboard API not available or no text to copy.");
-      }
-    }
+        function openDownloadModal(serviceRequestId, docSubId, docName, base64Data) {
+            if (!downloadModal || !confirmDownloadBtn || !downloadFilenameInput || !originalFileSizeSpan) {
+                console.error("Download modal elements not found!");
+                return;
+            }
 
-    // === Update Status Function ===
-    async function updateRequestStatus(requestId) { /* ... (same as before) ... */
-      if (!requestId) {
-          alert('Error: Request ID is missing.'); return;
-      }
-      const statusDropdown = document.getElementById('overall-status');
-      const selectedStatus = statusDropdown ? statusDropdown.value : null;
-      if (!selectedStatus) {
-          alert('Error: Could not read selected status.'); return;
-      }
-      console.log(`Updating status for ${requestId} to ${selectedStatus}`);
-      try {
-        const response = await fetch(`/update-request-status/${requestId}`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ status: selectedStatus })
-        });
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.message || `Server responded with status ${response.status}`);
+            // 1. Calculate Size
+            originalFileSizeSpan.textContent = calculateSizeAndFormat(base64Data);
+
+            // 2. Generate Default Filename (Name + Date/Time)
+            const safeName = docName ? docName.replace(/[^a-zA-Z0-9_\-\.]/g, '_').replace(/\.[^/.]+$/, "") : 'document'; // Remove existing extension
+            const timestamp = moment().format('YYYYMMDD_HHmmss');
+            downloadFilenameInput.value = `${safeName}_${timestamp}`; // Extension will be added by server based on format
+
+            // 3. Store IDs on the confirm button (or modal) for later retrieval
+            confirmDownloadBtn.dataset.serviceRequestId = serviceRequestId;
+            confirmDownloadBtn.dataset.docSubId = docSubId;
+
+            // 4. Reset format selection (optional, default to jpg)
+             const formatRadios = document.querySelectorAll('input[name="downloadFormat"]');
+             formatRadios.forEach(radio => radio.checked = (radio.value === 'jpg'));
+
+            // 5. Show Modal
+            downloadModal.classList.remove('hidden');
+            downloadModal.classList.add('flex');
         }
-        alert(data.message || 'Request status updated successfully!');
-      } catch (error) {
-        console.error('Error updating request status:', error);
-        alert(`Error updating request status: ${error.message}`);
-      }
-    }
-  </script>
+
+        function closeDownloadModal() {
+            if (downloadModal) {
+                downloadModal.classList.add('hidden');
+                downloadModal.classList.remove('flex');
+                // Clear stored data (optional)
+                if(confirmDownloadBtn) {
+                    delete confirmDownloadBtn.dataset.serviceRequestId;
+                    delete confirmDownloadBtn.dataset.docSubId;
+                }
+            }
+        }
+
+        function confirmDownload() {
+            if (!confirmDownloadBtn || !downloadFilenameInput) return;
+
+            const serviceRequestId = confirmDownloadBtn.dataset.serviceRequestId;
+            const docSubId = confirmDownloadBtn.dataset.docSubId;
+            const selectedFormat = document.querySelector('input[name="downloadFormat"]:checked')?.value;
+            const filename = downloadFilenameInput.value.trim(); // Get filename, trim whitespace
+
+            if (!serviceRequestId || !docSubId || !selectedFormat) {
+                alert('Error: Missing information to start download.');
+                return;
+            }
+             if (!filename) {
+                alert('Error: Filename cannot be empty.');
+                return;
+            }
+
+            // Construct the new download URL with format and filename
+            const downloadUrl = `/download-convert/${serviceRequestId}/${docSubId}?format=${selectedFormat}&filename=${encodeURIComponent(filename)}`;
+
+            console.log('Triggering download:', downloadUrl); // Debug log
+
+            // Trigger the download by navigating to the URL
+            window.location.href = downloadUrl;
+
+            closeDownloadModal();
+        }
+
+        // === Update Status Function (remains the same) ===
+        async function updateRequestStatus(requestId) { /* ... */
+            if (!requestId) { alert('Error: Request ID is missing.'); return; }
+            const statusDropdown = document.getElementById('overall-status');
+            const selectedStatus = statusDropdown ? statusDropdown.value : null;
+            if (!selectedStatus) { alert('Error: Could not read selected status.'); return; }
+            console.log(`Updating status for ${requestId} to ${selectedStatus}`);
+            try {
+                const response = await fetch(`/update-request-status/${requestId}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status: selectedStatus }) });
+                const data = await response.json();
+                if (!response.ok) { throw new Error(data.message || `Server error ${response.status}`); }
+                alert(data.message || 'Status updated!');
+            } catch (error) { console.error('Error:', error); alert(`Error: ${error.message}`); }
+        }
+
+        // === Copy Function (remains the same, though targets removed) ===
+        function copyToClipboard(text) { /* ... */
+             if (navigator.clipboard && text) { navigator.clipboard.writeText(text).then(() => { alert("Copied: " + text); }).catch(err => { console.error('Failed to copy:', err); alert("Failed to copy."); }); } else { alert("Clipboard API unavailable."); }
+        }
+
+    </script>
 </body>
 </html>
