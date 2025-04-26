@@ -212,7 +212,7 @@ module.exports = function({ CHAT_API_BASE, DOCUMENT_SERVICE_API_BASE }) {
     // --- Standard Flow ---
 
     // Greeting / Menu Reset
-    if (lower === "hi" || lower === "hello" || lower === "menu") {
+    if (lower === "hi" || lower === "hello" || lower === "menu" || lower === "hai" || lower === "ഹലോ" || lower === "ഹായ്") {
       logger.info(`Handling greeting/menu request for ${userPhone}`);
       // Reset state completely
       user.lastOption = null;
