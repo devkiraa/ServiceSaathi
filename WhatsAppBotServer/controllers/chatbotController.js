@@ -212,7 +212,42 @@ module.exports = function({ CHAT_API_BASE, DOCUMENT_SERVICE_API_BASE }) {
     // --- Standard Flow ---
 
     // Greeting / Menu Reset
-    if (lower === "hi" || lower === "hello" || lower === "menu" || lower === "hai" || lower === "ഹലോ" || lower === "ഹായ്") {
+    if (
+      // Original English & Malayalam
+      lower === "hi" ||
+      lower === "hello" ||
+      lower === "hai" || // Common alternative spelling/pronunciation
+      lower === "ഹലോ" || // Malayalam: hello
+      lower === "ഹായ്" || // Malayalam: hi
+  
+      // Added English Variations
+      lower === "hey" || // Very common informal greeting
+      lower === "helo" || // Common typo for hello
+      lower === "hallo" || // Another variation/typo
+      lower === "greeting" || // More formal
+      lower === "greetings" || // Plural form
+  
+      // Added Time-Based English Greetings
+      lower === "good morning" ||
+      lower === "good afternoon" ||
+      lower === "good evening" ||
+  
+      // Added Common Indian Greetings (often used across languages)
+      lower === "namaste" || // Widely recognized
+      lower === "namaskaram" || // Common in South India
+  
+      // Added Malayalam Formal Greetings
+      lower === "നമസ്കാരം" || // Malayalam: Namaskaram
+      lower === "നമസ്‌തേ" || // Malayalam: Namaste
+  
+      // Original non-greeting term
+      lower === "menu" ||
+  
+      // Added related terms often used to start
+      lower === "start" ||
+      lower === "help" ||
+      lower === "options" // Similar intent to 'menu'
+  ) {
       logger.info(`Handling greeting/menu request for ${userPhone}`);
       // Reset state completely
       user.lastOption = null;
