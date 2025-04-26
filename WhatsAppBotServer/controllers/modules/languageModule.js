@@ -10,7 +10,7 @@ module.exports = function(sendMessage, logger) { // Added logger
     prompt: async (From) => {
       logger.info(`Prompting language selection for ${From}`);
       await sendMessage(From,
-        "*✨ Welcome to SERVICE SAATHI - Akshaya Centre! ✨*\n\n" + // Added newline for spacing
+        "*✨ Welcome to SERVICE SAATHI ✨*\n\n" + // Added newline for spacing
         "Please choose your language | ദയവായി നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക:\n\n" +
         "1️⃣ English\n" +
         "2️⃣ മലയാളം (Malayalam)\n\n" +
