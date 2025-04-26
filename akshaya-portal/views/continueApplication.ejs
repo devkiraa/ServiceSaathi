@@ -1,19 +1,30 @@
-<!-- continueApplication.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Customer Details - Service Saathi</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-  <script src="/js/tailwindConfig.js"></script>
-  <script src="/js/profileIcon.js"></script>
+  <script src="/js/tailwindConfig.js"></script> <%# Assuming this configures Tailwind/DaisyUI themes %>
+  <script src="/js/profileIcon.js"></script> <%# Assuming this handles profile icon logic %>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+  <style>
+    /* Add simple copy icon style if not using an icon library */
+    .copy-icon::before {
+      content: '📄'; /* Basic emoji representation */
+      cursor: pointer;
+      display: inline-block;
+      margin-left: 5px;
+    }
+    .copy-icon:hover::before {
+      opacity: 0.7;
+    }
+  </style>
 </head>
 <body class="bg-bg-light text-gray-800 transition-all duration-300">
-  <!-- Sidebar -->
+
   <aside class="fixed top-0 left-0 h-screen w-56 bg-gradient-to-b from-primary to-secondary shadow-md z-50">
     <div class="flex flex-col justify-between h-full">
       <div class="p-6">
@@ -21,109 +32,233 @@
       </div>
       <nav class="flex-1 px-4">
         <ul class="space-y-3">
-          <!-- Home and Service links here -->
-        </ul>
+          <li><a href="/" class="block text-white hover:bg-white hover:text-primary rounded px-3 py-2">Home</a></li>
+          <li><a href="/services" class="block text-white hover:bg-white hover:text-primary rounded px-3 py-2">Services</a></li>
+          </ul>
       </nav>
-    </div>
+      </div>
   </aside>
 
-  <!-- Top Navbar -->
-  <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40">
+  <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40 h-16"> <%# Adjusted height %>
     <h2 class="text-xl font-semibold text-gray-700">Customer Details</h2>
     <div class="flex items-center space-x-4">
-      <!-- Profile dropdown here -->
+      <div id="profile-icon-container">
+         <span class="text-gray-600">Loading Profile...</span>
+      </div>
     </div>
   </nav>
 
-  <!-- Main Content -->
-  <div class="flex ml-56 pt-20 bg-bg-light min-h-screen">
+  <div class="flex ml-56 pt-16 bg-bg-light min-h-screen"> <%# Adjusted pt to match navbar height %>
     <div class="container mx-auto p-6">
-      <div class="max-w-4xl mx-auto bg-white shadow-md rounded-md p-6">
-        <!-- Customer Details Section -->
-        <h2 class="text-3xl font-bold text-gray-800 mb-4"><%= customerName || "Customer Name" %></h2>
-        <div class="bg-gray-200 p-4 rounded-md mb-6">
-          <!-- Personal info fields -->
-          <p class="text-lg flex justify-between items-center">
-            <strong>Mobile:</strong> <span id="mobileVal"><%= mobile || "Mobile Number" %></span>
-            <button onclick="copyToClipboard(document.getElementById('mobileVal').textContent)" class="text-gray-600 hover:text-blue-500">
-              <!-- copy icon -->
-            </button>
-          </p>
-          <p class="text-lg flex justify-between items-center mt-2">
-            <strong>Email:</strong> <span id="emailVal"><%= email || "Email Address" %></span>
-            <button onclick="copyToClipboard(document.getElementById('emailVal').textContent)" class="text-gray-600 hover:text-blue-500">
-              <!-- copy icon -->
-            </button>
-          </p>
-          <p class="text-lg flex justify-between items-center mt-2">
-            <strong>Address:</strong> <span id="addressVal"><%= address || "Customer Address" %></span>
-            <button onclick="copyToClipboard(document.getElementById('addressVal').textContent)" class="text-gray-600 hover:text-blue-500">
-              <!-- copy icon -->
-            </button>
-          </p>
-          <p class="text-lg flex justify-between items-center mt-2">
-            <strong>Date of Birth:</strong> <span id="dobVal"><%= dob || "Date of Birth" %></span>
-            <button onclick="copyToClipboard(document.getElementById('dobVal').textContent)" class="text-gray-600 hover:text-blue-500">
-              <!-- copy icon -->
-            </button>
-          </p>
+      <div class="max-w-5xl mx-auto bg-white shadow-md rounded-md p-6"> <%# Used max-w-5xl from snippet 1 for wider content area %>
+
+        <h2 class="text-3xl font-bold text-gray-800 mb-4"><%= customerName || "N/A" %></h2>
+        <div class="bg-gray-100 p-4 rounded-md mb-6 shadow-inner"> <%# Slightly different styling %>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3"> <%# Grid layout for better spacing %>
+            <p class="text-base flex justify-between items-center"> <%# Adjusted text size %>
+              <strong class="mr-2">Mobile:</strong>
+              <span class="flex-grow text-right mr-2" id="mobileVal"><%= mobile || "N/A" %></span>
+              <button onclick="copyToClipboard(document.getElementById('mobileVal').textContent)" title="Copy Mobile" class="text-gray-500 hover:text-primary copy-icon">
+                <%# Add SVG or Font Awesome icon here if preferred %>
+              </button>
+            </p>
+            <p class="text-base flex justify-between items-center">
+              <strong class="mr-2">Email:</strong>
+              <span class="flex-grow text-right mr-2" id="emailVal"><%= email || "N/A" %></span>
+              <button onclick="copyToClipboard(document.getElementById('emailVal').textContent)" title="Copy Email" class="text-gray-500 hover:text-primary copy-icon">
+              </button>
+            </p>
+            <p class="text-base flex justify-between items-center md:col-span-2"> <%# Full width for address %>
+              <strong class="mr-2">Address:</strong>
+              <span class="flex-grow text-right mr-2" id="addressVal"><%= address || "N/A" %></span>
+              <button onclick="copyToClipboard(document.getElementById('addressVal').textContent)" title="Copy Address" class="text-gray-500 hover:text-primary copy-icon">
+              </button>
+            </p>
+            <p class="text-base flex justify-between items-center">
+              <strong class="mr-2">Date of Birth:</strong>
+              <%# Format DOB if needed, assuming it's a string for now %>
+              <span class="flex-grow text-right mr-2" id="dobVal"><%= dob ? moment(dob).format('DD-MMM-YYYY') : "N/A" %></span>
+              <button onclick="copyToClipboard(document.getElementById('dobVal').textContent)" title="Copy DOB" class="text-gray-500 hover:text-primary copy-icon">
+              </button>
+            </p>
+          </div>
         </div>
 
-        <!-- Uploaded Documents Table -->
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Uploaded Documents & Extracted Data</h2>
-        <table class="w-full border-collapse border border-gray-300 mb-6">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="border border-gray-300 p-2">Document Name</th>
-              <th class="border border-gray-300 p-2">Extracted Data</th>
-              <th class="border border-gray-300 p-2">View</th>
-              <th class="border border-gray-300 p-2">Download</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% if (!serviceRequest || serviceRequest.requiredDocuments.length === 0) { %>
-              <tr><td colspan="4" class="text-center p-4">No documents uploaded.</td></tr>
-            <% } else { %>
-              <% serviceRequest.requiredDocuments.forEach(function(doc){ %>
-                <tr class="hover:bg-gray-50 align-top">
-                  <td class="border p-2 text-center"><%= doc.name %></td>
-                  <td class="border p-2">
-                    <% const extracted = doc.fileData ? JSON.parse(doc.fileData) : {}; %>
-                    <% if (Object.keys(extracted).length) { %>
-                      <ul class="list-disc pl-5 text-left">
-                        <% Object.entries(extracted).forEach(function([key,val]){ %>
-                          <li><strong><%= key %>:</strong> <%= val %></li>
-                        <% }); %>
-                      </ul>
-                    <% } else { %>
-                      <span class="text-yellow-600">Pending extraction</span>
-                    <% } %>
-                  </td>
-                  <td class="border p-2 text-center">
-                    <% if (doc.uploadedFile) { %>
-                      <a href="<%= doc.uploadedFile %>" target="_blank" class="text-blue-500 hover:text-blue-700">View</a>
-                    <% } else { %><span>-</span><% } %>
-                  </td>
-                  <td class="border p-2 text-center">
-                    <% if (doc.uploadedFile) { %>
-                      <a href="<%= doc.uploadedFile %>" download class="text-blue-500 hover:text-blue-700">Download</a>
-                    <% } else { %><span>-</span><% } %>
-                  </td>
-                </tr>
-              <% }); %>
-            <% } %>
-          </tbody>
-        </table>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4 mt-8">Uploaded Documents & Extracted Data</h2>
+        <div class="overflow-x-auto"> <%# Make table scrollable on small screens %>
+          <table class="w-full border-collapse border border-gray-300 mb-6 text-sm"> <%# Adjusted text size %>
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="border border-gray-300 p-2 text-center">Document Name</th>
+                <th class="border border-gray-300 p-2 text-center">Extracted Data</th>
+                <th class="border border-gray-300 p-2 text-center">View</th>
+                <th class="border border-gray-300 p-2 text-center">Download</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!serviceRequest || !serviceRequest.requiredDocuments || serviceRequest.requiredDocuments.length === 0) { %>
+                <tr><td colspan="4" class="text-center p-4 text-gray-500">No documents uploaded yet.</td></tr>
+              <% } else { %>
+                <% serviceRequest.requiredDocuments.forEach(function(doc) { %>
+                  <tr class="hover:bg-gray-50 align-top">
+                    <td class="border p-2 text-center font-medium"><%= doc.name %></td>
+                    <td class="border p-2 text-left">
+                      <%# Use the extractedFields logic from snippet 1 %>
+                      <% if (doc.extractedFields && typeof doc.extractedFields === 'object' && Object.keys(doc.extractedFields).length > 0) { %>
+                        <ul class="list-disc pl-5 space-y-1">
+                          <% for (const [label, value] of Object.entries(doc.extractedFields)) { %>
+                            <li><strong class="font-semibold"><%= label %>:</strong> <%= value %></li>
+                          <% } %>
+                        </ul>
+                      <% } else { %>
+                        <span class="text-gray-400 italic">Pending extraction</span>
+                      <% } %>
+                    </td>
+                    <td class="border p-2 text-center align-middle"> <%# Align middle for image %>
+                      <%# Use the image viewing logic from snippet 1 %>
+                      <% if (doc.base64Data) { %>
+                        <img
+                          src="data:image/jpeg;base64,<%= doc.base64Data %>" <%# Assuming JPEG, adjust if needed %>
+                          alt="Preview of <%= doc.name %>"
+                          class="h-20 md:h-24 mx-auto rounded-md shadow hover:scale-105 transition-transform duration-200 cursor-pointer object-contain" <%# Added object-contain %>
+                          onclick="openImageModal('data:image/jpeg;base64,<%= doc.base64Data %>')"
+                        />
+                      <% } else { %>
+                        <span class="text-gray-400">No Preview</span>
+                      <% } %>
+                    </td>
+                    <td class="border p-2 text-center align-middle"> <%# Align middle for button %>
+                      <%# Use the download link logic from previous fix %>
+                      <% if (doc.base64Data) { %>
+                        <a
+                          href="/download/<%= serviceRequest._id %>/<%= doc._id %>"
+                          class="inline-block bg-primary text-white px-3 py-1 rounded hover:bg-secondary transition-colors duration-200 text-xs md:text-sm" <%# Adjusted size %>
+                          title="Download <%= doc.name %>"
+                        >Download</a>
+                      <% } else { %>
+                        <span class="text-gray-400">–</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
 
-        <!-- Application Status Section (unchanged) -->
-      </div>
+        <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-end items-center gap-3"> <%# Added top border, flex layout %>
+          <label for="overall-status" class="mr-2 font-semibold text-gray-700">Overall Request Status:</label>
+          <select id="overall-status" class="border rounded p-2 bg-white shadow-sm focus:ring-primary focus:border-primary">
+             <%# Ensure serviceRequest.status exists and handle potential undefined %>
+             <% const currentStatus = serviceRequest ? serviceRequest.status : 'Pending'; %>
+             <option value="Pending"    <%= currentStatus === 'Pending'    ? 'selected' : '' %>>Pending</option>
+             <option value="Processing" <%= currentStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
+             <option value="Completed"  <%= currentStatus === 'Completed'  ? 'selected' : '' %>>Completed</option>
+             <%# Add other statuses from your schema if needed: started, submitted, approved, rejected, etc. %>
+             <option value="Approved"   <%= currentStatus === 'Approved'   ? 'selected' : '' %>>Approved</option>
+             <option value="Rejected"   <%= currentStatus === 'Rejected'   ? 'selected' : '' %>>Rejected</option>
+             <option value="Reupload Required"   <%= currentStatus === 'reupload_required'   ? 'selected' : '' %>>Reupload Required</option>
+           </select>
+           <button
+             onclick="updateRequestStatus('<%= serviceRequest ? serviceRequest._id : '' %>')" <%# Handle missing serviceRequest %>
+             class="ml-3 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors duration-200 shadow"
+             <%# Disable button if serviceRequest ID is missing %>
+             <%= !serviceRequest ? 'disabled' : '' %>
+           >Save Status</button>
+        </div>
+
+      </div></div> </div> <div id="imageModal" class="fixed inset-0 hidden bg-black bg-opacity-75 justify-center items-center z-[100] p-4" onclick="closeImageModal()"> <%# Higher z-index, close on backdrop click %>
+    <div class="relative max-w-full max-h-full" onclick="event.stopPropagation()"> <%# Prevent backdrop click closing when clicking image itself %>
+       <button onclick="closeImageModal()" class="absolute -top-8 right-0 text-white text-3xl font-bold hover:text-gray-300" title="Close Image">&times;</button>
+       <img id="modalImage" class="block max-h-[90vh] max-w-[90vw] rounded-md shadow-lg object-contain"/>
     </div>
   </div>
 
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
   <script>
-    function copyToClipboard(text){ navigator.clipboard.writeText(text); alert("Copied: " + text); }
-    async function updateStatus(newStatus){ /* existing */ }
+    // === Modal Functions ===
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+
+    function openImageModal(src) {
+      if (modalImage && imageModal) {
+         modalImage.src = src;
+         imageModal.classList.remove('hidden');
+         imageModal.classList.add('flex'); // Use flex to center
+       }
+    }
+
+    function closeImageModal() {
+       if (imageModal) {
+         imageModal.classList.add('hidden');
+         imageModal.classList.remove('flex');
+         modalImage.src = ''; // Clear src to prevent brief flash of old image
+       }
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !imageModal.classList.contains('hidden')) {
+            closeImageModal();
+        }
+    });
+
+    // === Copy to Clipboard Function ===
+    function copyToClipboard(text) {
+      if (navigator.clipboard && text) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert("Copied: " + text); // Simple confirmation
+          // TODO: Consider a more subtle notification (e.g., a temporary tooltip)
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+          alert("Failed to copy text."); // Fallback alert
+        });
+      } else {
+          alert("Clipboard API not available or no text to copy.");
+      }
+    }
+
+    // === Update Status Function ===
+    async function updateRequestStatus(requestId) {
+      if (!requestId) {
+          alert('Error: Request ID is missing.');
+          return;
+      }
+      const statusDropdown = document.getElementById('overall-status');
+      const selectedStatus = statusDropdown ? statusDropdown.value : null;
+
+      if (!selectedStatus) {
+          alert('Error: Could not read selected status.');
+          return;
+      }
+
+      console.log(`Updating status for ${requestId} to ${selectedStatus}`); // Debug log
+
+      try {
+        const response = await fetch(`/update-request-status/${requestId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+             // Add CSRF token header if needed
+          },
+          body: JSON.stringify({ status: selectedStatus })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Handle non-2xx responses
+            throw new Error(data.message || `Server responded with status ${response.status}`);
+        }
+
+        alert(data.message || 'Request status updated successfully!'); // Success message
+
+      } catch (error) {
+        console.error('Error updating request status:', error);
+        alert(`Error updating request status: ${error.message}`); // Show detailed error
+      }
+    }
   </script>
 </body>
 </html>
