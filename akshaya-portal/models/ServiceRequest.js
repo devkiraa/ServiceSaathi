@@ -5,7 +5,6 @@ const serviceRequestSchema = new mongoose.Schema({
   documentType: { type: String, required: true },
   centreId:    { type: String, required: true },
   mobileNumber:{ type: String, required: true },
-  extractionDone: { type: Boolean, default: false },
   status: {
     type: String,
     enum: ['documents-uploading','pending','started','submitted','approved','rejected','completed','reupload_required'],
@@ -15,7 +14,12 @@ const serviceRequestSchema = new mongoose.Schema({
     name:         { type: String, required: true },
     uploadedFile: { type: String, default: "" },
     fileData:     { type: String, default: "" },
-    needsReupload:{ type: Boolean, default: false }
+    needsReupload:{ type: Boolean, default: false },
+    extractionDone: { type: Boolean, default: false },
+    extractedFields: { // <-- ADDED FIELD
+      type: mongoose.Schema.Types.Mixed, // Allows storing flexible key-value pairs from API
+      default: {}
+  }
   }],
   uploadToken: { type: String },
   createdAt:   { type: Date, default: Date.now }
