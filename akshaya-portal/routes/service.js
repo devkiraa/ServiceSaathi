@@ -133,31 +133,6 @@ router.post('/service-request/:id/reupload', async (req, res) => {
   }
 });
 
-// Continue Application Route (Fixed)
-router.get('/continue-application/:serviceRequestId', async (req, res) => {
-  if (!req.session.user) return res.redirect('/');
-  try {
-    const serviceRequest = await ServiceRequest.findById(req.params.serviceRequestId);
-    if (!serviceRequest) {
-      return res.status(404).send("Service request not found.");
-    }
-
-    // Populate customer details from session if available
-    const customer = req.session.user || {};
-
-    res.render('continueApplication', {
-      customerName: customer.name || "",
-      mobile: customer.mobile || "",
-      email: customer.email || "",
-      address: customer.address || "",
-      dob: customer.dob || "",
-      serviceRequest: serviceRequest
-    });
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-});
-
 router.get('/service-request/:id', async (req, res) => {
   try {
     const serviceRequest = await ServiceRequest.findById(req.params.id);
