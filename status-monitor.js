@@ -5,7 +5,7 @@ const ping = require('ping');
 const chalk = require('chalk'); // Ensure chalk v4 is installed (npm install --save-dev chalk@4)
 
 // --- Configuration ---
-const CHECK_INTERVAL_MS = 2000; // Check every 10 seconds
+const CHECK_INTERVAL_MS = 30000; // Check every 10 seconds
 const PING_TIMEOUT_S = 4;      // Timeout for ping command in seconds
 const HTTP_TIMEOUT_MS = 5000;  // Timeout for the HTTP check
 
