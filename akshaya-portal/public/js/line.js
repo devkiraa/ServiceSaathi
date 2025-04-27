@@ -1,5 +1,3 @@
-
-
 // Initialize Chart.js for the line chart
 document.addEventListener("DOMContentLoaded", function () {
   const lineChartCtx = document.getElementById('lineChart').getContext('2d');
@@ -24,8 +22,8 @@ document.addEventListener("DOMContentLoaded", function () {
           {
             label: 'Total No of Services',
             data: values,
-            borderColor: '#ff6807', // Indigo 500
-            backgroundColor: '#ff6807',
+            borderColor: '#ff6807f2', // Indigo 500
+            backgroundColor: '#fec19a73',
             fill: true,
             tension: 0.1,
           },
@@ -77,7 +75,7 @@ async function fetchServiceData(period) {
   }
 }
 // Add event listeners to the period buttons
-document.querySelectorAll('.btn-xs').forEach(button => {
+document.querySelectorAll('.line-btn').forEach(button => {
   button.addEventListener('click', () => {
     const period = button.getAttribute('data-period'); // Get the period (today, week, month, all)
     fetchServiceData(period); // Fetch data for the selected period
