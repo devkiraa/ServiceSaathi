@@ -11,7 +11,7 @@ module.exports = function(sendMessage, applyModule, CHAT_API_BASE, logger, AXIOS
           "ദയവായി ഒരു ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക:\n\n" +
           "1️⃣ ചാറ്റ് (Chat with AI Assistant)\n" +
           "2️⃣ ഡോക്യുമെന്റ് അപേക്ഷിക്കുക (Apply for Document)\n" +
-          "\n_(നിങ്ങളുടെ അപേക്ഷകളുടെ നിലവിലെ நிலை അറിയാൻ /service എന്ന് അയക്കുക | Send /service to check application status)_" +
+          "\n_(നിങ്ങളുടെ അപേക്ഷകളുടെ നിലവിലെ അവസ്ഥ അറിയാൻ /service എന്ന് അയക്കുക. | Send /service to check application status)_" +
           "\n_(ഭാഷ മാറ്റാൻ /LANG എന്ന് അയക്കുക | Send /LANG to change language)_"
         : "*Main Menu*\n\n" +
           "Please choose an option:\n\n" +
