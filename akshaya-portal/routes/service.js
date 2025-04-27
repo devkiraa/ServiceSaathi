@@ -15,6 +15,17 @@ dotenv.config();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// routes/api.js
+router.get('/service-lst', async (req, res) => {
+  try {
+    const services = await Service.find({}, { key: 1, name: 1, _id: 0 }); // Fetch only `key` and `name`
+    res.json(services);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch services' });
+  }
+});
+
 router.get('/services', async (req, res) => {
   if (!req.session.user) return res.redirect('/');
   // helper to turn "income_certificate" → "Income Certificate"
