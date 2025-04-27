@@ -103,46 +103,55 @@ router.post('/api/signup', async (req, res) => {
       shopName,
       personName,
       password,
+      confirmPassword,
       type,
       centerId,
       district,
       subdistrict,
+      pincode,
       buildingName,
       street,
       locality,
-      pincode,
-      income_certificate,
-      voter_registration,
-      passport_service,
-      utility_payments,
-      possession_certificate
+      ...otherFields // Capture all remaining fields (checkboxes)
     } = req.body;
 
+    // Validate required fields
+    if (!phone || !email || !shopName || !personName || !password || !confirmPassword) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+
+    // Validate password match
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: 'Passwords do not match.' });
+    }
+
+    // Check if the mobile number is already registered
     if (await User.findOne({ username: phone })) {
       return res.status(400).json({ error: 'Mobile number already registered' });
     }
 
-    const services = {
-      income_certificate:   !!income_certificate,
-      voter_registration:   !!voter_registration,
-      passport_service:     !!passport_service,
-      utility_payments:     !!utility_payments,
-      possession_certificate: !!possession_certificate
-    };
-
+    // Group checkbox data into userServices
+    const userServices = {};
+    for (const [key, value] of Object.entries(otherFields)) {
+      if (value === 'on') {
+        userServices[key] = true; // Convert checkbox values to boolean
+      }
+    }
+    
+    // Create the user object
     const user = new User({
-      username:   phone,
+      username: phone,
       phone,
       email,
       shopName,
       personName,
       password,
-      role:       'user',
+      role: 'user',
       type,
       centerId,
       district,
       subdistrict,
-      services,
+      services: userServices, // Use the grouped services object
       address: {
         buildingName,
         street,
@@ -150,24 +159,30 @@ router.post('/api/signup', async (req, res) => {
         pincode: pincode ? Number(pincode) : null
       }
     });
+
+    // Save the user to the database
     await user.save();
 
-    if (['csc','akshaya'].includes(type.toLowerCase())) {
+    // If the user type is CSC or Akshaya, create a corresponding Centre entry
+    if (['csc', 'akshaya'].includes(type.toLowerCase())) {
       const centre = new Centre({
-        centreName:  shopName,
-        ownerName:   personName,
-        contact:     phone,
+        centreName: shopName,
+        ownerName: personName,
+        contact: phone,
         email,
-        type:        type.toLowerCase(),
+        type: type.toLowerCase(),
         centerId,
         district,
         subdistrict,
-        services,
-        status:      'pending'
+        services: userServices, // Use the same grouped services object
+        status: 'pending'
       });
+
+      // Save the centre to the database
       await centre.save();
     }
 
+    // Respond with success message
     res.status(201).json({ message: 'Signup successful. Await admin approval.' });
   } catch (error) {
     console.error(error);
