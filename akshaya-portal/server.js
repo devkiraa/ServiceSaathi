@@ -120,7 +120,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
       // Calculate total pending services
       const pendingServices = await ServiceRequest.countDocuments({
         centreId: user.centerId, // Use user.centerId instead of serviceRequests.centerId
-       status: { $in: ['started', 'submitted'] },
+       status: { $in: ["submitted", "started", "pending", "approved", "rejected", "reupload_required"] },
       });
   
       // Calculate total completed services
