@@ -30,7 +30,7 @@ router.get('/services', async (req, res) => {
 
     const serviceRequests = await ServiceRequest.find({
       centreId: user.centerId,
-      status: ["submitted", "started", "completed"]
+      status: ["submitted", "started", "completed", "pending", "approved", "rejected", "reupload_required"]
     });
 
     res.render('services', {

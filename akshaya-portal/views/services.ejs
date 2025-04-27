@@ -191,11 +191,16 @@
                   <td class="px-6 py-4 whitespace-nowrap"><%= formatDate(sr.applicationDate) %></td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="<%= 
-                      sr.status === 'submitted' ? 'bg-blue-200 text-blue-800' : 
+                      sr.status === 'pending' ? 'bg-gray-200 text-gray-800' : 
+                      sr.status === 'documents-uploading' ? 'bg-orange-200 text-orange-800' : 
                       sr.status === 'started' ? 'bg-yellow-200 text-yellow-800' : 
-                      sr.status === 'completed' ? 'bg-green-200 text-green-800' : 'N/A'
+                      sr.status === 'submitted' ? 'bg-blue-200 text-blue-800' : 
+                      sr.status === 'completed' ? 'bg-green-200 text-green-800' : 
+                      sr.status === 'rejected' ? 'bg-red-200 text-red-800' : 
+                      sr.status === 'approved' ? 'bg-teal-200 text-teal-800' : 
+                      sr.status === 'reupload_required' ? 'bg-pink-200 text-pink-800' : 'N/A'
                     %> rounded-full px-2 py-1 text-xs font-semibold">
-                      <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
+                      <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1).replace(/[-_]/g, ' ') %>
                     </span>
                   </td>
                   <!-- WhatsApp Chat Button Column -->
