@@ -107,8 +107,11 @@
     </div>
   </nav>
   <!-- Main Content -->
+   
   <div class="flex ml-56 pt-20 bg-gray-100 min-h-screen">
+    
     <main class="flex-1 p-6">
+      
       <!-- Centres List Section -->
       <section id="centres-section">
         <!-- Search Bar and Filter Icon -->
@@ -126,8 +129,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
-          </form>
-          <!-- Filter Dropdown -->
+            
+            </form>
+            <!-- Filter Dropdown -->
           <div class="relative ml-4">
             <button id="filterButton" class="flex items-center text-gray-500 hover:text-primary transition" onclick="toggleFilterMenu()">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -233,7 +237,12 @@
               <% } %>
             </tbody>
           </table>
+          
         </div>
+        <div class="p-2 flex flex-col space-y-2">
+          <a href="https://akshaya.kerala.gov.in/centers" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none text-center">Akshaya Centre Verification</a> 
+          <a href="https://findmycsc.nic.in/csc/" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none text-center ml-2">CSC Centre Verification</a>
+          </div>
       </section>
     </main>
   </div>
