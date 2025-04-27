@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Saathi Chat</title> <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Phone Prompt Styles */
+        #phone-prompt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        #phone-prompt-box { background-color: #fff; padding: 30px; border-radius: 8px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); max-width: 400px; margin: 20px;}
+        #phone-prompt-box h2 { margin-top: 0; margin-bottom: 15px; color: #333; font-weight: 500; }
+        #phone-prompt-box p { margin-bottom: 20px; color: #666; font-size: 14px; }
+        #phone-input { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; font-family: 'Inter', sans-serif; }
+        #submit-phone-button { padding: 10px 20px; background-color: var(--whatsapp-header-color, #00a884); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 500; transition: background-color 0.2s ease; }
+        #submit-phone-button:hover { background-color: #00876a; }
+        #app-container.hidden { display: none; }
+
+        /* General and WhatsApp Theme Variables */
+        :root {
+            --whatsapp-bg-color: #eae6df; --whatsapp-header-color: #00a884; --whatsapp-chat-bg: #e5ddd5;
+            --outgoing-bubble-color: #dcf8c6; --incoming-bubble-color: #ffffff; --text-primary-color: #111b21;
+            --text-secondary-color: #667781; --input-bg-color: #f0f2f5; --icon-color: #54656f;
+            --panel-header-bg: #f0f2f5; --border-stronger: #d1d7db; --bubble-meta-color: rgba(0, 0, 0, 0.4);
+            --tick-grey-color: #AEBAC1; --tick-blue-color: #53bdeb;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { height: 100%; } /* Ensure html takes full height */
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100%; background-color: var(--whatsapp-bg-color); color: var(--text-primary-color); font-size: 14.5px; overflow: hidden; /* Prevent body scrollbars */ }
+
+        /* Main Layout */
+        #app-container { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 1000px; margin: auto; box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.06), 0 2px 5px 0 rgba(0, 0, 0, 0.06); background-color: var(--whatsapp-chat-bg); overflow: hidden; }
+        #chat-header { background-color: var(--panel-header-bg); padding: 10px 16px; border-bottom: 1px solid var(--border-stronger); display: flex; align-items: center; height: 60px; flex-shrink: 0;}
+        #chat-header .avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 15px; background-color: #eee; background-image: url('/icons/handshake.png'); background-size: cover; background-position: center; background-repeat: no-repeat; border: 1px solid #ddd; }
+        #chat-header .chat-info .name { font-weight: 500; font-size: 16px; }
+        #chat-header .chat-info .status { font-size: 13px; color: var(--text-secondary-color); }
+
+        /* Chatbox Area */
+        #chatbox { flex-grow: 1; overflow-y: auto; padding: 12px 7%; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-color: var(--whatsapp-chat-bg); display: flex; flex-direction: column; }
+
+        /* Message Bubbles */
+        .message-container { display: flex; margin-bottom: 2px; max-width: 65%; margin-top: 8px; }
+        .message-container.user { margin-left: auto; justify-content: flex-end; }
+        .message-container.bot { margin-right: auto; justify-content: flex-start; }
+        .message { padding: 6px 9px 8px 9px; border-radius: 7.5px; word-wrap: break-word; line-height: 1.4; box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13); position: relative; font-size: 14.2px; white-space: pre-wrap; min-height: 32px; /* Ensure min height for meta */ }
+        .message.user { background-color: var(--outgoing-bubble-color); position: relative; }
+        .message.bot { background-color: var(--incoming-bubble-color); }
+
+        /* Formatting Styles */
+        .message strong { font-weight: 600; }
+        .message em { font-style: italic; }
+        .message del { text-decoration: line-through; }
+        .message code { font-family: 'Courier New', Courier, monospace; background-color: rgba(0, 0, 0, 0.05); padding: 1px 4px; border-radius: 3px; font-size: 0.95em; }
+        .message pre { font-family: 'Courier New', Courier, monospace; background-color: rgba(0, 0, 0, 0.05); padding: 8px; border-radius: 4px; overflow-x: auto; display: block; margin: 4px 0; white-space: pre-wrap; word-wrap: break-word; }
+        .message blockquote { border-left: 3px solid var(--whatsapp-header-color, #00a884); padding-left: 10px; margin: 4px 0; color: var(--text-secondary-color); font-style: italic; }
+        .message ul, .message ol { margin: 4px 0 4px 20px; padding-left: 15px; }
+        .message li { margin-bottom: 2px; }
+
+         /* Meta Area (Timestamp & Ticks) */
+        .message-meta-area { position: absolute; bottom: 4px; right: 8px; /* Position at bottom right */ user-select: none; display: flex; align-items: center; height: 16px; }
+        .message .timestamp { font-size: 11px; color: var(--bubble-meta-color); margin-right: 3px; }
+        .ticks { display: inline-block; width: 16px; height: 16px; background-repeat: no-repeat; background-position: center; vertical-align: middle; flex-shrink: 0;}
+        .ticks.single-grey { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15.5" width="16" height="15.5"><path fill="%23AEBAC1" d="M15.01 3.316l-4.93 4.93-1.71-1.71a.996.996 0 1 0-1.41 1.41l2.45 2.45a.996.996 0 0 0 1.41 0l5.64-5.64a.996.996 0 1 0-1.41-1.41z"></path><path fill="%23AEBAC1" d="M8.89 10.105l-4.93 4.93-1.71-1.71a.996.996 0 1 0-1.41 1.41l2.45 2.45a.996.996 0 0 0 1.41 0l5.64-5.64a.996.996 0 1 0-1.41-1.41z" opacity="0"></path></svg>'); }
+        .ticks.double-blue { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15.5" width="16" height="15.5"><path fill="%2353bdeb" d="M15.01 3.316l-4.93 4.93-1.71-1.71a.996.996 0 1 0-1.41 1.41l2.45 2.45a.996.996 0 0 0 1.41 0l5.64-5.64a.996.996 0 1 0-1.41-1.41z"></path><path fill="%2353bdeb" d="M8.89 10.105l-4.93 4.93-1.71-1.71a.996.996 0 1 0-1.41 1.41l2.45 2.45a.996.996 0 0 0 1.41 0l5.64-5.64a.996.996 0 1 0-1.41-1.41z"></path></svg>'); }
+        /* Adjust message padding to accommodate meta area */
+         .message { padding-bottom: 20px; } /* Add padding at the bottom */
+
+         /* Delete Button */
+         .delete-button { position: absolute; top: 1px; right: 1px; width: 16px; height: 16px; background-color: rgba(0, 0, 0, 0.1); border: none; border-radius: 50%; cursor: pointer; display: none; font-size: 11px; line-height: 16px; text-align: center; color: rgba(0, 0, 0, 0.4); font-weight: bold; padding: 0; transition: background-color 0.2s ease, color 0.2s ease; z-index: 1;}
+         .message-container.user:hover .delete-button { display: block; }
+         .delete-button:hover { background-color: rgba(0, 0, 0, 0.2); color: rgba(0, 0, 0, 0.8); }
+
+        /* Input Area */
+        #input-area { display: flex; padding: 5px 10px; background-color: var(--input-bg-color); border-top: 1px solid var(--border-stronger); align-items: center; min-height: 62px; flex-shrink: 0;}
+        #message-input { flex-grow: 1; padding: 9px 12px; border: none; border-radius: 20px; margin: 0 10px; font-family: 'Inter', sans-serif; font-size: 15px; outline: none; min-height: 20px; resize: none; }
+        #send-button { background: none; border: none; cursor: pointer; padding: 8px; color: var(--icon-color); display: flex; align-items: center; justify-content: center; }
+        #send-button svg { width: 24px; height: 24px; fill: currentColor; }
+        #send-button:hover { color: #3b4a54; }
+        #loading { display: none; text-align: center; padding: 5px 0; font-style: italic; color: var(--text-secondary-color); font-size: 12px; height: 20px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="phone-prompt-overlay">
+        <div id="phone-prompt-box">
+            <h2>Enter Phone Number</h2>
+            <p>Please enter your phone number including the country code (e.g., +91xxxxxxxxxx) to start the chat.</p>
+            <input type="tel" id="phone-input" placeholder="+91xxxxxxxxxx">
+            <button id="submit-phone-button">Start Chat</button>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden">
+        <div id="chat-header">
+            <div class="avatar"></div>
+            <div class="chat-info">
+                <div class="name">Service Saathi Bot</div>
+                <div class="status">online</div>
+            </div>
+        </div>
+        <div id="chatbox">
+             </div>
+        <div id="loading">typing...</div>
+        <div id="input-area">
+            <input type="text" id="message-input" placeholder="Type a message">
+            <button id="send-button" title="Send">
+                <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M1.101 21.757 23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="chat.js"></script>
+</body>
+</html>

@@ -12,6 +12,13 @@ REM Start WhatsApp Bot Server
 echo Starting WhatsApp Bot Server (localhost:5600)...
 start "WhatsApp Bot" cmd /k "cd WhatsAppBotServer && echo Running WhatsApp Bot Server... && node server.js"
 
+REM Wait a moment for the first window to potentially initialize
+timeout /t 2 /nobreak > nul
+
+REM Start WhatsApp Chat Server
+echo Starting WhatsApp Chat Server (localhost:3030)...
+start "WhatsApp Chat Bot" cmd /k "cd WhatsAppBotServer && echo Running WhatsApp Chat Server... && node chatScreenServer.js"
+
 REM Wait a moment
 timeout /t 2 /nobreak > nul
 

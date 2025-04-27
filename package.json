@@ -34,5 +34,8 @@
   "bugs": {
     "url": "https://github.com/devkiraa/ServiceSathi/issues"
   },
-  "homepage": "https://github.com/devkiraa/ServiceSathi#readme"
+  "homepage": "https://github.com/devkiraa/ServiceSathi#readme",
+  "dependencies": {
+    "cors": "^2.8.5"
+  }
 }
