@@ -72,7 +72,7 @@ async function fetchServiceData(period) {
 }
 
 // Add event listeners to the period buttons
-document.querySelectorAll('.btn-xs').forEach(button => {
+document.querySelectorAll('.doughnut-btn').forEach(button => {
   button.addEventListener('click', () => {
     const period = button.getAttribute('data-period'); // Get the period (today, week, month, all)
     fetchServiceData(period); // Fetch data for the selected period
