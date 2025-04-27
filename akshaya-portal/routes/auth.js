@@ -137,7 +137,7 @@ router.post('/api/signup', async (req, res) => {
         userServices[key] = true; // Convert checkbox values to boolean
       }
     }
-    console.log(userServices);
+    
     // Create the user object
     const user = new User({
       username: phone,
