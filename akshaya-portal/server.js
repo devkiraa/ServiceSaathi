@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const session = require('express-session');
 const path = require('path');
 const moment = require('moment');
+const chalk = require('chalk'); // Import chalk
 
 dotenv.config();
 const app = express();
@@ -38,7 +39,7 @@ const ServiceRequest = require('./models/ServiceRequest');
 mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   console.log("✅ MongoDB Atlas connected to CHATBOTDB");
   console.log('\n=======================================');
-  console.log('\nLogs from Service Saathi WhatsApp Server');
+  console.log(`${chalk.magenta('\nLogs from Service Saathi WhatsApp Server')}`);
 
   const authRoutes = require('./routes/auth');
   const documentRoutes = require('./routes/documents');
@@ -185,12 +186,12 @@ const PORT = process.env.PORT || 5601;
 app.listen(PORT, () => {
   const HOST = process.env.HOST || 'localhost';
   const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
-  console.log('\n================================');
-  console.log('🚀 SERVICE SAATHI WEBSITE SERVER');
-  console.log('================================');
-  console.log(`🔗 Server URL: ${protocol}://${HOST}:${PORT}`);
-  console.log(`📦 Running on port: ${PORT}`);
-  console.log('📅 Start time:', new Date().toLocaleString());
-  console.log('🌐 Environment:', process.env.NODE_ENV || 'development');
-  console.log('================================\n');
+  console.log(chalk.bold('\n================================'));
+  console.log(chalk.bold.blue('🚀 SERVICE SAATHI WEBSITE SERVER')); // Changed color
+  console.log(chalk.bold('================================'));
+  console.log(`${chalk.cyan('🔗 Server URL:')} ${chalk.underline.blue(`${protocol}://${HOST}:${PORT}`)}`);
+  console.log(`${chalk.magenta('📦 Running on port:')} ${chalk.yellow(PORT)}`);
+  console.log(`${chalk.green('📅 Start time:')} ${new Date().toLocaleString()}`);
+  console.log(`${chalk.yellow('🌐 Environment:')} ${process.env.NODE_ENV || 'development'}`);
+  console.log(chalk.bold('================================\n'));
 });

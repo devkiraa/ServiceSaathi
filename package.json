@@ -4,17 +4,24 @@
   "private": true,
   "description": "Monorepo for Akshaya Portal and WhatsApp Bot Server",
   "scripts": {
-    "start": "concurrently \"npm run start --workspace=akshaya-portal\" \"npm run start --workspace=WhatsAppBotServer\"",
-    "start:akshaya": "npm run start --workspace=akshaya-portal",
-    "start:whatsapp": "npm run start --workspace=WhatsAppBotServer",
-    "install-all": "npm install --workspaces"
+    "install-all": "npm install --workspaces",
+    "dev:portal": "npm run start --workspace=akshaya-portal",
+    "dev:whatsapp": "npm run start --workspace=WhatsAppBotServer",
+    "dev:monitor": "node status-monitor.js",
+    "dev": "concurrently \"npm run dev:portal\" \"npm run dev:whatsapp\" \"npm run dev:monitor\"",
+    "start": "npm run dev"
   },
   "workspaces": [
     "akshaya-portal",
     "WhatsAppBotServer"
   ],
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "axios": "^1.9.0",
+    "chalk": "^4.1.2",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.5.0",
+    "mongoose": "^8.13.2",
+    "ping": "^0.4.4"
   },
   "repository": {
     "type": "git",
