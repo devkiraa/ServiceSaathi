@@ -122,7 +122,15 @@
                     </div>
                     <div>
                         <label class="block text-gray-700">District</label>
-                        <input type="text" id="district" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.district || 'Not Available' %>" disabled>
+                        <select id="district" class="w-full px-3 py-2 border rounded-lg" disabled>
+                            <option value="">Select District</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Subdistrict</label>
+                        <select id="subdistrict" class="w-full px-3 py-2 border rounded-lg" disabled>
+                            <option value="">Select Subdistrict</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-gray-700">Building/House Name</label>
@@ -185,27 +193,96 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
     <script>
+        // District and Sub-District Data
+        const districtData = {
+            "Alappuzha": ["Ambalappuzha", "Chengannur", "Cherthala", "Karthikappally", "Kuttanad", "Mavelikkara"],
+            "Ernakulam": ["Aluva", "Kanayannur", "Kochi", "Kothamangalam", "Kunnathunad", "Muvattupuzha", "Paravur"],
+            "Idukki": ["Devikulam", "Idukki", "Peerumade", "Thodupuzha", "Udumbanchola"],
+            "Kannur": ["Iritty", "Kannur", "Payyannur", "Taliparamba", "Thalassery"],
+            "Kasaragod": ["Hosdurg", "Kasaragod", "Manjeswaram", "Vellarikkundu"],
+            "Kollam": ["Karunagappally", "Kollam", "Kottarakkara", "Kunnathur", "Pathanapuram", "Punalur"],
+            "Kottayam": ["Changanassery", "Kanjirappally", "Kottayam", "Meenachil", "Vaikom"],
+            "Kozhikode": ["Koyilandi", "Kozhikode", "Thamarassery", "Vatakara"],
+            "Malappuram": ["Ernad", "Kondotty", "Nilambur", "Perinthalmanna", "Ponnani", "Tirur", "Tirurangadi"],
+            "Palakkad": ["Alathur", "Chittur", "Mannarkad", "Ottappalam", "Palakkad", "Pattambi", "Tribal Taluk Office Attappadi"],
+            "Pathanamthitta": ["Adoor", "Konni", "Kozhenchery", "Mallappally", "Ranni", "Thiruvalla"],
+            "Thiruvananthapuram": ["Chirayinkeezhu", "Kattakkada", "Nedumangad", "Neyyattinkara", "Thiruvananthapuram", "Varkala"],
+            "Thrissur": ["Chalakkudy", "Chavakkad", "Kodungallur", "Kunnamkulam", "Mukundapuram", "Talappilly", "Thrissur"],
+            "Wayanad": ["Mananthavady", "Sulthanbathery", "Vythiri"]
+        };
+    
         document.addEventListener("DOMContentLoaded", function () {
             const editBtn = document.getElementById("editBtn");
             const saveBtn = document.getElementById("saveBtn");
-            const formFields = document.querySelectorAll("#profileForm input");
-
+            const formFields = document.querySelectorAll("#profileForm input, #profileForm select");
+            const districtDropdown = document.getElementById("district");
+            const subdistrictDropdown = document.getElementById("subdistrict");
+    
+            // Populate District Dropdown
+            for (const district in districtData) {
+                const option = document.createElement("option");
+                option.value = district;
+                option.textContent = district;
+                districtDropdown.appendChild(option);
+            }
+    
+            // Pre-select District and Subdistrict
+            const userDistrict = "<%= user.district %>";
+            const userSubdistrict = "<%= user.subdistrict %>";
+            console.log(userSubdistrict);
+    
+            if (userDistrict && districtData[userDistrict]) {
+                districtDropdown.value = userDistrict;
+    
+                // Populate Subdistrict Dropdown based on selected District
+                districtData[userDistrict].forEach(subdistrict => {
+                    const option = document.createElement("option");
+                    option.value = subdistrict;
+                    option.textContent = subdistrict;
+                    subdistrictDropdown.appendChild(option);
+                });
+    
+                if (userSubdistrict) {
+                    subdistrictDropdown.value = userSubdistrict;
+                }
+            }
+    
+            // Update Subdistrict Dropdown Based on Selected District
+            districtDropdown.addEventListener("change", () => {
+                const selectedDistrict = districtDropdown.value;
+    
+                // Clear Subdistrict Dropdown
+                subdistrictDropdown.innerHTML = '<option value="">Select Subdistrict</option>';
+                subdistrictDropdown.disabled = true;
+    
+                if (selectedDistrict && districtData[selectedDistrict]) {
+                    districtData[selectedDistrict].forEach(subdistrict => {
+                        const option = document.createElement("option");
+                        option.value = subdistrict;
+                        option.textContent = subdistrict;
+                        subdistrictDropdown.appendChild(option);
+                    });
+    
+                    subdistrictDropdown.disabled = false;
+                }
+            });
+    
             editBtn.addEventListener("click", function () {
                 formFields.forEach(field => field.removeAttribute("disabled"));
                 editBtn.classList.add("hidden");
                 saveBtn.classList.remove("hidden");
             });
-
+    
             saveBtn.addEventListener("click", async function () {
                 const selectedServices = {};
                 document.querySelectorAll("input[name^='services']").forEach(cb => {
                     const serviceKey = cb.name.match(/\[(.*?)\]/)[1];
                     selectedServices[serviceKey] = cb.checked;
                 });
-
+    
                 const typeField = document.querySelector("input[name='type']:checked");
                 const typeValue = typeField ? typeField.value : null;
-
+    
                 const formData = {
                     email: document.getElementById("email").value,
                     shopName: document.getElementById("shopName").value,
@@ -213,6 +290,7 @@
                     phone: document.getElementById("phone").value,
                     type: typeValue,
                     district: document.getElementById("district").value,
+                    subdistrict: document.getElementById("subdistrict").value,
                     address: {
                         buildingName: document.getElementById("buildingName").value,
                         street: document.getElementById("street").value,
@@ -221,14 +299,14 @@
                     },
                     services: selectedServices
                 };
-
+    
                 try {
                     const response = await fetch("/profile-update", {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(formData)
                     });
-
+    
                     const result = await response.json();
                     if (response.ok) {
                         alert(result.message);
