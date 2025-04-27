@@ -47,7 +47,7 @@ router.get('/pending-centres/:id', async (req, res) => {
 router.get('/approve-centre/:id', async (req, res) => {
   try {
     await Centre.findByIdAndUpdate(req.params.id, { status: 'approved' });
-    res.redirect('/admin-dashboard');
+    res.redirect('/centers-list');
   } catch (error) {
     res.status(500).send(error.message);
   }
@@ -57,7 +57,7 @@ router.get('/approve-centre/:id', async (req, res) => {
 router.get('/reject-centre/:id', async (req, res) => {
   try {
     await Centre.findByIdAndUpdate(req.params.id, { status: 'rejected' });
-    res.redirect('/admin-dashboard');
+    res.redirect('/centers-list');
   } catch (error) {
     res.status(500).send(error.message);
   }
