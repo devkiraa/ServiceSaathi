@@ -490,7 +490,7 @@ module.exports = function (
                 centres
                   .map(
                     (c, i) =>
-                      `${i + 1}.  ${c.centreName}\n👤  ${c.ownerName}\n📞 ${
+                      `${i + 1}.${c.centreName}\n👤  ${c.ownerName}\n📞 ${
                         c.contact || "-"
                       }\n🆔 ${c.centerId}`
                   )
