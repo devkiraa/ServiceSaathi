@@ -17,6 +17,7 @@ router.get('/profile', async (req, res) => {
         centerId: user.centerId,
         phone: user.phone,
         district: user.district,
+        subdistrict: user.subdistrict,
         type: user.type,
         services: user.services,
         address: user.address.toObject()
@@ -40,6 +41,7 @@ router.put('/profile-update', async (req, res) => {
       phone,
       type,
       district,
+      subdistrict,
       address,
       services
     } = req.body;
@@ -55,6 +57,7 @@ router.put('/profile-update', async (req, res) => {
     user.phone = phone;
     user.type = type;
     user.district = district;
+    user.subdistrict = subdistrict;
 
     // Update nested address fields
     user.address.buildingName = address.buildingName;
