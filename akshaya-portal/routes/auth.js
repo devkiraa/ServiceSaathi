@@ -154,7 +154,7 @@ router.post('/api/signup', async (req, res) => {
 
     if (['csc','akshaya'].includes(type.toLowerCase())) {
       const centre = new Centre({
-        centreName:  centerId,
+        centreName:  shopName,
         ownerName:   personName,
         contact:     phone,
         email,
