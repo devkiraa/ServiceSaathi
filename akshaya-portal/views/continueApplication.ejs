@@ -38,310 +38,376 @@
     </style>
 </head>
 <body class="bg-bg-light text-gray-800 transition-all duration-300">
-  <aside class="fixed top-0 left-0 h-screen w-56 bg-gradient-to-b from-primary to-secondary shadow-md z-50">
-    <div class="flex flex-col justify-between h-full">
-      <div class="p-6">
-        <h1 class="text-2xl font-bold text-white">Service Saathi</h1>
-      </div>
-      <nav class="flex-1 px-4 " >
-        <ul class="space-y-3">
-          <li>
-            <a href="/dashboard" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-              </svg>              
-              <span>Home</span>
-            </a>
-          </li>
-          <li>
-            <a href="/services" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-              </svg>                            
-              <span>Service</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </aside>
 
-  <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40">
-    <div class="flex items-center space-x-4">
-      <h2 class="text-xl font-semibold text-gray-700 truncate pr-4">Document applying for
-        <%= serviceRequest ? serviceRequest.documentType : "Service Request Details" %>
-      </h2>
-    </div>
-    <div class="flex items-center space-x-4">
-      <div class="dropdown dropdown-end">
-        <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center text-black">
-            <img src="/icons/profile2.svg" alt="User Avatar" class="w-full h-full object-cover" />
-          </div>
-        </label>
-        <div tabindex="0" class="mt-3 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-          <div>
-            <ul>
-              <li>
-                <p class="hover:text-[#6161f9] active:bg-white" onclick="redirect('profile')">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                  </svg>
-                  User Profile
-                </p>
-              </li>
-              <li>
-                <p class="hover:text-[#6161f9] active:bg-white" onclick="redirect('change-pass')">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
-                  </svg>
-                  Change Password
-                </p>
-              </li>
-            </ul>
-            <div class="border-t-[1.5px] border-[#dfdfe1]"></div>
-            <ul>
-              <li>
-                <p class="hover:text-[#f04545] active:bg-white" onclick="redirect('logout')">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
-                  </svg>
-                  Logout
-                </p>
-              </li>
-            </ul>
-          </div>
+    <aside class="fixed top-0 left-0 h-screen w-56 bg-gradient-to-b from-primary to-secondary shadow-md z-50">
+        <div class="flex flex-col justify-between h-full">
+          <div class="p-6"> <h1 class="text-2xl font-bold text-white">Service Saathi</h1> </div>
+          <nav class="flex-1 px-4"> <ul class="space-y-3">
+              <li><a href="/" class="block text-white hover:bg-white hover:text-primary rounded px-3 py-2">Home</a></li>
+              <li><a href="/services" class="block text-white hover:bg-white hover:text-primary rounded px-3 py-2">Services</a></li>
+          </ul> </nav>
         </div>
-      </div>
-    </div>
-  </nav>
-  <div class="flex ml-56 pt-16 bg-bg-light min-h-screen">
-    <div class="container mx-auto p-6">
-      <div class="max-w-5xl mx-auto bg-white shadow-md rounded-md p-6">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Uploaded Documents & Extracted Data</h2>
-        <div class="overflow-x-auto">
-          <table class="w-full border-collapse border border-gray-300 mb-6 text-sm">
-            <thead>
-              <tr class="bg-gray-100">
-                <th class="border border-gray-300 p-2 text-center">Document Name</th>
-                <th class="border border-gray-300 p-2 text-center">Extracted Data</th>
-                <th class="border border-gray-300 p-2 text-center">View</th>
-                <th class="border border-gray-300 p-2 text-center">Actions</th> <%# Changed Header %>
-              </tr>
-            </thead>
-            <tbody>
-              <% if (!serviceRequest || !serviceRequest.requiredDocuments || serviceRequest.requiredDocuments.length === 0) { %>
-                <tr><td colspan="4" class="text-center p-4 text-gray-500">No documents uploaded yet.</td></tr>
-              <% } else { %>
-                <% serviceRequest.requiredDocuments.forEach(function(doc) { %>
-                <tr class="hover:bg-gray-50 align-top">
-                  <td class="border p-2 text-center font-medium"><%= doc.name %></td>
-                  <td class="border p-2 text-left">
-                    <%# Extracted data display (remains the same) %>
-                    <% if (doc.extractedFields && typeof doc.extractedFields === 'object' && Object.keys(doc.extractedFields).length > 0) { %>
-                      <ul class="list-disc pl-5 space-y-1">
-                      <% for (const [label, value] of Object.entries(doc.extractedFields)) { %>
-                          <li><strong class="font-semibold"><%= label %>:</strong> <%= value %></li>
-                      <% } %>
-                      </ul>
-                    <% } else { %> <span class="text-gray-400 italic">Pending extraction</span> <% } %>
-                  </td>
-                  <td class="border p-2 text-center align-middle">
-                    <%# Image preview (remains the same) %>
-                    <% if (doc.base64Data) { %>
-                        <img src="data:image/jpeg;base64,<%= doc.base64Data %>" alt="Preview of <%= doc.name %>" class="h-20 md:h-24 mx-auto rounded-md shadow hover:scale-105 transition-transform duration-200 cursor-pointer object-contain" onclick="openImageModal('data:image/jpeg;base64,<%= doc.base64Data %>')"/>
-                    <% } else { %> <span class="text-gray-400">No Preview</span> <% } %>
-                  </td>
-                  <td class="border p-2 text-center align-middle">
-                    <%# --- MODIFIED Download Button --- %>
-                    <% if (doc.base64Data) { %>
-                      <button
-                      type="button"
-                      onclick="openDownloadModal('<%= serviceRequest._id %>', '<%= doc._id %>', '<%= doc.name %>', `<%- doc.base64Data %>`)" <%# Pass base64 data carefully %>
-                      class="inline-block bg-primary text-white px-3 py-1 rounded hover:bg-secondary transition-colors duration-200 text-xs md:text-sm"
-                      title="Download Options for <%= doc.name %>"
-                      >Download</button>
-                    <% } else { %> <span class="text-gray-400">–</span> <% } %>
-                    </td>
-                </tr>
-                <% }); %>
-              <% } %>
-            </tbody>
-          </table>
+    </aside>
+
+    <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40 h-16">
+        <h2 class="text-xl font-semibold text-gray-700 truncate pr-4">Document applying for
+            <%= serviceRequest ? serviceRequest.documentType : "Service Request Details" %>
+        </h2>
+        <div class="flex items-center space-x-4">
+            <div id="profile-icon-container"> <span class="text-gray-600">Loading Profile...</span> </div>
         </div>
-        <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-end items-center gap-3">
-            <label for="overall-status" class="mr-2 font-semibold text-gray-700">Overall Request Status:</label>
-            <select id="overall-status" class="border rounded p-2 bg-white shadow-sm focus:ring-primary focus:border-primary">
-              <% const currentStatus = serviceRequest ? serviceRequest.status : 'Pending'; %>
-              <option value="Pending"    <%= currentStatus === 'Pending'    ? 'selected' : '' %>>Pending</option>
-              <option value="Processing" <%= currentStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
-              <option value="Completed"  <%= currentStatus === 'Completed'  ? 'selected' : '' %>>Completed</option>
-              <option value="Approved"   <%= currentStatus === 'Approved'   ? 'selected' : '' %>>Approved</option>
-              <option value="Rejected"   <%= currentStatus === 'Rejected'   ? 'selected' : '' %>>Rejected</option>
-              <option value="Reupload Required"   <%= currentStatus === 'reupload_required'   ? 'selected' : '' %>>Reupload Required</option>
-            </select>
-            <button onclick="updateRequestStatus('<%= serviceRequest ? serviceRequest._id : '' %>')" class="ml-3 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors duration-200 shadow" <%= !serviceRequest ? 'disabled' : '' %>>Save Status</button>
+    </nav>
+
+    <div class="flex ml-56 pt-16 bg-bg-light min-h-screen">
+        <div class="container mx-auto p-6">
+            <div class="max-w-5xl mx-auto bg-white shadow-md rounded-md p-6">
+
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Uploaded Documents & Extracted Data</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300 mb-6 text-sm">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2 text-center">Document Name</th>
+                                <th class="border border-gray-300 p-2 text-center">Extracted Data</th>
+                                <th class="border border-gray-300 p-2 text-center">View</th>
+                                <th class="border border-gray-300 p-2 text-center">Actions</th> <%# Changed Header %>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (!serviceRequest || !serviceRequest.requiredDocuments || serviceRequest.requiredDocuments.length === 0) { %>
+                                <tr><td colspan="4" class="text-center p-4 text-gray-500">No documents uploaded yet.</td></tr>
+                            <% } else { %>
+                                <% serviceRequest.requiredDocuments.forEach(function(doc) { %>
+                                    <tr class="hover:bg-gray-50 align-top" id="doc-row-<%= doc._id %>"> <%# Added ID to row %>
+                                        <td class="border p-2 text-center font-medium"><%= doc.name %></td>
+                                        <td class="border p-2 text-left extracted-data-cell" id="extracted-data-<%= doc._id %>"> <%# Added ID %>
+                                            <%# --- MODIFIED: Extracted data display with Copy --- %>
+                                            <% if (doc.extractionDone && doc.extractedFields && typeof doc.extractedFields === 'object' && Object.keys(doc.extractedFields).length > 0) { %>
+                                                <ul class="list-disc pl-5 space-y-1">
+                                                <% for (const [label, value] of Object.entries(doc.extractedFields)) { %>
+                                                    <li>
+                                                        <strong class="font-semibold"><%= label %>:</strong> <%= value %>
+                                                        <span class="copy-icon" title="Copy value" onclick="copyToClipboard('<%= value %>')">
+                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                            </svg>
+                                                        </span>
+                                                    </li>
+                                                <% } %>
+                                                </ul>
+                                            <% } else if (doc.extractionDone) { %>
+                                                <span class="text-gray-500 italic">Extraction complete, but no data found.</span>
+                                            <% } else { %>
+                                                <span class="text-gray-400 italic">Pending extraction</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="border p-2 text-center align-middle">
+                                            <%# Image preview %>
+                                            <% if (doc.base64Data) { %>
+                                                <img src="data:image/jpeg;base64,<%= doc.base64Data %>" alt="Preview of <%= doc.name %>" class="h-20 md:h-24 mx-auto rounded-md shadow hover:scale-105 transition-transform duration-200 cursor-pointer object-contain" onclick="openImageModal('data:image/jpeg;base64,<%= doc.base64Data %>')"/>
+                                            <% } else { %> <span class="text-gray-400">No Preview</span> <% } %>
+                                        </td>
+                                        <td class="border p-2 text-center align-middle">
+                                            <div class="flex flex-col items-center justify-center gap-2"> <%# Flex container for buttons %>
+                                                <%# --- Download Button --- %>
+                                                <% if (doc.base64Data) { %>
+                                                    <button
+                                                        type="button"
+                                                        onclick="openDownloadModal('<%= serviceRequest._id %>', '<%= doc._id %>', '<%= doc.name %>', `<%- doc.base64Data %>`)"
+                                                        class="w-full sm:w-auto inline-block bg-primary text-white px-3 py-1 rounded hover:bg-secondary transition-colors duration-200 text-xs md:text-sm"
+                                                        title="Download Options for <%= doc.name %>"
+                                                    >Download</button>
+                                                <% } else { %> <span class="text-gray-400">–</span> <% } %>
+
+                                                <%# --- NEW Extract Data Button --- %>
+                                                <% if (doc.base64Data && !doc.extractionDone) { %>
+                                                    <button
+                                                        type="button"
+                                                        id="extract-btn-<%= doc._id %>" <%# Added ID %>
+                                                        onclick="triggerExtraction('<%= serviceRequest._id %>', '<%= doc._id %>', '<%= doc.name %>', this)" <%# Pass button element %>
+                                                        class="w-full sm:w-auto inline-block bg-accent text-white px-3 py-1 rounded hover:bg-accent-focus transition-colors duration-200 text-xs md:text-sm"
+                                                        title="Extract data from <%= doc.name %>"
+                                                    >Extract Data</button>
+                                                <% } else if (doc.extractionDone) { %>
+                                                    <span class="text-xs text-green-600">Extracted</span>
+                                                <% } %>
+                                                <%# --- END NEW Extract Data Button --- %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-end items-center gap-3">
+                    <label for="overall-status" class="mr-2 font-semibold text-gray-700">Overall Request Status:</label>
+                    <select id="overall-status" class="border rounded p-2 bg-white shadow-sm focus:ring-primary focus:border-primary">
+                        <% const currentStatus = serviceRequest ? serviceRequest.status : 'Pending'; %>
+                        <option value="pending"    <%= currentStatus === 'pending'    ? 'selected' : '' %>>Pending</option> <%# Use lowercase as per schema %>
+                        <option value="documents-uploading" <%= currentStatus === 'documents-uploading' ? 'selected' : '' %>>Documents Uploading</option>
+                        <option value="started"    <%= currentStatus === 'started'    ? 'selected' : '' %>>Started</option>
+                        <option value="submitted"  <%= currentStatus === 'submitted'  ? 'selected' : '' %>>Submitted</option>
+                        <option value="approved"   <%= currentStatus === 'approved'   ? 'selected' : '' %>>Approved</option>
+                        <option value="rejected"   <%= currentStatus === 'rejected'   ? 'selected' : '' %>>Rejected</option>
+                        <option value="completed"  <%= currentStatus === 'completed'  ? 'selected' : '' %>>Completed</option>
+                        <option value="reupload_required" <%= currentStatus === 'reupload_required' ? 'selected' : '' %>>Reupload Required</option>
+                    </select>
+                    <button onclick="updateRequestStatus('<%= serviceRequest ? serviceRequest._id : '' %>')" class="ml-3 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors duration-200 shadow" <%= !serviceRequest ? 'disabled' : '' %>>Save Status</button>
+                </div>
+
+            </div>
         </div>
-      </div></div> </div> <div id="imageModal" class="fixed inset-0 hidden bg-black bg-opacity-75 justify-center items-center z-[100] p-4" onclick="closeImageModal()">
-    <div class="relative max-w-full max-h-full" onclick="event.stopPropagation()">
-      <button onclick="closeImageModal()" class="absolute -top-8 right-0 text-white text-3xl font-bold hover:text-gray-300" title="Close Image">&times;</button>
-      <img id="modalImage" class="block max-h-[90vh] max-w-[90vw] rounded-md shadow-lg object-contain"/>
     </div>
-  </div>
+
+    <div id="imageModal" class="fixed inset-0 hidden bg-black bg-opacity-75 justify-center items-center z-[100] p-4" onclick="closeImageModal()">
+        <div class="relative max-w-full max-h-full" onclick="event.stopPropagation()">
+            <button onclick="closeImageModal()" class="absolute -top-8 right-0 text-white text-3xl font-bold hover:text-gray-300" title="Close Image">&times;</button>
+            <img id="modalImage" class="block max-h-[90vh] max-w-[90vw] rounded-md shadow-lg object-contain"/>
+        </div>
+    </div>
+
     <div id="downloadModal" class="fixed inset-0 hidden items-center justify-center z-[105]">
-      <div class="modal-backdrop fixed inset-0" onclick="closeDownloadModal()"></div>
-      <div id="downloadModalContent" class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 relative">
-        <h3 class="text-lg font-semibold mb-4">Download Options</h3>
-        <div class="mb-4">
-          <label for="downloadFilename" class="block text-sm font-medium text-gray-700 mb-1">Filename:</label>
-          <input type="text" id="downloadFilename" name="downloadFilename" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary">
+        <div class="modal-backdrop fixed inset-0" onclick="closeDownloadModal()"></div>
+        <div id="downloadModalContent" class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 relative">
+            <h3 class="text-lg font-semibold mb-4">Download Options</h3>
+            <div class="mb-4">
+                <label for="downloadFilename" class="block text-sm font-medium text-gray-700 mb-1">Filename:</label>
+                <input type="text" id="downloadFilename" name="downloadFilename" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary">
+            </div>
+            <div class="mb-4">
+                 <p class="text-sm text-gray-600">Original Size: <span id="originalFileSize">Calculating...</span></p>
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Download Format:</label>
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center">
+                        <input type="radio" name="downloadFormat" value="jpg" class="form-radio h-4 w-4 text-primary focus:ring-primary" checked>
+                        <span class="ml-2 text-sm">JPG</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="downloadFormat" value="png" class="form-radio h-4 w-4 text-primary focus:ring-primary">
+                        <span class="ml-2 text-sm">PNG</span>
+                    </label>
+                    <label class="flex items-center opacity-50 cursor-not-allowed" title="PDF conversion not supported for download yet">
+                        <input type="radio" name="downloadFormat" value="pdf" class="form-radio h-4 w-4 text-primary focus:ring-primary" disabled>
+                        <span class="ml-2 text-sm">PDF</span>
+                    </label>
+                </div>
+                 <p class="text-xs text-gray-500 mt-2">Note: Conversion depends on the original file type. PDF input cannot be converted to images.</p>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeDownloadModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">Cancel</button>
+                <button type="button" id="confirmDownloadBtn" onclick="confirmDownload()" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary text-sm">Confirm & Download</button>
+            </div>
         </div>
-        <div class="mb-4">
-          <p class="text-sm text-gray-600">Original Size: <span id="originalFileSize">Calculating...</span></p>
-        </div>
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Download Format:</label>
-          <div class="flex items-center space-x-4">
-              <label class="flex items-center">
-                  <input type="radio" name="downloadFormat" value="jpg" class="form-radio h-4 w-4 text-primary focus:ring-primary" checked>
-                  <span class="ml-2 text-sm">JPG</span>
-              </label>
-              <label class="flex items-center">
-                  <input type="radio" name="downloadFormat" value="png" class="form-radio h-4 w-4 text-primary focus:ring-primary">
-                  <span class="ml-2 text-sm">PNG</span>
-              </label>
-              <label class="flex items-center opacity-50 cursor-not-allowed" title="PDF conversion from images coming soon"> <%# Disable PDF for now %>
-                  <input type="radio" name="downloadFormat" value="pdf" class="form-radio h-4 w-4 text-primary focus:ring-primary" disabled>
-                  <span class="ml-2 text-sm">PDF</span>
-              </label>
-          </div>
-          <p class="text-xs text-gray-500 mt-2">Note: Conversion depends on the original file type. PDF output may not preserve original layout perfectly. PDF input cannot be converted to images.</p>
-        </div>
-        <div class="flex justify-end space-x-3">
-          <button type="button" onclick="closeDownloadModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">Cancel</button>
-          <button type="button" id="confirmDownloadBtn" onclick="confirmDownload()" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary text-sm">Confirm & Download</button>
-        </div>
-      </div>
     </div>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
     <script>
-      // === Image Modal Functions (remain the same) ===
-      const imageModal = document.getElementById('imageModal');
-      const modalImage = document.getElementById('modalImage');
-      function openImageModal(src) { if (modalImage && imageModal) { modalImage.src = src; imageModal.classList.remove('hidden'); imageModal.classList.add('flex'); } }
-      function closeImageModal() { if (imageModal) { imageModal.classList.add('hidden'); imageModal.classList.remove('flex'); modalImage.src = ''; } }
-      document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !imageModal.classList.contains('hidden')) { closeImageModal(); } });
+        // === Image Modal Functions ===
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        function openImageModal(src) { if (modalImage && imageModal) { modalImage.src = src; imageModal.classList.remove('hidden'); imageModal.classList.add('flex'); } }
+        function closeImageModal() { if (imageModal) { imageModal.classList.add('hidden'); imageModal.classList.remove('flex'); modalImage.src = ''; } }
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !imageModal.classList.contains('hidden')) { closeImageModal(); } });
 
-      // === Download Modal Functions ===
-      const downloadModal = document.getElementById('downloadModal');
-      const downloadFilenameInput = document.getElementById('downloadFilename');
-      const originalFileSizeSpan = document.getElementById('originalFileSize');
-      const confirmDownloadBtn = document.getElementById('confirmDownloadBtn');
+        // === Download Modal Functions ===
+        const downloadModal = document.getElementById('downloadModal');
+        const downloadFilenameInput = document.getElementById('downloadFilename');
+        const originalFileSizeSpan = document.getElementById('originalFileSize');
+        const confirmDownloadBtn = document.getElementById('confirmDownloadBtn');
 
-      function calculateSizeAndFormat(base64String) {
-          // Basic Base64 size estimation
-        if (!base64String) return 'N/A';
-
-        // Remove data URI prefix if present for accurate calculation
-        const C = base64String.startsWith('data:') ? base64String.substring(base64String.indexOf(',') + 1) : base64String;
-        const L = C.length;
-        const bytes = L * 0.75 - (C.endsWith('==') ? 2 : (C.endsWith('=') ? 1 : 0));
-
-        if (bytes < 1024) return `${bytes} Bytes`;
-
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-      }
-
-      function openDownloadModal(serviceRequestId, docSubId, docName, base64Data) {
-        if (!downloadModal || !confirmDownloadBtn || !downloadFilenameInput || !originalFileSizeSpan) {
-          console.error("Download modal elements not found!");
-          return;
-        }
-        
-        // 1. Calculate Size
-        originalFileSizeSpan.textContent = calculateSizeAndFormat(base64Data);
-
-        // 2. Generate Default Filename (Name + Date/Time)
-        const safeName = docName ? docName.replace(/[^a-zA-Z0-9_\-\.]/g, '_').replace(/\.[^/.]+$/, "") : 'document'; // Remove existing extension
-        const timestamp = moment().format('YYYYMMDD_HHmmss');
-        downloadFilenameInput.value = `${safeName}_${timestamp}`; // Extension will be added by server based on format
-
-        // 3. Store IDs on the confirm button (or modal) for later retrieval
-        confirmDownloadBtn.dataset.serviceRequestId = serviceRequestId;
-        confirmDownloadBtn.dataset.docSubId = docSubId;
-
-        // 4. Reset format selection (optional, default to jpg)
-        const formatRadios = document.querySelectorAll('input[name="downloadFormat"]');
-        formatRadios.forEach(radio => radio.checked = (radio.value === 'jpg'));
-
-        // 5. Show Modal
-        downloadModal.classList.remove('hidden');
-        downloadModal.classList.add('flex');
-      }
-
-      function closeDownloadModal() {
-        if (downloadModal) {
-          downloadModal.classList.add('hidden');
-          downloadModal.classList.remove('flex');
-          
-          // Clear stored data (optional)
-          if(confirmDownloadBtn) {
-            delete confirmDownloadBtn.dataset.serviceRequestId;
-            delete confirmDownloadBtn.dataset.docSubId;
-          }
-        }
-      }
-
-      function confirmDownload() {
-        if (!confirmDownloadBtn || !downloadFilenameInput) return;
-        const serviceRequestId = confirmDownloadBtn.dataset.serviceRequestId;
-        const docSubId = confirmDownloadBtn.dataset.docSubId;
-        const selectedFormat = document.querySelector('input[name="downloadFormat"]:checked')?.value;
-        const filename = downloadFilenameInput.value.trim(); // Get filename, trim whitespace
-
-        if (!serviceRequestId || !docSubId || !selectedFormat) {
-          alert('Error: Missing information to start download.');
-          return;
+        function calculateSizeAndFormat(base64String) {
+            if (!base64String) return 'N/A';
+            const C = base64String.startsWith('data:') ? base64String.substring(base64String.indexOf(',') + 1) : base64String;
+            const L = C.length;
+            const bytes = L * 0.75 - (C.endsWith('==') ? 2 : (C.endsWith('=') ? 1 : 0));
+            if (bytes < 1024) return `${bytes} Bytes`;
+            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+            return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
         }
 
-        if (!filename) {
-          alert('Error: Filename cannot be empty.');
-          return;
+        function openDownloadModal(serviceRequestId, docSubId, docName, base64Data) {
+            if (!downloadModal || !confirmDownloadBtn || !downloadFilenameInput || !originalFileSizeSpan) { console.error("Download modal elements not found!"); return; }
+            originalFileSizeSpan.textContent = calculateSizeAndFormat(base64Data);
+            const safeName = docName ? docName.replace(/[^a-zA-Z0-9_\-\.]/g, '_').replace(/\.[^/.]+$/, "") : 'document';
+            const timestamp = moment().format('YYYYMMDD_HHmmss');
+            downloadFilenameInput.value = `${safeName}_${timestamp}`;
+            confirmDownloadBtn.dataset.serviceRequestId = serviceRequestId;
+            confirmDownloadBtn.dataset.docSubId = docSubId;
+             const formatRadios = document.querySelectorAll('input[name="downloadFormat"]');
+             formatRadios.forEach(radio => radio.checked = (radio.value === 'jpg'));
+            downloadModal.classList.remove('hidden');
+            downloadModal.classList.add('flex');
         }
 
-        // Construct the new download URL with format and filename
-        const downloadUrl = `/download-convert/${serviceRequestId}/${docSubId}?format=${selectedFormat}&filename=${encodeURIComponent(filename)}`;
-        console.log('Triggering download:', downloadUrl); // Debug log
+        function closeDownloadModal() {
+            if (downloadModal) {
+                downloadModal.classList.add('hidden');
+                downloadModal.classList.remove('flex');
+                if(confirmDownloadBtn) {
+                    delete confirmDownloadBtn.dataset.serviceRequestId;
+                    delete confirmDownloadBtn.dataset.docSubId;
+                }
+            }
+        }
 
-        // Trigger the download by navigating to the URL
-        window.location.href = downloadUrl;
-        closeDownloadModal();
-      }
-      // === Update Status Function (remains the same) ===
-      async function updateRequestStatus(requestId) { /* ... */
-        if (!requestId) { alert('Error: Request ID is missing.'); return; }
+        function confirmDownload() {
+            if (!confirmDownloadBtn || !downloadFilenameInput) return;
+            const serviceRequestId = confirmDownloadBtn.dataset.serviceRequestId;
+            const docSubId = confirmDownloadBtn.dataset.docSubId;
+            const selectedFormat = document.querySelector('input[name="downloadFormat"]:checked')?.value;
+            const filename = downloadFilenameInput.value.trim();
+            if (!serviceRequestId || !docSubId || !selectedFormat || !filename) {
+                alert('Error: Missing information or empty filename.');
+                return;
+            }
+            const downloadUrl = `/download-convert/${serviceRequestId}/${docSubId}?format=${selectedFormat}&filename=${encodeURIComponent(filename)}`;
+            console.log('Triggering download:', downloadUrl);
+            window.location.href = downloadUrl;
+            closeDownloadModal();
+        }
 
-        const statusDropdown = document.getElementById('overall-status');
-        const selectedStatus = statusDropdown ? statusDropdown.value : null;
+        // === Update Status Function ===
+        async function updateRequestStatus(requestId) {
+             if (!requestId) { alert('Error: Request ID is missing.'); return; }
+            const statusDropdown = document.getElementById('overall-status');
+            const selectedStatus = statusDropdown ? statusDropdown.value : null;
+            if (!selectedStatus) { alert('Error: Could not read selected status.'); return; }
+            console.log(`Updating status for ${requestId} to ${selectedStatus}`);
+            try {
+                // Use PUT or PATCH for updates ideally, but POST is used here
+                const response = await fetch(`/update-request-status/${requestId}`, {
+                    method: 'POST', // Or PUT/PATCH
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ status: selectedStatus })
+                 });
+                const data = await response.json();
+                if (!response.ok) { throw new Error(data.message || `Server error ${response.status}`); }
+                alert(data.message || 'Status updated!');
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert(`Error: ${error.message}`);
+            }
+        }
 
-        if (!selectedStatus) { alert('Error: Could not read selected status.'); return; }
-        console.log(`Updating status for ${requestId} to ${selectedStatus}`);
+        // === Copy Function ===
+        function copyToClipboard(text) {
+             if (navigator.clipboard && text) {
+                 navigator.clipboard.writeText(text).then(() => {
+                    // Subtle feedback maybe? Like a temporary tooltip?
+                    console.log("Copied:", text);
+                    // Optional: Show a small temporary message near the icon
+                 }).catch(err => {
+                     console.error('Failed to copy:', err);
+                     alert("Failed to copy text.");
+                 });
+             } else {
+                 alert("Clipboard API unavailable or text is empty.");
+             }
+        }
 
-        try {
-          const response = await fetch(`/update-request-status/${requestId}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status: selectedStatus }) });
-          const data = await response.json();
-          if (!response.ok) { throw new Error(data.message || `Server error ${response.status}`); }
-          alert(data.message || 'Status updated!');
-        } catch (error) { console.error('Error:', error); alert(`Error: ${error.message}`); }
-      }
+        // === NEW Extraction Functions ===
+        function triggerExtraction(serviceRequestId, docSubId, docName, buttonElement) {
+            if (!serviceRequestId || !docSubId || !docName) {
+                alert('Error: Missing document information for extraction.');
+                return;
+            }
+            if (buttonElement) {
+                buttonElement.disabled = true;
+                buttonElement.innerHTML = 'Extracting... <span class="loader"></span>';
+            }
 
-      // === Copy Function (remains the same, though targets removed) ===
-      function copyToClipboard(text) { /* ... */
-        if (navigator.clipboard && text) { navigator.clipboard.writeText(text).then(() => { alert("Copied: " + text); }).catch(err => { console.error('Failed to copy:', err); alert("Failed to copy."); }); } else { alert("Clipboard API unavailable."); }
-      }
+            // Call the function that performs the async operations
+            performExtraction(serviceRequestId, docSubId, docName, buttonElement);
+        }
+
+        async function performExtraction(serviceRequestId, docSubId, docName, buttonElement) {
+            const apiUrl = `/extract-and-save/${serviceRequestId}/${docSubId}`;
+            const extractedDataCell = document.getElementById(`extracted-data-${docSubId}`);
+
+            try {
+                console.log(`Starting extraction for doc ${docSubId} (${docName})`);
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // Add any necessary auth headers if your backend requires them
+                    },
+                    // Body is not needed here as the backend fetches the base64 itself
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || `Extraction API call failed with status ${response.status}`);
+                }
+
+                console.log('Extraction successful, data saved:', result.savedData);
+
+                // Update the UI
+                if (extractedDataCell) {
+                    if (result.savedData && typeof result.savedData === 'object' && Object.keys(result.savedData).length > 0) {
+                        let htmlContent = '<ul class="list-disc pl-5 space-y-1">';
+                        for (const [label, value] of Object.entries(result.savedData)) {
+                            // Escape potentially problematic characters in value for the onclick string
+                            const escapedValue = String(value).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                            htmlContent += `
+                                <li>
+                                    <strong class="font-semibold">${label}:</strong> ${value}
+                                    <span class="copy-icon" title="Copy value" onclick="copyToClipboard('${escapedValue}')">
+                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                    </span>
+                                </li>`;
+                        }
+                        htmlContent += '</ul>';
+                        extractedDataCell.innerHTML = htmlContent;
+                    } else {
+                        extractedDataCell.innerHTML = '<span class="text-gray-500 italic">Extraction complete, but no data found.</span>';
+                    }
+                }
+
+                // Remove the button and show "Extracted" text
+                if (buttonElement) {
+                    const parentTd = buttonElement.closest('td'); // Find the parent cell
+                    buttonElement.remove(); // Remove the button
+                    if (parentTd) {
+                         // Add the "Extracted" span - ensure it's visible within the flex layout
+                         const extractedSpan = document.createElement('span');
+                         extractedSpan.className = 'text-xs text-green-600 mt-1'; // Added margin-top for spacing
+                         extractedSpan.textContent = 'Extracted';
+                         // Find the flex container if it exists, otherwise append to td
+                         const flexContainer = parentTd.querySelector('.flex');
+                         if(flexContainer) {
+                             flexContainer.appendChild(extractedSpan);
+                         } else {
+                             parentTd.appendChild(extractedSpan);
+                         }
+                    }
+                }
+                 alert('Data extracted and saved successfully!');
+
+            } catch (error) {
+                console.error('Extraction failed:', error);
+                alert(`Error during extraction: ${error.message}`);
+                // Re-enable the button on failure
+                if (buttonElement) {
+                    buttonElement.disabled = false;
+                    buttonElement.textContent = 'Extract Data'; // Reset button text
+                }
+                // Optionally reset the cell content if needed
+                // if (extractedDataCell) {
+                //     extractedDataCell.innerHTML = '<span class="text-gray-400 italic">Extraction failed.</span>';
+                // }
+            }
+        }
+
+
     </script>
 </body>
 </html>
