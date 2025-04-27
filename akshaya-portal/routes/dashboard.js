@@ -64,7 +64,9 @@ if (!user || !user.centerId) {
       lineChartData = await ServiceRequest.aggregate([
         { 
           $match: { createdAt: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } ,
-          centreId: user.centerId},
+          centreId: user.centerId,
+          status: { $ne: 'documents-uploading' }} // Exclude 'documents-uploading'
+          
           
         },
         { 
@@ -82,8 +84,9 @@ if (!user || !user.centerId) {
       lineChartData = await ServiceRequest.aggregate([
         { 
           $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) } ,
-          centreId: user.centerId },
-         
+          centreId: user.centerId ,
+          status: { $ne: 'documents-uploading' }}
+      
         },
         { 
           $group: { 
@@ -103,6 +106,7 @@ if (!user || !user.centerId) {
           
            createdAt: { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 1)) } ,
           centreId: user.centerId, // Filter by the logged-in user's centerId
+          status: { $ne: 'documents-uploading' }
         }
       },
         { 
@@ -123,6 +127,7 @@ if (!user || !user.centerId) {
           $match: {
             createdAt: { $gte: new Date(0) }, // Matches all dates (from the epoch time)
             centreId: user.centerId, // Filter by the logged-in user's centerId
+            status: { $ne: 'documents-uploading' }
           }
         },
         {
