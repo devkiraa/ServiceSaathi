@@ -222,6 +222,7 @@
       e.preventDefault();
       if (!validateStep2()) return;
       const data = Object.fromEntries(new FormData(e.target));
+      console.log(data);
       try {
         const res = await fetch('/api/signup', {
           method: 'POST',
