@@ -196,7 +196,7 @@ router.post('/api/login', async (req, res) => {
     // For non-admin users, ensure the centre is approved before login
     if (user.role !== 'admin' && user.centerId) {
       const Centre = require('../models/Centre');
-      const centre = await Centre.findOne({ centreName: user.centerId });
+      const centre = await Centre.findOne({ centerId: user.centerId });
       if (!centre || centre.status !== 'approved') {
         return res.status(400).json({ error: 'Your centre is not approved yet' });
       }
