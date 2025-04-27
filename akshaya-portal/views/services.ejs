@@ -198,6 +198,12 @@
                       <%= sr.status.charAt(0).toUpperCase() + sr.status.slice(1) %>
                     </span>
                   </td>
+                  <!-- WhatsApp Chat Button Column -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <a href="https://wa.me/<%= sr.mobileNumber %>" target="_blank" class="rounded-full px-2 py-1 text-xs font-semibold inline-flex items-center btn btn-sm btn-success">
+                      <span>WhatsApp</span>
+                    </a>
+                  </td>
                 </tr>
               <% }); %>
             <% } %>
