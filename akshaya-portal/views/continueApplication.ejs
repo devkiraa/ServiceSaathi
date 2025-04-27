@@ -215,11 +215,8 @@
           <label for="overall-status" class="mr-2 font-semibold text-gray-700">Overall Request Status:</label>
           <select id="overall-status" class="border rounded p-2 bg-white shadow-sm focus:ring-primary focus:border-primary">
             <% const currentStatus = serviceRequest ? serviceRequest.status : 'Pending'; %>
-            <option value="pending"    <%= currentStatus === 'pending'    ? 'selected' : '' %>>Pending</option> <%# Use lowercase as per schema %>
-            <option value="documents-uploading" <%= currentStatus === 'documents-uploading' ? 'selected' : '' %>>Documents Uploading</option>
             <option value="started"    <%= currentStatus === 'started'    ? 'selected' : '' %>>Started</option>
             <option value="submitted"  <%= currentStatus === 'submitted'  ? 'selected' : '' %>>Submitted</option>
-            <option value="approved"   <%= currentStatus === 'approved'   ? 'selected' : '' %>>Approved</option>
             <option value="rejected"   <%= currentStatus === 'rejected'   ? 'selected' : '' %>>Rejected</option>
             <option value="completed"  <%= currentStatus === 'completed'  ? 'selected' : '' %>>Completed</option>
             <option value="reupload_required" <%= currentStatus === 'reupload_required' ? 'selected' : '' %>>Reupload Required</option>
