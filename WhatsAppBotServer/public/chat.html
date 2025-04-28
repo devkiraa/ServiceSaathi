@@ -52,12 +52,12 @@
         .message-container { display: flex; margin-bottom: 2px; max-width: 75%; /* Increased max width */ margin-top: 8px; }
         .message-container.user { margin-left: auto; justify-content: flex-end; }
         .message-container.bot { margin-right: auto; justify-content: flex-start; }
-        .message { padding: 6px 9px 8px 9px; /* Remove bottom padding override here */ border-radius: 7.5px; word-wrap: break-word; line-height: 1.4; box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13); position: relative; font-size: 14.2px; white-space: pre-wrap; display: flex; align-items: flex-end; min-height: auto; /* Let content determine height */ }
+        .message { padding: 6px 9px 8px 9px; border-radius: 7.5px; word-wrap: break-word; line-height: 1.4; box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13); position: relative; font-size: 14.2px; white-space: pre-wrap; display: flex; align-items: flex-end; min-height: auto; /* Let content determine height */ }
         .message.user { background-color: var(--outgoing-bubble-color); position: relative; }
         .message.bot { background-color: var(--incoming-bubble-color); }
-        /* Add padding internally for meta area */
         .message .message-content { padding-bottom: 16px; /* Space for meta area below */}
         .message.bot .message-content { padding-bottom: 0; } /* No extra space needed if no meta */
+
 
         /* Formatting Styles */
         .message strong { font-weight: 600; } .message em { font-style: italic; } .message del { text-decoration: line-through; }
@@ -66,7 +66,7 @@
         .message blockquote { border-left: 3px solid var(--whatsapp-header-color, #00a884); padding-left: 10px; margin: 4px 0; color: var(--text-secondary-color); font-style: italic; }
         .message ul, .message ol { margin: 4px 0 4px 20px; padding-left: 15px; } .message li { margin-bottom: 2px; }
 
-        /* Meta Area (Timestamp & Ticks) */
+         /* Meta Area (Timestamp & Ticks) */
         .message-meta-area { position: absolute; bottom: 4px; right: 8px; user-select: none; display: flex; align-items: center; height: 16px; }
         .message .timestamp { font-size: 11px; color: var(--bubble-meta-color); margin-right: 3px; }
         .ticks { display: inline-block; width: 16px; height: 16px; background-repeat: no-repeat; background-position: center; vertical-align: middle; flex-shrink: 0;}
@@ -88,37 +88,32 @@
 
         /* --- MOBILE OPTIMIZATIONS --- */
         @media (max-width: 600px) {
-            body { font-size: 15px; } /* Slightly larger base font */
-            #app-container {
-                max-width: 100%;
-                margin: 0;
-                box-shadow: none; /* Remove shadow on mobile */
-            }
-             #chat-header { height: 55px; padding: 8px 10px;} /* Adjust header */
-             #chat-header .avatar { width: 36px; height: 36px; margin-right: 10px;}
-             #chat-header .chat-info .name { font-size: 15px; }
-             #chat-header .chat-info .status { font-size: 12px; }
-             #header-menu-button { padding: 6px; }
-             #header-menu { top: 50px; right: 5px; } /* Adjust menu position */
+            body { font-size: 15px; }
+            #app-container { max-width: 100%; margin: 0; box-shadow: none; }
+            #chat-header { height: 55px; padding: 8px 10px;}
+            #chat-header .avatar { width: 36px; height: 36px; margin-right: 10px;}
+            #chat-header .chat-info .name { font-size: 15px; }
+            #chat-header .chat-info .status { font-size: 12px; }
+            #header-menu-button { padding: 6px; }
+            #header-menu { top: 50px; right: 5px; }
 
-            #chatbox { padding: 10px 8px; } /* Reduce chatbox padding */
-             .message-container { max-width: 85%; } /* Allow bubbles to be wider */
-             .message { font-size: 14.5px; } /* Adjust bubble font size */
-             .message .timestamp { font-size: 10px; } /* Smaller timestamp */
-             .ticks { width: 14px; height: 14px; } /* Slightly smaller ticks */
-             .message-meta-area { height: 14px; bottom: 3px; right: 6px; }/* Adjust meta position */
-             .message .message-content { padding-bottom: 14px; } /* Adjust for smaller meta */
+            #chatbox { padding: 10px 8px; }
+            .message-container { max-width: 85%; }
+            .message { font-size: 14.5px; }
+            .message .timestamp { font-size: 10px; }
+            .ticks { width: 14px; height: 14px; }
+            .message-meta-area { height: 14px; bottom: 3px; right: 6px; }
+            .message .message-content { padding-bottom: 14px; }
 
 
-            #input-area { min-height: 50px; padding: 5px 8px; } /* Adjust input area */
-            #message-input { margin: 0 5px; font-size: 16px; } /* Slightly larger input text */
+            #input-area { min-height: 50px; padding: 5px 8px; }
+            #message-input { margin: 0 5px; font-size: 16px; }
             #send-button { padding: 6px; }
         }
 
     </style>
 </head>
 <body>
-
     <div id="phone-prompt-overlay">
         <div id="phone-prompt-box">
             <h2>Enter Phone Number</h2>
