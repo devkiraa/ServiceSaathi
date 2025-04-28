@@ -57,12 +57,12 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => res.send('OK'));
 // --- Start Server ---
 // Explicitly provide 'localhost' or '127.0.0.1' as the hostname
-app.listen(PORT, 'localhost', () => {
-    console.log('\\n==================================');
+app.listen(PORT, '127.0.0.1', () => {
+    console.log('\n==================================');
     console.log('CHAT SCREEN SERVER');
     console.log('==================================');
     // Update the log message to reflect the explicit host
     console.log(`Server URL: http://localhost:${PORT}`);
     console.log(`Chat API Base: ${CHAT_API_BASE || 'Not Set'}`);
-    console.log('==================================\\n');
+    console.log('==================================\n');
   });
