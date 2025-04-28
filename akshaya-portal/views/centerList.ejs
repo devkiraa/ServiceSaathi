@@ -203,7 +203,11 @@
               <% } else { %>
                 <% centres.forEach(function(centre) { %>
                   <tr class="centre-row" data-status="<%= centre.status %>">
-                    <td class="px-6 py-4 whitespace-nowrap"><%= centre.centreName %></td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <a href="/view-centre/<%= centre._id %>">
+                        <%= centre.centreName %>
+                      </a>
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap"><%= centre.ownerName %></td>
                     <td class="px-6 py-4 whitespace-nowrap"><%= centre.contact %></td>
                     <td class="px-6 py-4 whitespace-nowrap">

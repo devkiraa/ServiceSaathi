@@ -32,6 +32,19 @@ router.get('/centers-list', async (req, res) => {
   }
 });
 
+// Admin centers route – only accessible to admins
+router.get('/view-centre/:id', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+  try {
+    const centreId = req.params.id;
+    const centre = await Centre.findById(centreId); // Fetch centre by ID
+    console.log(centre);
+    res.render('viewCentre', { centre, user: req.session.user });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
 // Pending centres route
 router.get('/pending-centres/:id', async (req, res) => {
   try {
