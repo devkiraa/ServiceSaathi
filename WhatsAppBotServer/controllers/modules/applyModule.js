@@ -586,14 +586,16 @@ module.exports = function (
                   .map((d) => `• ${d.name}`)
                   .join("\n")}` +
                 `\nഅപ്‌ലോഡ് ലിങ്ക്: ${uploadLink}` +
-                `\n\nഈ അഭ്യർത്ഥന റദ്ദാക്കാൻ എപ്പോൾ വേണമെങ്കിലും /cancel എന്ന് മറുപടി നൽകുക.`
+                `\n\nഈ അഭ്യർത്ഥന റദ്ദാക്കാൻ എപ്പോൾ വേണമെങ്കിലും /cancel എന്ന് മറുപടി നൽകുക.`+
+                `\n\n\ പണമടയ്ക്കൽ സംബന്ധിച്ച് അക്ഷയ കേന്ദ്രം നിങ്ങളെ ബന്ധപ്പെടുന്നതായിരിക്കും.`
               : `*${data.message || "Request submitted successfully."}*\n` +
                 `\nRequest ID: ${data.serviceRequestId}\n` +
                 `Required Documents:\n${requiredDocs
                   .map((d) => `• ${d.name}`)
                   .join("\n")}` +
                 `\n\nUpload Link: ${uploadLink}` +
-                `\n\nTo cancel this request at any time, reply with /cancel`;
+                `\n\nTo cancel this request at any time, reply with /cancel`+
+                  `\n\n The Akshaya centre will be contacting you regards the payment.`;
           await sendMessage(From, confirmationMsg);
 
           // Start status polling
