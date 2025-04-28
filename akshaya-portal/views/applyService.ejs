@@ -164,6 +164,8 @@
       docHint.textContent  = `Position the document, capture, then adjust the crop.`;
       backBtn.disabled = currentStep === 0;
       nextBtn.textContent = "Capture";
+      flashBtn.hidden = true;
+      // toggleFlash();
     }
   
     // Capture & crop flow
@@ -199,12 +201,12 @@
           nextBtn.textContent = "Capture";
           renderStep();
         };
-        cropImage.onerror = () => {
-          console.error("Error loading image into cropper.");
-          // Instead of alert, update the instruction text
-          docHint.textContent = "Failed to load captured image. Please try again.";
-          resetToCamera();
-        };
+        // cropImage.onerror = () => {
+        //   console.error("Error loading image into cropper.");
+        //   // Instead of alert, update the instruction text
+        //   docHint.textContent = "Failed to load captured image. Please try again.";
+        //   resetToCamera();
+        // };
       } else {
         docHint.textContent = "Failed to capture photo. Please try again.";
         nextBtn.disabled = false;
@@ -303,6 +305,7 @@
       cameraContainer.classList.remove("hidden");
       controlContainer.classList.remove("hidden");
       instructionContainer.classList.remove("hidden");
+      flashBtn.hidden = true;
   
       if (!videoStream) {
         initCamera().then(() => {
@@ -338,7 +341,6 @@
       console.log("Preparing to submit documents...");
       const formData = new FormData();
       let filesAttached = 0;
-  
       requiredDocuments.forEach((doc) => {
         if (doc.file instanceof File) {
           formData.append(`files`, doc.file, doc.file.name);
@@ -347,14 +349,12 @@
           console.warn(`No valid file captured for document: ${doc.name}`);
         }
       });
-  
       if (filesAttached === 0 && totalSteps > 0) {
         docHint.textContent = "No documents captured to submit.";
         resetToCamera();
         renderStep();
         return;
       }
-  
       if (filesAttached < totalSteps) {
         if (!confirm(`Only ${filesAttached} out of ${totalSteps} documents captured. Submit anyway?`)) {
           resetToCamera();
@@ -362,26 +362,38 @@
           return;
         }
       }
-  
       instructionContainer.classList.remove('hidden');
       docLabel.textContent = "Submitting...";
       docHint.textContent = "Please wait.";
       controlContainer.classList.add('hidden');
       cameraContainer.classList.add('hidden');
       cropContainer.classList.add('hidden');
-      stopVideoStream();
-  
+      controlContainer.style.display = 'none';
+      stopVideoStream(); // Turn off the camera
+
       try {
         const response = await fetch(`/upload-documents/${serviceRequestId}`, {
           method: 'POST',
           body: formData
         });
-  
         if (response.ok) {
           const result = await response.json();
           console.log("Upload successful:", result);
+        
+          // Final UI updates after successful submission
           docLabel.textContent = "Upload Complete";
-          docHint.textContent = "Your documents have been submitted successfully.";
+          docHint.textContent = "Your documents have been submitted successfully. Please close this tab. You will redirected back to whatsapp in 5 seconds. ";
+
+          // Hide all buttons and unnecessary elements
+          controlContainer.style.display = 'none';
+
+          // Turn off Video Streaming
+          stopVideoStream();
+          
+          // Use setTimeout to delay the redirection by 5000 milliseconds (5 seconds)
+          setTimeout(() => {
+            window.location.href = `https://wa.me/+14155238886`; // Redirect to the specified URL
+          }, 5000);
         } else {
           let errorMsg = `Upload failed: ${response.status}`;
           try {
