@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             metaArea.classList.add('message-meta-area');
             const timestampSpan = document.createElement('span');
             timestampSpan.classList.add('timestamp');
-            timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }); // Use consistent time format
+            timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
             metaArea.appendChild(timestampSpan);
             const ticksSpan = document.createElement('span');
             ticksSpan.classList.add('ticks', 'single-grey');
@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Track the container element just added by the user
             lastSentUserMessageInfo = { element: messageContainer, id: messageId };
         }
+         // Removed placeholder for bot messages as layout change might not need it
 
         messageContainer.appendChild(messageDiv);
         chatbox.appendChild(messageContainer);
@@ -98,19 +99,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return messageContainer; // Return the container element
     }
 
+
     function scrollToBottom() {
         setTimeout(() => { chatbox.scrollTop = chatbox.scrollHeight; }, 50);
     }
 
     // Updated showLoading to control header status
     function showLoading(show) {
-        loadingIndicator.style.display = show ? 'block' : 'none'; // Show "typing..." below input
-        if (botStatusElement) { // Check if element exists
-            botStatusElement.textContent = show ? 'typing...' : 'online';
-        }
-        sendButton.disabled = show;
-        // messageInput.disabled = show; // Keep input enabled
-        if (!show && messageInput) messageInput.focus(); // Check if messageInput exists
+        if (loadingIndicator) loadingIndicator.style.display = show ? 'block' : 'none'; // Show "typing..." below input
+        if (botStatusElement) botStatusElement.textContent = show ? 'typing...' : 'online';
+        if (sendButton) sendButton.disabled = show;
+        if (!show && messageInput) messageInput.focus();
     }
 
     async function fetchHistoryAndDisplay(userId) {
@@ -158,13 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function sendMessage() {
-        if (!messageInput || !USER_ID) return; // Add check for messageInput
+        if (!messageInput || !USER_ID) return;
         const messageText = messageInput.value.trim();
         if (!messageText) return;
 
-        // Add user message and store the container element reference
+        // Add user message and capture its container element
         const currentSentMessageContainer = addMessage('You', messageText, 'inbound', null);
-        // lastSentUserMessageInfo is now set within addMessage
+        // lastSentUserMessageInfo is updated within addMessage
 
         messageInput.value = '';
         showLoading(true);
@@ -183,10 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            // Update Ticks and Add Delete Button/ID for the just-sent message
+            // Update Ticks and potentially add ID/Delete Btn to the sent message container
             if (currentSentMessageContainer) {
                 const ticksElement = currentSentMessageContainer.querySelector('.ticks');
-                // Update ticks if request succeeded (reply or ID received)
+                // Update ticks if request succeeded (reply received OR backend confirmed save by sending ID)
                 if (ticksElement && (data.replies?.length > 0 || data.inboundMessageId)) {
                     ticksElement.classList.remove('single-grey');
                     ticksElement.classList.add('double-blue');
@@ -211,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.replies && data.replies.length > 0) {
                 data.replies.forEach(reply => addMessage('Bot', reply, 'outbound'));
             }
-            // No need for "No reply received" message if ticks updated correctly
 
         } catch (error) {
             console.error("Error sending message:", error);
@@ -261,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Header Menu Logic ---
     function toggleHeaderMenu() {
-        if (headerMenu) { // Check if menu exists
+        if (headerMenu) {
             headerMenu.style.display = (headerMenu.style.display === 'block') ? 'none' : 'block';
         }
     }
@@ -296,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Event Listeners ---
-    // Add checks to ensure elements exist before adding listeners
+    // Add checks for element existence before adding listeners
     if (sendButton) sendButton.addEventListener('click', sendMessage);
     if (messageInput) messageInput.addEventListener('keypress', (event) => { if (event.key === 'Enter' && !sendButton?.disabled) sendMessage(); });
     if (submitPhoneButton) submitPhoneButton.addEventListener('click', handlePhoneSubmit);
