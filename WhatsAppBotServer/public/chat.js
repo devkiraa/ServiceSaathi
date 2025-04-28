@@ -4,104 +4,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatbox = document.getElementById('chatbox');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
-    const loadingIndicator = document.getElementById('loading');
+    const loadingIndicator = document.getElementById('loading'); // "typing..." below input
     const phonePromptOverlay = document.getElementById('phone-prompt-overlay');
     const phoneInput = document.getElementById('phone-input');
     const submitPhoneButton = document.getElementById('submit-phone-button');
     const appContainer = document.getElementById('app-container');
+    // Header elements
+    const botStatusElement = document.getElementById('bot-status');
+    const headerMenuButton = document.getElementById('header-menu-button');
+    const headerMenu = document.getElementById('header-menu');
+    const clearChatButton = document.getElementById('clear-chat-button');
+    const resetChatButton = document.getElementById('reset-chat-button');
+    const changeNumberButton = document.getElementById('change-number-button');
 
     const API_URL = '/api/chat';
     let USER_ID = null;
-    let lastInboundMessageContainer = null; // To track the last user message for ticks
+    let lastSentUserMessageInfo = { element: null, id: null }; // Tracks the container element and potential ID
 
     // --- Formatting Parser ---
     function parseWhatsAppFormatting(text) {
         if (typeof text !== 'string') return '';
         let escapedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-        // Monospace Block (```text```) - Process first, re-escape content inside
-        escapedText = escapedText.replace(/```([\s\S]*?)```/g, (match, p1) =>
-            `<pre>${p1.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`
-        );
-
+        escapedText = escapedText.replace(/```([\s\S]*?)```/g, (match, p1) => `<pre>${p1.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`);
         const lines = escapedText.split('\n');
-        let inBlock = null; // null, 'quote', 'ul', 'ol', 'pre'
-        const processedLines = [];
-
+        let inBlock = null; const processedLines = [];
         lines.forEach(line => {
-            let currentLine = line;
-            let lineAdded = false;
-
-            // Check if inside a pre block (simple check, might fail with nested pre)
-             const preStartMatch = /<pre>/.test(currentLine);
-             const preEndMatch = /<\/pre>/.test(currentLine);
-             if (preStartMatch && !preEndMatch) inBlock = 'pre'; // Enter pre block
-             if (inBlock === 'pre') {
-                 processedLines.push(currentLine);
-                 if (preEndMatch) inBlock = null; // Exit pre block
-                 return;
-             }
-
-            // Check for other block starters
-            const quoteMatch = currentLine.startsWith('&gt; ');
-            const ulMatch = currentLine.trim().match(/^(\*|-)\s+/);
-            const olMatch = currentLine.trim().match(/^(\d+)\.\s+/);
-
-            // Close previous blocks if type changes or line is not part of it
-            if (inBlock === 'quote' && !quoteMatch) { processedLines.push('</blockquote>'); inBlock = null; }
-            if (inBlock === 'ul' && !ulMatch) { processedLines.push('</ul>'); inBlock = null; }
-            if (inBlock === 'ol' && !olMatch) { processedLines.push('</ol>'); inBlock = null; }
-
-            // Handle Block Elements
-            if (quoteMatch) {
-                if (inBlock !== 'quote') { processedLines.push('<blockquote>'); inBlock = 'quote'; }
-                processedLines.push(currentLine.substring(4)); // Add content without marker
-                lineAdded = true;
-            } else if (ulMatch) {
-                if (inBlock !== 'ul') { processedLines.push('<ul>'); inBlock = 'ul'; }
-                processedLines.push(`<li>${currentLine.replace(/^(\*|-)\s+/, '').trim()}</li>`);
-                lineAdded = true;
-            } else if (olMatch) {
-                if (inBlock !== 'ol') { processedLines.push('<ol>'); inBlock = 'ol'; }
-                processedLines.push(`<li>${currentLine.replace(/^\d+\.\s+/, '').trim()}</li>`);
-                lineAdded = true;
-            }
-
-            if (!lineAdded) {
-                processedLines.push(currentLine); // Add line if not processed as block item
-            }
+            let currentLine = line; let lineAdded = false;
+            const preStartMatch = /<pre>/.test(currentLine); const preEndMatch = /<\/pre>/.test(currentLine);
+            if (preStartMatch && !preEndMatch) inBlock = 'pre';
+            if (inBlock === 'pre') { processedLines.push(currentLine); if (preEndMatch) inBlock = null; return; }
+            const quoteMatch = currentLine.startsWith('&gt; '); const ulMatch = currentLine.trim().match(/^(\*|-)\s+/); const olMatch = currentLine.trim().match(/^(\d+)\.\s+/);
+            if (inBlock === 'quote' && !quoteMatch) { processedLines.push('</blockquote>'); inBlock = null; } if (inBlock === 'ul' && !ulMatch) { processedLines.push('</ul>'); inBlock = null; } if (inBlock === 'ol' && !olMatch) { processedLines.push('</ol>'); inBlock = null; }
+            if (quoteMatch) { if (inBlock !== 'quote') { processedLines.push('<blockquote>'); inBlock = 'quote'; } processedLines.push(currentLine.substring(4)); lineAdded = true; }
+            else if (ulMatch) { if (inBlock !== 'ul') { processedLines.push('<ul>'); inBlock = 'ul'; } processedLines.push(`<li>${currentLine.replace(/^(\*|-)\s+/, '').trim()}</li>`); lineAdded = true; }
+            else if (olMatch) { if (inBlock !== 'ol') { processedLines.push('<ol>'); inBlock = 'ol'; } processedLines.push(`<li>${currentLine.replace(/^\d+\.\s+/, '').trim()}</li>`); lineAdded = true; }
+            if (!lineAdded) { processedLines.push(currentLine); }
         });
-
-        // Close any remaining open blocks
-        if (inBlock === 'quote') processedLines.push('</blockquote>');
-        if (inBlock === 'ul') processedLines.push('</ul>');
-        if (inBlock === 'ol') processedLines.push('</ol>');
-
-        escapedText = processedLines.join('\n'); // Join lines back with newline for inline processing
-
-        // --- Inline Elements (Apply after blocks) ---
-        // Regex needs to be careful about HTML tags and entities. Using negative lookarounds helps.
-        // Order: code -> bold/italic/strike
-        escapedText = escapedText.replace(/(?<!\\|`|<code>|<pre>|&lt;)``([^`\n]+?)`(?!`|<\/code>|<\/pre>|&gt;)/g, '<code>$1</code>'); // Inline Code `code`
-        escapedText = escapedText.replace(/(?<!\\|\*|<strong>|<em>|<pre>|<code>|&lt;)\*([^\*\n<]+?)\*(?!\*|<\/strong>|<\/em>|<\/pre>|<\/code>|&gt;)/g, '<strong>$1</strong>'); // Bold *bold*
-        escapedText = escapedText.replace(/(?<!\\|_|<em>|<strong>|<pre>|<code>|&lt;)_([^\_\n<]+?)_(?!_|<\/em>|<\/strong>|<\/pre>|<\/code>|&gt;)/g, '<em>$1</em>'); // Italic _italic_
-        escapedText = escapedText.replace(/(?<!\\|~|<del>|<pre>|<code>|&lt;)~([^~\n<]+?)~(?!\~|<\/del>|<\/pre>|<\/code>|&gt;)/g, '<del>$1</del>'); // Strikethrough ~strike~
-
-        // Replace actual newlines with <br> for final HTML rendering
+        if (inBlock === 'quote') processedLines.push('</blockquote>'); if (inBlock === 'ul') processedLines.push('</ul>'); if (inBlock === 'ol') processedLines.push('</ol>');
+        escapedText = processedLines.join('\n');
+        escapedText = escapedText.replace(/(?<!\\|`|<code>|<pre>|&lt;)``([^`\n]+?)`(?!`|<\/code>|<\/pre>|&gt;)/g, '<code>$1</code>');
+        escapedText = escapedText.replace(/(?<!\\|\*|<strong>|<em>|<pre>|<code>|&lt;)\*([^\*\n<]+?)\*(?!\*|<\/strong>|<\/em>|<\/pre>|<\/code>|&gt;)/g, '<strong>$1</strong>');
+        escapedText = escapedText.replace(/(?<!\\|_|<em>|<strong>|<pre>|<code>|&lt;)_([^\_\n<]+?)_(?!_|<\/em>|<\/strong>|<\/pre>|<\/code>|&gt;)/g, '<em>$1</em>');
+        escapedText = escapedText.replace(/(?<!\\|~|<del>|<pre>|<code>|&lt;)~([^~\n<]+?)~(?!\~|<\/del>|<\/pre>|<\/code>|&gt;)/g, '<del>$1</del>');
         escapedText = escapedText.replace(/\n/g, '<br>');
-
-        // Cleanup potentially broken tags from joining lines (redundant if using \n then replacing with <br>)
-        escapedText = escapedText.replace(/<\/li><br>/g, '</li>');
-        escapedText = escapedText.replace(/<\/blockquote><br>/g, '</blockquote>');
-        escapedText = escapedText.replace(/<\/ul><br>/g, '</ul>');
-        escapedText = escapedText.replace(/<\/ol><br>/g, '</ol>');
-        escapedText = escapedText.replace(/<\/pre><br>/g, '</pre>');
-        escapedText = escapedText.replace(/^<br>|<br>$/g, ''); // Remove leading/trailing breaks
-
-
+        escapedText = escapedText.replace(/<\/li><br>/g, '</li>').replace(/<\/blockquote><br>/g, '</blockquote>').replace(/<\/ul><br>/g, '</ul>').replace(/<\/ol><br>/g, '</ol>').replace(/<\/pre><br>/g, '</pre>');
+        escapedText = escapedText.replace(/^<br>|<br>$/g, '');
         return escapedText;
     }
-
 
     // --- Core Functions ---
 
@@ -113,58 +62,55 @@ document.addEventListener('DOMContentLoaded', () => {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message');
         messageDiv.classList.add(direction === 'inbound' ? 'user' : 'bot');
-        // Use the parser to set innerHTML
-        messageDiv.innerHTML = parseWhatsAppFormatting(text);
 
-        // Add Meta Area (Timestamp & Ticks) for user messages
+        const contentSpan = document.createElement('span');
+        contentSpan.classList.add('message-content');
+        contentSpan.innerHTML = parseWhatsAppFormatting(text);
+        messageDiv.appendChild(contentSpan);
+
         if (direction === 'inbound') {
             const metaArea = document.createElement('div');
             metaArea.classList.add('message-meta-area');
-
             const timestampSpan = document.createElement('span');
             timestampSpan.classList.add('timestamp');
-            timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+            timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }); // Use consistent time format
             metaArea.appendChild(timestampSpan);
-
             const ticksSpan = document.createElement('span');
-            ticksSpan.classList.add('ticks', 'single-grey'); // Start with single grey
-            if (messageId) ticksSpan.dataset.messageId = messageId; // Link ticks to message ID
+            ticksSpan.classList.add('ticks', 'single-grey');
+            if (messageId) ticksSpan.dataset.messageId = messageId;
             metaArea.appendChild(ticksSpan);
-            messageDiv.appendChild(metaArea); // Append meta area
+            messageDiv.appendChild(metaArea);
 
-             // Add delete button only if messageId exists (loaded from history)
-             if (messageId) {
+            if (messageId) { // Only add delete button if message has an ID (from history)
                 const deleteBtn = document.createElement('button');
                 deleteBtn.classList.add('delete-button');
-                deleteBtn.innerHTML = '&times;'; // 'x' symbol
+                deleteBtn.innerHTML = '&times;';
                 deleteBtn.title = 'Delete message';
-                // Event listener is handled by delegation on chatbox
                 messageDiv.appendChild(deleteBtn);
             }
-            // Track the container for the last message sent by the user
-            lastInboundMessageContainer = messageContainer;
-        } else {
-             // Add padding to bot messages as well to align heights visually if needed
-             const botMetaPlaceholder = document.createElement('div');
-             botMetaPlaceholder.style.height = '16px'; // Reserve space similar to meta area
-             messageDiv.appendChild(botMetaPlaceholder);
-         }
+            // Track the container element just added by the user
+            lastSentUserMessageInfo = { element: messageContainer, id: messageId };
+        }
 
         messageContainer.appendChild(messageDiv);
         chatbox.appendChild(messageContainer);
         scrollToBottom();
+        return messageContainer; // Return the container element
     }
-
 
     function scrollToBottom() {
         setTimeout(() => { chatbox.scrollTop = chatbox.scrollHeight; }, 50);
     }
 
+    // Updated showLoading to control header status
     function showLoading(show) {
-        loadingIndicator.style.display = show ? 'block' : 'none';
+        loadingIndicator.style.display = show ? 'block' : 'none'; // Show "typing..." below input
+        if (botStatusElement) { // Check if element exists
+            botStatusElement.textContent = show ? 'typing...' : 'online';
+        }
         sendButton.disabled = show;
         // messageInput.disabled = show; // Keep input enabled
-        if (!show) messageInput.focus();
+        if (!show && messageInput) messageInput.focus(); // Check if messageInput exists
     }
 
     async function fetchHistoryAndDisplay(userId) {
@@ -173,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_URL}/history?userId=${userId}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const history = await response.json();
-             chatbox.innerHTML = ''; // Clear before adding history
+            if (chatbox) chatbox.innerHTML = ''; // Clear only if chatbox exists
             history.forEach(msg => {
                 addMessage(
                     msg.direction === 'inbound' ? 'You' : 'Bot',
@@ -184,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (error) {
             console.error("Error fetching chat history:", error);
-             chatbox.innerHTML = ''; // Clear on error too
+            if (chatbox) chatbox.innerHTML = '';
             addMessage('System', 'Could not load chat history.', 'outbound');
         }
     }
@@ -192,25 +138,17 @@ document.addEventListener('DOMContentLoaded', () => {
     async function startSession(userId) {
         if (!userId) return;
         showLoading(true);
-        chatbox.innerHTML = ''; // Clear chatbox immediately
+        if (chatbox) chatbox.innerHTML = '';
         try {
-            // Fetch history first
-             await fetchHistoryAndDisplay(userId);
-
-            // Then call /start to get potential initial prompts if needed
+            await fetchHistoryAndDisplay(userId); // Fetch history first
             const startUrl = `${API_URL}/start?userId=${userId}`;
             const response = await fetch(startUrl);
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) { const errorData = await response.json().catch(() => ({})); throw new Error(errorData.error || `HTTP error! status: ${response.status}`); }
             const data = await response.json();
-
-            // Only display initialReplies if the backend sent any
+            // Display initial prompts only if received from backend
             if (data.initialReplies && data.initialReplies.length > 0) {
                 data.initialReplies.forEach(reply => addMessage('Bot', reply, 'outbound'));
             }
-
         } catch (error) {
             console.error("Error starting session:", error);
             addMessage('System', `Error starting session: ${error.message}`, 'outbound');
@@ -220,12 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function sendMessage() {
+        if (!messageInput || !USER_ID) return; // Add check for messageInput
         const messageText = messageInput.value.trim();
-        if (!messageText || !USER_ID) return;
+        if (!messageText) return;
 
-        // Add user message visually (ID is null, no delete button yet)
-        addMessage('You', messageText, 'inbound', null);
-        const currentSentMessageContainer = lastInboundMessageContainer; // Capture ref to the container just added
+        // Add user message and store the container element reference
+        const currentSentMessageContainer = addMessage('You', messageText, 'inbound', null);
+        // lastSentUserMessageInfo is now set within addMessage
 
         messageInput.value = '';
         showLoading(true);
@@ -244,29 +183,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            // Update Ticks and potentially add ID/Delete Btn to the sent message container
+            // Update Ticks and Add Delete Button/ID for the just-sent message
             if (currentSentMessageContainer) {
                 const ticksElement = currentSentMessageContainer.querySelector('.ticks');
-                 // Update ticks only if reply received or processing confirmed
-                if (ticksElement && (data.replies && data.replies.length > 0 || data.inboundMessageId)) {
-                     ticksElement.classList.remove('single-grey');
-                     ticksElement.classList.add('double-blue');
+                // Update ticks if request succeeded (reply or ID received)
+                if (ticksElement && (data.replies?.length > 0 || data.inboundMessageId)) {
+                    ticksElement.classList.remove('single-grey');
+                    ticksElement.classList.add('double-blue');
                 }
 
-                // If backend returns the ID of the message we just saved, add it
+                // Add ID and delete button if provided by backend
                 if (data.inboundMessageId) {
                     currentSentMessageContainer.dataset.messageId = data.inboundMessageId;
-                     if(ticksElement) ticksElement.dataset.messageId = data.inboundMessageId;
-
-                    // Add delete button now that we have an ID
-                     const messageDiv = currentSentMessageContainer.querySelector('.message');
-                     if (messageDiv && !messageDiv.querySelector('.delete-button')) {
+                    if (ticksElement) ticksElement.dataset.messageId = data.inboundMessageId;
+                    const messageDiv = currentSentMessageContainer.querySelector('.message');
+                    if (messageDiv && !messageDiv.querySelector('.delete-button')) {
                         const deleteBtn = document.createElement('button');
                         deleteBtn.classList.add('delete-button');
                         deleteBtn.innerHTML = '&times;';
                         deleteBtn.title = 'Delete message';
                         messageDiv.appendChild(deleteBtn);
-                     }
+                    }
                 }
             }
 
@@ -274,19 +211,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.replies && data.replies.length > 0) {
                 data.replies.forEach(reply => addMessage('Bot', reply, 'outbound'));
             }
-             // Optionally handle the case of no specific reply but successful processing
+            // No need for "No reply received" message if ticks updated correctly
 
         } catch (error) {
             console.error("Error sending message:", error);
             addMessage('System', `Error: ${error.message}`, 'outbound');
-             // Revert tick on error for the specific message container
-             if (currentSentMessageContainer) {
+            // Revert tick on error
+            if (currentSentMessageContainer) {
                 const ticksElement = currentSentMessageContainer.querySelector('.ticks');
-                 if (ticksElement) {
+                if (ticksElement) {
                     ticksElement.classList.remove('double-blue');
                     ticksElement.classList.add('single-grey');
-                 }
-             }
+                }
+            }
         } finally {
             showLoading(false);
         }
@@ -295,52 +232,94 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Delete Logic ---
     async function handleDelete(messageId) {
         if (!messageId || !USER_ID || !confirm('Are you sure you want to delete this message?')) return;
-        console.log(`Requesting delete for message: ${messageId}`);
         const messageContainer = chatbox.querySelector(`.message-container[data-message-id="${messageId}"]`);
         const deleteButton = messageContainer ? messageContainer.querySelector('.delete-button') : null;
-        if(deleteButton) deleteButton.disabled = true; // Disable button during API call
+        if (deleteButton) deleteButton.disabled = true;
 
         try {
             const response = await fetch(`${API_URL}/message/${messageId}?userId=${USER_ID}`, { method: 'DELETE' });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Failed to delete' }));
-                throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
-            }
-            if (messageContainer) messageContainer.remove(); // Remove from DOM
+            if (!response.ok) { const errorData = await response.json().catch(() => ({ error: 'Failed to delete' })); throw new Error(errorData.error || `HTTP error! Status: ${response.status}`); }
+            if (messageContainer) messageContainer.remove();
             console.log(`Message ${messageId} deleted from view.`);
-        } catch (error) {
-            console.error("Error deleting message:", error);
-            alert(`Could not delete message: ${error.message}`);
-            if(deleteButton) deleteButton.disabled = false; // Re-enable button on error
-        }
+        } catch (error) { console.error("Error deleting message:", error); alert(`Could not delete message: ${error.message}`); if (deleteButton) deleteButton.disabled = false; }
     }
 
     // --- Phone Prompt Logic ---
     function handlePhoneSubmit() {
+        if (!phoneInput) return;
         const phoneNumber = phoneInput.value.trim();
-        if (/^\+\d{10,}$/.test(phoneNumber)) { // Basic validation
+        if (/^\+\d{10,}$/.test(phoneNumber)) {
             USER_ID = phoneNumber;
             localStorage.setItem('chatScreenUserId', USER_ID);
-            phonePromptOverlay.style.display = 'none';
-            appContainer.classList.remove('hidden');
+            if (phonePromptOverlay) phonePromptOverlay.style.display = 'none';
+            if (appContainer) appContainer.classList.remove('hidden');
             startSession(USER_ID);
         } else {
             alert('Please enter a valid phone number including country code (e.g., +91xxxxxxxxxx).');
         }
     }
 
-    // --- Event Listeners ---
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (event) => { if (event.key === 'Enter' && !sendButton.disabled) sendMessage(); });
-    submitPhoneButton.addEventListener('click', handlePhoneSubmit);
-    phoneInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') handlePhoneSubmit(); });
+    // --- Header Menu Logic ---
+    function toggleHeaderMenu() {
+        if (headerMenu) { // Check if menu exists
+            headerMenu.style.display = (headerMenu.style.display === 'block') ? 'none' : 'block';
+        }
+    }
 
-    // Delete listener using event delegation
-    chatbox.addEventListener('click', (event) => {
-        if (event.target.classList.contains('delete-button')) {
-            const messageContainer = event.target.closest('.message-container');
-            const messageId = messageContainer ? messageContainer.dataset.messageId : null;
-            if (messageId) handleDelete(messageId);
+    function clearChat() {
+        if (confirm('Are you sure you want to clear all messages in this chat?')) {
+            if (chatbox) chatbox.innerHTML = '';
+            if (headerMenu) headerMenu.style.display = 'none';
+            console.log("Chat cleared.");
+        }
+    }
+
+    function changeNumber() {
+        if (confirm('Are you sure you want to change your phone number? This will reset the current chat session.')) {
+            localStorage.removeItem('chatScreenUserId');
+            USER_ID = null;
+            if (chatbox) chatbox.innerHTML = '';
+            if (appContainer) appContainer.classList.add('hidden');
+            if (phonePromptOverlay) phonePromptOverlay.style.display = 'flex';
+            if (headerMenu) headerMenu.style.display = 'none';
+            if (phoneInput) { phoneInput.value = ''; phoneInput.focus(); }
+            console.log("Number changed, showing prompt.");
+        }
+    }
+
+    function resetChat() {
+        if (confirm('Are you sure you want to reset the chat? This will clear all messages and require you to enter your phone number again.')) {
+            localStorage.removeItem('chatScreenUserId');
+            if (headerMenu) headerMenu.style.display = 'none';
+            window.location.reload();
+        }
+    }
+
+    // --- Event Listeners ---
+    // Add checks to ensure elements exist before adding listeners
+    if (sendButton) sendButton.addEventListener('click', sendMessage);
+    if (messageInput) messageInput.addEventListener('keypress', (event) => { if (event.key === 'Enter' && !sendButton?.disabled) sendMessage(); });
+    if (submitPhoneButton) submitPhoneButton.addEventListener('click', handlePhoneSubmit);
+    if (phoneInput) phoneInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') handlePhoneSubmit(); });
+
+    if (chatbox) {
+        chatbox.addEventListener('click', (event) => {
+            if (event.target.classList.contains('delete-button')) {
+                const messageContainer = event.target.closest('.message-container');
+                const messageId = messageContainer?.dataset.messageId;
+                if (messageId) handleDelete(messageId);
+            }
+        });
+    }
+
+    if (headerMenuButton) headerMenuButton.addEventListener('click', toggleHeaderMenu);
+    if (clearChatButton) clearChatButton.addEventListener('click', clearChat);
+    if (resetChatButton) resetChatButton.addEventListener('click', resetChat);
+    if (changeNumberButton) changeNumberButton.addEventListener('click', changeNumber);
+
+    document.addEventListener('click', (event) => {
+        if (headerMenu && headerMenuButton && !headerMenu.contains(event.target) && !headerMenuButton.contains(event.target)) {
+            headerMenu.style.display = 'none';
         }
     });
 
@@ -348,12 +327,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const storedPhone = localStorage.getItem('chatScreenUserId');
     if (storedPhone && /^\+\d{10,}$/.test(storedPhone)) {
         USER_ID = storedPhone;
-        phonePromptOverlay.style.display = 'none';
-        appContainer.classList.remove('hidden');
+        if (phonePromptOverlay) phonePromptOverlay.style.display = 'none';
+        if (appContainer) appContainer.classList.remove('hidden');
         startSession(USER_ID);
     } else {
-        phonePromptOverlay.style.display = 'flex';
-        appContainer.classList.add('hidden');
-        phoneInput.focus();
+        if (phonePromptOverlay) phonePromptOverlay.style.display = 'flex';
+        if (appContainer) appContainer.classList.add('hidden');
+        if (phoneInput) phoneInput.focus();
     }
 });
