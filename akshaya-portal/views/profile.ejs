@@ -11,9 +11,7 @@
     <script src="/js/profileIcon.js"></script>
     <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
 </head>
-<body class="bg-bg-light text-gray-800 transition-all duration-300">
-    <!-- Sidebar -->
-    <aside class="fixed top-0 left-0 h-screen w-56 bg-gradient-to-b from-primary to-secondary shadow-md z-50">
+<body class="bg-bg-light text-gray-800 transition-all duration-300"> <aside class="fixed top-0 left-0 h-screen w-56 bg-gradient-to-b from-primary to-secondary shadow-md z-50">
         <div class="flex flex-col justify-between h-full">
             <div class="p-6">
                 <h1 class="text-2xl font-bold text-white">Service Saathi</h1>
@@ -22,25 +20,25 @@
                 <ul class="space-y-3">
                     <li>
                         <a href="/dashboard" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                            </svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                 <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                             </svg>
                             <span>Home</span>
                         </a>
                     </li>
                     <li>
                         <a href="/services" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white/20 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                            </svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                             </svg>
                             <span>Service</span>
                         </a>
                     </li>
-                </ul>
+                    </ul>
             </nav>
         </div>
     </aside>
-    <!-- Top Navbar -->
+
     <nav class="fixed top-0 left-56 right-0 bg-base-100 shadow-md py-2.5 px-6 flex justify-between items-center z-40">
         <div class="flex items-center space-x-4">
             <h2 class="text-xl font-semibold text-gray-700">User Profile</h2>
@@ -88,102 +86,88 @@
             </div>
         </div>
     </nav>
-    <!-- Main Content -->
-    <div class="flex ml-56 pt-20 bg-bg-light min-h-screen">
-        <div class="container mx-auto p-6">
+
+    <div class="ml-56 pt-20 bg-bg-light min-h-screen"> <div class="container mx-auto p-6">
             <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">User Profile</h2>
-                <form id="profileForm" class="space-y-4">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">User Profile</h2> <form id="profileForm" class="space-y-4"> <div>
+                        <label for="email" class="block text-gray-700">Email</label>
+                        <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg bg-gray-100 cursor-not-allowed" value="<%= user?.email || 'N/A' %>" disabled> </div>
+
                     <div>
-                        <label class="block text-gray-700">Email</label>
-                        <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.email %>" disabled>
-                    </div>
+                        <label for="shopName" class="block text-gray-700">Shop Name</label>
+                        <input type="text" id="shopName" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.shopName || '' %>" disabled> </div>
+
                     <div>
-                        <label class="block text-gray-700">Shop Name</label>
-                        <input type="text" id="shopName" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.shopName || 'Not Available' %>" disabled>
-                    </div>
+                        <label for="personName" class="block text-gray-700">Person Name</label>
+                        <input type="text" id="personName" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.personName || '' %>" disabled> </div>
+
                     <div>
-                        <label class="block text-gray-700">Person Name</label>
-                        <input type="text" id="personName" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.personName || 'Not Available' %>" disabled>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700">Phone Number</label>
-                        <input type="text" id="phone" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.phone || 'Not Available' %>" disabled>
-                    </div>
+                        <label for="phone" class="block text-gray-700">Phone Number</label>
+                        <input type="tel" id="phone" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.phone || '' %>" disabled> </div>
+
                     <div>
                         <label class="block text-gray-700">Centre Type</label>
                         <div class="flex items-center mt-2">
-                            <input type="radio" id="CSC" name="type" value="CSC" class="mr-2" <%= user?.type === 'CSC' ? 'checked' : '' %> disabled>
-                            <label for="CSC" class="text-gray-700">CSC</label>
+                             <input type="radio" id="CSC" name="type" value="CSC" class="mr-2" <%= user?.type === 'CSC' ? 'checked' : '' %> disabled> <label for="CSC" class="text-gray-700">CSC</label>
                         </div>
                         <div class="flex items-center mt-2">
-                            <input type="radio" id="Akshaya" name="type" value="Akshaya" class="mr-2" <%= user?.type === 'Akshaya' ? 'checked' : '' %> disabled>
-                            <label for="Akshaya" class="text-gray-700">Akshaya</label>
+                             <input type="radio" id="Akshaya" name="type" value="Akshaya" class="mr-2" <%= user?.type === 'Akshaya' ? 'checked' : '' %> disabled> <label for="Akshaya" class="text-gray-700">Akshaya</label>
                         </div>
                     </div>
+
                     <div>
-                        <label class="block text-gray-700">District</label>
-                        <select id="district" class="w-full px-3 py-2 border rounded-lg" disabled>
-                            <option value="">Select District</option>
-                        </select>
-                    </div>
+                         <label for="district" class="block text-gray-700">District</label>
+                         <select id="district" name="district" class="w-full px-3 py-2 border rounded-lg" disabled> <option value="" disabled selected>Select District</option>
+                             </select>
+                     </div>
+
+                     <div>
+                         <label for="subdistrict" class="block text-gray-700">Subdistrict</label>
+                         <select id="subdistrict" name="subdistrict" class="w-full px-3 py-2 border rounded-lg" disabled> <option value="" disabled selected>Select Subdistrict</option>
+                             </select>
+                     </div>
+
+                     <fieldset class="border border-gray-300 p-4 rounded-md mt-1"> <legend class="text-sm font-medium text-gray-700 px-1 -mt-3 bg-white w-auto">Address</legend> <div class="space-y-4 mt-2"> <div>
+                                <label for="buildingName" class="block text-gray-700 text-sm">Building/House Name</label>
+                                <input type="text" id="buildingName" class="w-full px-3 py-2 border rounded-lg text-sm" value="<%= user?.address?.buildingName || '' %>" disabled> </div>
+                            <div>
+                                <label for="street" class="block text-gray-700 text-sm">Street</label>
+                                <input type="text" id="street" class="w-full px-3 py-2 border rounded-lg text-sm" value="<%= user?.address?.street || '' %>" disabled> </div>
+                            <div>
+                                <label for="locality" class="block text-gray-700 text-sm">Locality</label>
+                                <input type="text" id="locality" class="w-full px-3 py-2 border rounded-lg text-sm" value="<%= user?.address?.locality || '' %>" disabled> </div>
+                            <div>
+                                <label for="pincode" class="block text-gray-700 text-sm">Pincode</label>
+                                <input type="text" id="pincode" class="w-full px-3 py-2 border rounded-lg text-sm" value="<%= user?.address?.pincode || '' %>" disabled pattern="\d{6}" title="Enter 6 digit pincode"> </div>
+                         </div>
+                     </fieldset>
+
                     <div>
-                        <label class="block text-gray-700">Subdistrict</label>
-                        <select id="subdistrict" class="w-full px-3 py-2 border rounded-lg" disabled>
-                            <option value="">Select Subdistrict</option>
-                        </select>
+                         <fieldset id="servicesFieldset" class="border border-gray-300 p-4 rounded-md mt-1"> <legend class="text-sm font-medium text-gray-700 px-1 -mt-3 bg-white w-auto">Services You Offer</legend> <div id="servicesContainer" class="mt-2 flex flex-wrap gap-x-4 gap-y-2"> <% if (services && services.length > 0) { %>
+                                    <% services.forEach(service => { %>
+                                        <label class="inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                name="<%= service.key %>"  value="true"
+                                                class="mr-2" <%= user.services && user.services[service.key] ? 'checked' : '' %>
+                                                disabled
+                                            />
+                                            <span class="text-sm text-gray-700"><%= service.name %></span> </label>
+                                    <% }); %>
+                                <% } else { %>
+                                    <p class="text-sm text-gray-500">No services available to configure.</p>
+                                <% } %>
+                            </div>
+                        </fieldset>
                     </div>
-                    <div>
-                        <label class="block text-gray-700">Building/House Name</label>
-                        <input type="text" id="buildingName" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.address?.buildingName || 'Not Available' %>" disabled>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700">Street</label>
-                        <input type="text" id="street" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.address?.street || 'Not Available' %>" disabled>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700">Locality</label>
-                        <input type="text" id="locality" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.address?.locality || 'Not Available' %>" disabled>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700">Pincode</label>
-                        <input type="text" id="pincode" class="w-full px-3 py-2 border rounded-lg" value="<%= user?.address?.pincode || 'Not Available' %>" disabled>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700">Services Available Online</label>
-                        <div class="flex flex-col mt-2">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" name="services[income_certificate]" value="true" class="mr-2" <%= user?.services?.income_certificate ? 'checked' : '' %> disabled>
-                                Income Certificate
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" name="services[voter_registration]" value="true" class="mr-2" <%= user?.services?.voter_registration ? 'checked' : '' %> disabled>
-                                Voter Registration
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" name="services[passport_service]" value="true" class="mr-2" <%= user?.services?.passport_service ? 'checked' : '' %> disabled>
-                                Passport Service
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" name="services[utility_payments]" value="true" class="mr-2" <%= user?.services?.utility_payments ? 'checked' : '' %> disabled>
-                                Utility Payments
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" name="services[possession_certificate]" value="true" class="mr-2" <%= user?.services?.possession_certificate ? 'checked' : '' %> disabled>
-                                Possession Certificate
-                            </label>
-                        </div>
-                    </div>
-                    <div class="flex justify-between">
-                        <button type="button" id="editBtn" class="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="#ffffff">
-                                <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h357l-80 80H200v560h560v-278l80-80v358q0 33-23.5 56.5T760-120H200Zm280-360ZM360-360v-170l367-367q12-12 27-18t30-6q16 0 30.5 6t26.5 18l56 57q11 12 17 26.5t6 29.5q0 15-5.5 29.5T897-728L530-360H360Zm481-424-56-56 56 56ZM440-440h56l232-232-28-28-29-28-231 231v57Zm260-260-29-28 29 28 28 28-28-28Z"/>
+
+                    <div class="flex justify-between mt-6"> <button type="button" id="editBtn" class="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-150">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#ffffff"> <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h357l-80 80H200v560h560v-278l80-80v358q0 33-23.5 56.5T760-120H200Zm280-360ZM360-360v-170l367-367q12-12 27-18t30-6q16 0 30.5 6t26.5 18l56 56q11 12 17 26.5t6 29.5q0 15-5.5 29.5T897-728L530-360H360Zm481-424-56-56 56 56ZM440-440h56l232-232-28-28-29-28-231 231v57Zm260-260-29-28 29 28 28 28-28-28Z"/>
                             </svg>
                             <span>Edit</span>
                         </button>
-                        <button type="button" id="saveBtn" class="flex items-center space-x-2 px-4 px-4 py-2 bg-green-500 text-white rounded-lg hidden">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="#ffffff">
-                                <path d="M840-680v480q0 33-23.5 56.5T760-120H200q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160Zm-80 34L646-760H200v560h560v-446ZM480-240q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM240-560h360v-160H240v160Zm-40-86v446-560 114Z"/>
+                        <button type="button" id="saveBtn" class="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-150 hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#ffffff"> <path d="M840-680v480q0 33-23.5 56.5T760-120H200q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160Zm-80 34L646-760H200v560h560v-446ZM480-240q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM240-560h360v-160H240v160Zm-40-86v446-560 114Z"/>
                             </svg>
                             <span>Save</span>
                         </button>
@@ -192,9 +176,11 @@
             </div>
         </div>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+
     <script>
-        // District and Sub-District Data
+        // District and Sub-District Data (Kerala)
         const districtData = {
             "Alappuzha": ["Ambalappuzha", "Chengannur", "Cherthala", "Karthikappally", "Kuttanad", "Mavelikkara"],
             "Ernakulam": ["Aluva", "Kanayannur", "Kochi", "Kothamangalam", "Kunnathunad", "Muvattupuzha", "Paravur"],
@@ -205,57 +191,41 @@
             "Kottayam": ["Changanassery", "Kanjirappally", "Kottayam", "Meenachil", "Vaikom"],
             "Kozhikode": ["Koyilandi", "Kozhikode", "Thamarassery", "Vatakara"],
             "Malappuram": ["Ernad", "Kondotty", "Nilambur", "Perinthalmanna", "Ponnani", "Tirur", "Tirurangadi"],
-            "Palakkad": ["Alathur", "Chittur", "Mannarkad", "Ottappalam", "Palakkad", "Pattambi", "Tribal Taluk Office Attappadi"],
+            "Palakkad": ["Alathur", "Chittur", "Mannarkad", "Ottappalam", "Palakkad", "Pattambi", "Attappady"],
             "Pathanamthitta": ["Adoor", "Konni", "Kozhenchery", "Mallappally", "Ranni", "Thiruvalla"],
             "Thiruvananthapuram": ["Chirayinkeezhu", "Kattakkada", "Nedumangad", "Neyyattinkara", "Thiruvananthapuram", "Varkala"],
             "Thrissur": ["Chalakkudy", "Chavakkad", "Kodungallur", "Kunnamkulam", "Mukundapuram", "Talappilly", "Thrissur"],
             "Wayanad": ["Mananthavady", "Sulthanbathery", "Vythiri"]
         };
-    
+
         document.addEventListener("DOMContentLoaded", function () {
             const editBtn = document.getElementById("editBtn");
             const saveBtn = document.getElementById("saveBtn");
-            const formFields = document.querySelectorAll("#profileForm input, #profileForm select");
+            // Select all relevant form elements *except* the email input
+            const formFields = document.querySelectorAll("#profileForm input:not(#email), #profileForm select, #profileForm radio, #profileForm textarea");
+            const serviceCheckboxes = document.querySelectorAll("#servicesContainer input[type='checkbox']");
             const districtDropdown = document.getElementById("district");
             const subdistrictDropdown = document.getElementById("subdistrict");
-    
-            // Populate District Dropdown
+
+            // --- Populate District Dropdown ---
+            districtDropdown.innerHTML = '<option value="" disabled>Select District</option>';
             for (const district in districtData) {
                 const option = document.createElement("option");
                 option.value = district;
                 option.textContent = district;
                 districtDropdown.appendChild(option);
             }
-    
-            // Pre-select District and Subdistrict
-            const userDistrict = "<%= user.district %>";
-            const userSubdistrict = "<%= user.subdistrict %>";
-            console.log(userSubdistrict);
-    
-            if (userDistrict && districtData[userDistrict]) {
-                districtDropdown.value = userDistrict;
-    
-                // Populate Subdistrict Dropdown based on selected District
-                districtData[userDistrict].forEach(subdistrict => {
-                    const option = document.createElement("option");
-                    option.value = subdistrict;
-                    option.textContent = subdistrict;
-                    subdistrictDropdown.appendChild(option);
-                });
-    
-                if (userSubdistrict) {
-                    subdistrictDropdown.value = userSubdistrict;
-                }
-            }
-    
-            // Update Subdistrict Dropdown Based on Selected District
-            districtDropdown.addEventListener("change", () => {
-                const selectedDistrict = districtDropdown.value;
-    
-                // Clear Subdistrict Dropdown
-                subdistrictDropdown.innerHTML = '<option value="">Select Subdistrict</option>';
+
+            // --- Pre-select District and Subdistrict from User Data ---
+            // Use optional chaining and nullish coalescing for safety
+            const userDistrict = "<%= user?.district ?? '' %>";
+            const userSubdistrict = "<%= user?.subdistrict ?? '' %>";
+
+            // Function to populate subdistricts
+            const populateSubdistricts = (selectedDistrict) => {
+                subdistrictDropdown.innerHTML = '<option value="" disabled selected>Select Subdistrict</option>';
                 subdistrictDropdown.disabled = true;
-    
+
                 if (selectedDistrict && districtData[selectedDistrict]) {
                     districtData[selectedDistrict].forEach(subdistrict => {
                         const option = document.createElement("option");
@@ -263,69 +233,150 @@
                         option.textContent = subdistrict;
                         subdistrictDropdown.appendChild(option);
                     });
-    
-                    subdistrictDropdown.disabled = false;
+                    // Only enable if not in view mode (check if editBtn is hidden)
+                    if (editBtn.classList.contains('hidden')) {
+                         subdistrictDropdown.disabled = false;
+                    }
                 }
+            };
+
+            // Set initial district value and populate/select subdistricts
+            if (userDistrict && districtData[userDistrict]) {
+                districtDropdown.value = userDistrict;
+                populateSubdistricts(userDistrict);
+                if (userSubdistrict) {
+                    subdistrictDropdown.value = userSubdistrict;
+                }
+            } else {
+                 districtDropdown.value = "";
+                 populateSubdistricts(""); // Keep subdistrict empty and disabled
+            }
+
+
+            // --- Update Subdistrict Dropdown When District Changes ---
+            districtDropdown.addEventListener("change", () => {
+                populateSubdistricts(districtDropdown.value);
             });
-    
+
+             // --- Navbar Dropdown Toggle --- (Added for the reverted navbar)
+             const profileMenuButton = document.getElementById('profile-menu-button');
+             const profileMenu = document.getElementById('profile-menu');
+
+             if (profileMenuButton && profileMenu) {
+                 profileMenuButton.addEventListener('click', () => {
+                     const isExpanded = profileMenuButton.getAttribute('aria-expanded') === 'true';
+                     profileMenuButton.setAttribute('aria-expanded', !isExpanded);
+                     profileMenu.classList.toggle('hidden');
+                 });
+
+                 // Optional: Close dropdown when clicking outside
+                 document.addEventListener('click', (event) => {
+                    if (!profileMenuButton.contains(event.target) && !profileMenu.contains(event.target)) {
+                        profileMenuButton.setAttribute('aria-expanded', 'false');
+                        profileMenu.classList.add('hidden');
+                    }
+                 });
+             }
+
+
+            // --- Enable Edit Mode ---
             editBtn.addEventListener("click", function () {
-                formFields.forEach(field => field.removeAttribute("disabled"));
+                formFields.forEach(field => {
+                     if(field) field.removeAttribute("disabled");
+                });
+                serviceCheckboxes.forEach(cb => {
+                    if (cb) cb.removeAttribute("disabled");
+                });
+                // Explicitly enable subdistrict dropdown if a district is selected
+                if (districtDropdown.value && districtData[districtDropdown.value]) {
+                     subdistrictDropdown.disabled = false;
+                } else {
+                     subdistrictDropdown.disabled = true; // Keep disabled if no district or district has no subs
+                }
                 editBtn.classList.add("hidden");
                 saveBtn.classList.remove("hidden");
             });
-    
+
+            // --- Save Form Data ---
             saveBtn.addEventListener("click", async function () {
+                // Collect Service Checkbox States
                 const selectedServices = {};
-                document.querySelectorAll("input[name^='services']").forEach(cb => {
-                    const serviceKey = cb.name.match(/\[(.*?)\]/)[1];
-                    selectedServices[serviceKey] = cb.checked;
+                serviceCheckboxes.forEach(cb => {
+                     if (cb) {
+                        selectedServices[cb.name] = cb.checked;
+                     }
                 });
-    
+
                 const typeField = document.querySelector("input[name='type']:checked");
                 const typeValue = typeField ? typeField.value : null;
-    
+
                 const formData = {
-                    email: document.getElementById("email").value,
-                    shopName: document.getElementById("shopName").value,
-                    personName: document.getElementById("personName").value,
-                    phone: document.getElementById("phone").value,
+                    shopName: document.getElementById("shopName")?.value || '',
+                    personName: document.getElementById("personName")?.value || '',
+                    phone: document.getElementById("phone")?.value || '',
                     type: typeValue,
-                    district: document.getElementById("district").value,
-                    subdistrict: document.getElementById("subdistrict").value,
+                    district: document.getElementById("district")?.value || '',
+                    subdistrict: document.getElementById("subdistrict")?.value || '',
                     address: {
-                        buildingName: document.getElementById("buildingName").value,
-                        street: document.getElementById("street").value,
-                        locality: document.getElementById("locality").value,
-                        pincode: document.getElementById("pincode").value
+                        buildingName: document.getElementById("buildingName")?.value || '',
+                        street: document.getElementById("street")?.value || '',
+                        locality: document.getElementById("locality")?.value || '',
+                        pincode: document.getElementById("pincode")?.value || ''
                     },
                     services: selectedServices
                 };
-    
+
+                // Frontend Validation
+                if (formData.address.pincode && !/^\d{6}$/.test(formData.address.pincode)) {
+                    alert("Please enter a valid 6-digit pincode."); return;
+                }
+                 if (!formData.district) {
+                     alert("Please select a district."); return;
+                 }
+                 // Check if subdistrict is required and missing
+                 const requiresSubdistrict = formData.district && districtData[formData.district] && districtData[formData.district].length > 0;
+                 if (requiresSubdistrict && !formData.subdistrict) {
+                     alert("Please select a subdistrict for the chosen district."); return;
+                 }
+                 // Add more validation...
+
+
+                // Disable fields and buttons before fetch
+                formFields.forEach(field => field?.setAttribute("disabled", "true"));
+                serviceCheckboxes.forEach(cb => cb?.setAttribute("disabled", "true"));
+                saveBtn.classList.add("hidden");
+                editBtn.classList.remove("hidden");
+
                 try {
                     const response = await fetch("/profile-update", {
-                        method: "PUT",
+                        method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(formData)
                     });
-    
+
+                    console.log(formData);
                     const result = await response.json();
+
                     if (response.ok) {
-                        alert(result.message);
-                        formFields.forEach(field => field.setAttribute("disabled", "true"));
-                        editBtn.classList.remove("hidden");
-                        saveBtn.classList.add("hidden");
+                        alert(result.message || "Profile updated successfully!");
                     } else {
-                        alert("Error: " + result.message);
+                        alert("Error: " + (result.message || "Failed to update profile."));
+                        // Re-enable form by simulating edit click *might* be desired on error,
+                        // but can lead to confusion. Leaving it disabled is safer.
+                        // If you want to re-enable: editBtn.click();
                     }
                 } catch (error) {
-                    console.error("Error updating profile:", error);
-                    alert("An unexpected error occurred. Please try again.");
-                    formFields.forEach(field => field.setAttribute("disabled", "true"));
+                    console.error("Error submitting profile update:", error);
+                    alert("An unexpected network or server error occurred. Please try again.");
+                    // Ensure UI is reset to view mode
+                    formFields.forEach(field => field?.setAttribute("disabled", "true"));
+                    serviceCheckboxes.forEach(cb => cb?.setAttribute("disabled", "true"));
                     editBtn.classList.remove("hidden");
                     saveBtn.classList.add("hidden");
                 }
             });
         });
     </script>
+
 </body>
 </html>

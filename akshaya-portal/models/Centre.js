@@ -6,7 +6,7 @@ const centreSchema = new mongoose.Schema({
   ownerName:   { type: String, required: true },
   contact:     { type: String, required: true },
   email:       { type: String, required: true },
-  type:        { type: String, enum: ['csc','akshaya'], required: true },
+  type:        { type: String, enum: ['csc', 'akshaya', 'CSC', 'Akshaya'], required: true },
   centerId:    { type: String },
   status:      { type: String, enum: ['pending','approved','rejected'], default: 'pending' },
   district:    { type: String, required: true },   // ← newly added
@@ -14,6 +14,12 @@ const centreSchema = new mongoose.Schema({
   services: {
     type: Map, // Allows dynamic keys
     of: Boolean, // Values will be booleans (true/false)
+  },
+  address: {
+    buildingName: { type: String, default: null },
+    street:       { type: String, default: null },
+    locality:     { type: String, default: null },
+    pincode:      { type: Number, default: null }
   },
   createdAt:   { type: Date, default: Date.now }
 });
