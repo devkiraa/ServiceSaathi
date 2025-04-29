@@ -15,11 +15,8 @@ const userSchema = new mongoose.Schema({
   district:   { type: String, required: true },
   subdistrict:{ type: String, required: true },   // ← newly added
   services: {
-    income_certificate:   Boolean,
-    voter_registration:   Boolean,
-    passport_service:     Boolean,
-    utility_payments:     Boolean,
-    possession_certificate:Boolean
+    type: Map, // Allows dynamic keys
+    of: Boolean, // Values will be booleans (true/false)
   },
   address: {
     buildingName: { type: String, default: null },
