@@ -1,0 +1,53 @@
+# Render Blueprint - ServiceSathi Multi-Service Deployment
+# Deploy both akshaya-portal and whatsapp-bot-server as separate web services
+
+services:
+  # Akshaya Portal - Main Web Application
+  - type: web
+    name: servicesathi-portal
+    runtime: node
+    region: singapore  # Closest to India
+    plan: free
+    rootDir: akshaya-portal
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false  # Set manually in Render dashboard for security
+      - key: SESSION_SECRET
+        generateValue: true  # Auto-generate secure secret
+      - key: WEATHER_API_KEY
+        sync: false  # Set manually in Render dashboard
+
+  # WhatsApp Bot Server - Twilio Webhook Handler
+  - type: web
+    name: servicesathi-whatsapp
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: whatsapp-bot-server
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: CHAT_API_BASE
+        sync: false  # Will be set to your deployed chat API URL
+      - key: DOCUMENT_SERVICE_API_BASE
+        sync: false  # Will be set to portal URL after deployment

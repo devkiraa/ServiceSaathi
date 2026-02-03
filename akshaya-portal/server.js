@@ -28,6 +28,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/sendimage', express.static(path.join(__dirname, 'uploads/service-documents')));
 
+// Health check endpoint for Render.com
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() }));
+
 // Models
 const User = require('./models/User');
 const Document = require('./models/Document');
@@ -51,7 +54,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
   const userRoutes = require('./routes/user');
 
   app.use(authRoutes);
-  app.use('/',documentRoutes);
+  app.use('/', documentRoutes);
   app.use(adminRoutes);
   app.use('/', serviceRoutes); // Mount service routes at the root
   app.use('/', serviceAdminRoutes); // Mount service admin routes at the root
@@ -64,7 +67,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
     if (!dateString) return 'N/A'; // Handle missing or invalid dates
     return moment(dateString).format('hh:mm A DD/MM/YYYY');
   }
-  
+
   // Make formatDate available to all EJS templates
   app.locals.formatDate = formatDate;
 
@@ -110,26 +113,26 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
     try {
       // Fetch recent documents
       const documents = await Document.find().sort({ createdAt: -1 }).limit(10);
-  
+
       // Fetch user details
       const user = await User.findOne({ _id: req.session.user.id });
       if (!user) return res.status(404).send("User not found");
-  
+
       // Fetch service requests for the user's center
       const serviceRequests = await ServiceRequest.find({ centreId: user.centerId });
-  
+
       // Calculate total pending services
       const pendingServices = await ServiceRequest.countDocuments({
         centreId: user.centerId, // Use user.centerId instead of serviceRequests.centerId
-       status: { $in: ["submitted", "started", "pending", "approved", "rejected", "reupload_required"] },
+        status: { $in: ["submitted", "started", "pending", "approved", "rejected", "reupload_required"] },
       });
-  
+
       // Calculate total completed services
       const completedServices = await ServiceRequest.countDocuments({
         centreId: user.centerId, // Use user.centerId instead of serviceRequests.centerId
         status: 'completed',
       });
-  
+
       // Calculate service type distribution
       const serviceTypes = {};
       serviceRequests.forEach((sr) => {
@@ -140,22 +143,22 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
           serviceTypes[serviceType] = 1;
         }
       });
-  
+
       // Convert to array format for chart rendering
       const serviceData = Object.entries(serviceTypes).map(([type, count]) => ({
         label: type,
         value: count,
       }));
-  
+
       // Calculate total services
       const totalServices = serviceRequests.length;
-  
+
       // Calculate percentages
       const servicePercentages = serviceData.map(({ label, value }) => ({
         label,
         value: (value / totalServices) * 100, // Percentage
       }));
-  
+
       // Render the dashboard with the calculated data
       res.render('dashboard', {
         user: req.session.user,
@@ -177,8 +180,8 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'akshyaportal' }).then(() => {
     }
   });
 }).catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1); // Stop server if DB fails
+  console.error('❌ MongoDB connection error:', err);
+  process.exit(1); // Stop server if DB fails
 });
 
 // Start Server

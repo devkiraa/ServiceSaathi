@@ -1,1 +1,30 @@
-node_modules/*
+# Dependencies
+node_modules/
+
+# Environment files (contain secrets)
+.env
+*.env.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+dist/
+build/
+
+# Uploads (local development)
+uploads/
+
+# Keep example env files
+!.env.example
