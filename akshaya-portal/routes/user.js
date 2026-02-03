@@ -25,7 +25,7 @@ router.get('/profile', async (req, res) => {
     let servicesList = []; // Default to empty array
     try {
         // IMPORTANT: Ensure this URL is correct for your environment (e.g., use environment variables)
-        const serviceApiUrl = process.env.SERVICE_API_URL || 'http://localhost:3000/service-lst';
+        const serviceApiUrl = process.env.SERVICE_API_URL || 'http://localhost:5601/service-lst';
         const serviceResponse = await axios.get(serviceApiUrl);
         if (serviceResponse.data && Array.isArray(serviceResponse.data)) {
              servicesList = serviceResponse.data; // Expecting an array like [{ key: 'service1', name: 'Service One' }, ...]
