@@ -1,0 +1,28 @@
+﻿Service_Name,Required_Documents,Processing_Time,Fees
+Birth_Certificate,"Aadhaar, Hospital Certificate",7 days,₹ 50
+Voter_ID,"Address Proof, Age Proof",21 days,Free
+PAN_Card,"Aadhaar, Photo",15 days,₹ 110
+Voter_ID_Card,"Address Proof (Aadhaar, Passport, Utility Bill); Age Proof (Birth Certificate, Class 10 Marksheet); 2 Photos",21–30 days,Free
+Aadhaar_Card,"Address Proof; Identity Proof (PAN, Passport); Birth Certificate",15–30 days,Free
+PAN_Card_Online,"Aadhaar, Photo, Address Proof (if Aadhaar unavailable)",15–20 days,₹110 (Online)
+OCI_Card,"Surrender Certificate, Indian Origin Proof, Passport, Marriage Certificate (if applicable)",8–10 weeks,"₹ 15,000"
+Passport_Normal,"Aadhaar, Birth Certificate, Address Proof, Photo",30–45 days,"₹1,500–₹2,000"
+Passport_Tatkal,Same as Normal + Priority Processing Proof (Ticket/Letter),1–3 days,"₹2,000–₹4,000"
+Tourist_Visa_eVisa,"Passport, Photo, Return Ticket, Proof of Funds",3–5 days,"₹4,000–₹8,000"
+Business_Visa,"Company Letter, Invitation from Indian Firm, Financial Documents",10–15 days,"₹10,000+"
+Employment_Visa,"Employment Contract, Company Registration Proof, Qualifications",2–4 weeks,"₹15,000+"
+Student_Visa,"Admission Letter from Indian Institution, Financial Stability Proof",4–6 weeks,"₹3,000–₹5,000"
+Medical_Visa,"Doctor’s Recommendation, Hospital Admission Letter, Financial Proof",7–10 days,"₹ 5,000"
+Degree_Attestation,"Original Degree, Passport, Board/University Letter",2–4 weeks,"₹500–₹2,000"
+CBSE_Marksheet_Duplicate,"FIR, Affidavit, School ID",30–45 days,₹ 500
+UGC_NET_Certificate,"Application Form, Admit Card, Photo ID",60–90 days,"₹ 1,000"
+EPFO_Pension_Scheme,"Aadhaar, Bank Details, Employment Proof",30–60 days,Free
+Marriage_Certificate,"Application Form, Wedding Photos, Age/Address Proof, Affidavit",30–60 days,₹100–₹500
+Property_Registration,"Sale Deed, Encumbrance Certificate, ID Proof, PAN",15–30 days,4–8% of Property Value
+Will_Registration,"Will Draft, Witness Details, ID Proof",7–14 days,"₹1,000–₹2,000"
+Police_Clearance_Certificate,"Passport, Address Proof, Fingerprint Verification",15–30 days,₹ 500
+Ration_Card,"Residence Proof, Family Details, Income Certificate",15–30 days,Free
+Driving_License,"Address Proof, Age Proof, Medical Certificate (for Commercial)",30–45 days,₹200–₹500
+Birth_Certificate_Misc,"Hospital Certificate, Parent’s ID Proof, Affidavit",7–14 days,₹50–₹100
+Death_Certificate,"Hospital/NGO Letter, ID Proof of Deceased, Affidavit",7–14 days,₹50–₹100
+GST_Registration,"PAN, Aadhaar, Business Address Proof, Bank Details",7–10 days,Free
