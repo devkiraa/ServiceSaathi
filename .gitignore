@@ -26,5 +26,8 @@ build/
 # Uploads (local development)
 uploads/
 
+# Jupyter notebooks (may contain embedded secrets)
+*.ipynb
+
 # Keep example env files
 !.env.example
